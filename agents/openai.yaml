@@ -1,0 +1,4 @@
+interface:
+  display_name: "BSV QQQ React Live Lecture Slides"
+  short_description: "Build Modern Glassy Light React slides for instructor-led lectures"
+  default_prompt: "Use $bsv-qqq-react-live-lecture-visual-slides to build the lecture slide deck."

@@ -212,3 +212,9 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 ## 브랜드 로고
 
 AI 툴·서비스나 개발 도구(Claude Code·Codex·Antigravity·ChatGPT·Gemini·GitHub·VS Code·Python·Node 등)를 언급할 때는 **임의 이모지(🤖·💻 등)를 쓰지 않고 공식 로고를 쓴다.** `component-gallery.html`의 `brandTile(key,label,size)` / `brandLogo(key,size)`를 사용한다 (키: claude/openai/antigravity/gemini/github/vscode/python/node — Claude Code는 claude, ChatGPT는 openai 마크 재사용). 로고는 브랜드 원색, 타일은 중립 라이트 광택. 카탈로그 82번(공식 로고)에서 확인.
+
+## Install and sync (BSV)
+
+- Skill name: `bsv-qqq-react-live-lecture-visual-slides`. Source of truth: the Git repository `C:\AI\qqq-react-live-lecture-visual-slides` (GitHub `rheps/qqq-react-live-lecture-visual-slides`). Edit the repository, never an installed copy.
+- Install by copying the tracked files (`git ls-files`; never `.git/` or the ignored `.superpowers/`) into `~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides`, `~/.codex/skills/bsv-qqq-react-live-lecture-visual-slides` and `~/.gemini/config/skills/bsv-qqq-react-live-lecture-visual-slides`. After each pushed commit, re-sync all three and confirm each matches the repository byte for byte.
+- Registered in `C:\AI\개인서류관리\스킬\관리정보.json` under `외부원본스킬`. `도구/스킬설치.ps1 -Update` does not install or update this skill.

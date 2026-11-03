@@ -1,6 +1,6 @@
 # 추가 템플릿 12종 (복붙용 스펙)
 
-`qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
+`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
 
 전제 헬퍼(생성기 본문에 이미 있는 것):
 ```js
