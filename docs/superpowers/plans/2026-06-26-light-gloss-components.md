@@ -16,7 +16,7 @@
 - 도형 채움은 불투명-광택이 기본. 도형 `fill`에 `rgba(255,255,255,…)` 같은 반투명 단색 금지(벤의 통제된 multiply 예외만 허용).
 - 다크 테마는 이번 범위 밖.
 - 대표 6개 = **35(hub-spoke), 33(trinity), 31(pyramid), 28(segmented-cycle), 27(gear-cycle), 38(venn)**. (설계 문서의 "8번"은 28번의 오기 — 본 계획이 우선.)
-- 작업 위치: `C:\AI\qqq-react-live-lecture-visual-slides`. 각 컴포넌트 완료 후 글로벌(`~/.claude/skills/qqq-react-live-lecture-visual-slides`)로 동기화는 Task 8에서 일괄.
+- 작업 위치: `C:\AI\bsv-qqq-react-live-lecture-visual-slides`. 각 컴포넌트 완료 후 글로벌(`~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides`)로 동기화는 Task 8에서 일괄.
 
 ---
 
@@ -494,9 +494,9 @@ Expected: PASS (키트 + 6개 컴포넌트 + 문서 체크 전부 통과).
 - [ ] **Step 7: 글로벌 스킬 폴더로 동기화**
 
 ```bash
-cp component-gallery.html ~/.claude/skills/qqq-react-live-lecture-visual-slides/component-gallery.html
-cp references/design-and-readability.md ~/.claude/skills/qqq-react-live-lecture-visual-slides/references/design-and-readability.md
-cp references/component-registry.md ~/.claude/skills/qqq-react-live-lecture-visual-slides/references/component-registry.md
+cp component-gallery.html ~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides/component-gallery.html
+cp references/design-and-readability.md ~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides/references/design-and-readability.md
+cp references/component-registry.md ~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides/references/component-registry.md
 ```
 
 - [ ] **Step 8: 커밋**

@@ -215,6 +215,6 @@ AI 툴·서비스나 개발 도구(Claude Code·Codex·Antigravity·ChatGPT·Gem
 
 ## Install and sync (BSV)
 
-- Skill name: `bsv-qqq-react-live-lecture-visual-slides`. Source of truth: the Git repository `C:\AI\qqq-react-live-lecture-visual-slides` (GitHub `rheps/qqq-react-live-lecture-visual-slides`). Edit the repository, never an installed copy.
+- Skill name: `bsv-qqq-react-live-lecture-visual-slides`. Source of truth: the Git repository `C:\AI\bsv-qqq-react-live-lecture-visual-slides` (GitHub `rheps/bsv-qqq-react-live-lecture-visual-slides`). Edit the repository, never an installed copy.
 - Install by copying the tracked files (`git ls-files`; never `.git/` or the ignored `.superpowers/`) into `~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides`, `~/.codex/skills/bsv-qqq-react-live-lecture-visual-slides` and `~/.gemini/config/skills/bsv-qqq-react-live-lecture-visual-slides`. After each pushed commit, re-sync all three and confirm each matches the repository byte for byte.
 - Registered in `C:\AI\개인서류관리\스킬\관리정보.json` under `외부원본스킬`. `도구/스킬설치.ps1 -Update` does not install or update this skill.

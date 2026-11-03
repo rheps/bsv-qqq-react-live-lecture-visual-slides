@@ -57,7 +57,7 @@ for (const k of ["claude","openai","antigravity","gemini","github","vscode","pyt
 
 - [ ] **Step 2: 가드 실행 → 실패 확인**
 
-Run: `cd /c/AI/qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
+Run: `cd /c/AI/bsv-qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
 Expected: BRAND/brandLogo/brandTile/8키 체크 FAIL, exit 1.
 
 - [ ] **Step 3: BRAND + 헬퍼 구현 (초기 로고)**
@@ -84,7 +84,7 @@ function brandTile(key,label,size=120){const b=BRAND[key];if(!b)return "";const 
 
 - [ ] **Step 4: 가드 실행 → 통과 확인**
 
-Run: `cd /c/AI/qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
+Run: `cd /c/AI/bsv-qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
 Expected: 새 체크 전부 PASS, exit 0.
 
 - [ ] **Step 5: 시각 확인 (식별성)**
@@ -94,7 +94,7 @@ Expected: 새 체크 전부 PASS, exit 0.
 - [ ] **Step 6: 커밋**
 
 ```bash
-cd /c/AI/qqq-react-live-lecture-visual-slides && git add component-gallery.html tests/gloss-guard.mjs && git commit -m "feat(gallery): 브랜드 로고 세트 brandLogo/brandTile 추가"
+cd /c/AI/bsv-qqq-react-live-lecture-visual-slides && git add component-gallery.html tests/gloss-guard.mjs && git commit -m "feat(gallery): 브랜드 로고 세트 brandLogo/brandTile 추가"
 ```
 
 ---
@@ -125,7 +125,7 @@ ok("SKILL에 공식 로고 지침", /공식 로고|brandTile/.test(skill));
 
 - [ ] **Step 2: 가드 실행 → 실패 확인**
 
-Run: `cd /c/AI/qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
+Run: `cd /c/AI/bsv-qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
 Expected: "82 brandTile 사용", "SKILL에 공식 로고 지침" FAIL (renderOf(82)는 throw할 수 있음 → 먼저 Step 3에서 n:82 추가). 만약 renderOf(82)가 throw하면 그 자체가 미구현 신호이므로 Step 3 진행.
 
 - [ ] **Step 3: 쇼케이스 컴포넌트 n:82 추가**
@@ -159,9 +159,9 @@ AI 툴·서비스나 개발 도구(Claude Code·Codex·Antigravity·ChatGPT·Gem
 
 - [ ] **Step 6: 가드 + 실행검증 → 통과 확인**
 
-Run: `cd /c/AI/qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
+Run: `cd /c/AI/bsv-qqq-react-live-lecture-visual-slides && node tests/gloss-guard.mjs`
 Expected: 전부 PASS.
-Run: `cd /c/AI/qqq-react-live-lecture-visual-slides && node .superpowers/sdd/render-check.mjs 82`
+Run: `cd /c/AI/bsv-qqq-react-live-lecture-visual-slides && node .superpowers/sdd/render-check.mjs 82`
 Expected: `PASS n:82 …`.
 
 - [ ] **Step 7: 시각 확인 (8개 로고 식별성 게이트)**
@@ -171,9 +171,9 @@ Expected: `PASS n:82 …`.
 - [ ] **Step 8: 커밋 + 글로벌 동기화**
 
 ```bash
-cd /c/AI/qqq-react-live-lecture-visual-slides && git add component-gallery.html SKILL.md references/component-registry.md tests/gloss-guard.mjs && git commit -m "feat(gallery): 공식 로고 쇼케이스(82) + SKILL 지침 + registry"
-cp component-gallery.html SKILL.md ~/.claude/skills/qqq-react-live-lecture-visual-slides/
-cp references/component-registry.md ~/.claude/skills/qqq-react-live-lecture-visual-slides/references/
+cd /c/AI/bsv-qqq-react-live-lecture-visual-slides && git add component-gallery.html SKILL.md references/component-registry.md tests/gloss-guard.mjs && git commit -m "feat(gallery): 공식 로고 쇼케이스(82) + SKILL 지침 + registry"
+cp component-gallery.html SKILL.md ~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides/
+cp references/component-registry.md ~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides/references/
 ```
 
 ---

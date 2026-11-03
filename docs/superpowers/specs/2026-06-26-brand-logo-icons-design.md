@@ -1,7 +1,7 @@
 # 공식 브랜드 로고 아이콘 — 설계 문서
 
 - 날짜: 2026-06-26
-- 대상 스킬: `qqq-react-live-lecture-visual-slides`
+- 대상 스킬: `bsv-qqq-react-live-lecture-visual-slides`
 
 ## 1. 배경과 문제
 
@@ -81,5 +81,5 @@
 
 ## 8. 동기화
 
-작업 위치 `C:\AI\qqq-react-live-lecture-visual-slides`(GitHub 풀 클론). 완료 후
+작업 위치 `C:\AI\bsv-qqq-react-live-lecture-visual-slides`(GitHub 풀 클론). 완료 후
 글로벌(`~/.claude/skills/...`) 동기화. push는 사용자 요청 시.

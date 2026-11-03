@@ -1,7 +1,7 @@
 # 라이트 광택 컴포넌트 표준 — 설계 문서
 
 - 날짜: 2026-06-26
-- 대상 스킬: `qqq-react-live-lecture-visual-slides`
+- 대상 스킬: `bsv-qqq-react-live-lecture-visual-slides`
 - 벤치마크: `rheps/remotion-news-shorts` (`src/remotion/ds/` — kit.tsx, smartart, components, tokens)
 
 ## 1. 배경과 문제
@@ -118,6 +118,6 @@
 
 ## 7. 산출물 동기화
 
-- 작업 위치: `C:\AI\qqq-react-live-lecture-visual-slides` (GitHub 원본 풀 클론).
-- 단계마다 글로벌 스킬 폴더(`~/.claude/skills/qqq-react-live-lecture-visual-slides`)로 동기화해 즉시 사용.
+- 작업 위치: `C:\AI\bsv-qqq-react-live-lecture-visual-slides` (GitHub 원본 풀 클론).
+- 단계마다 글로벌 스킬 폴더(`~/.claude/skills/bsv-qqq-react-live-lecture-visual-slides`)로 동기화해 즉시 사용.
 - GitHub push는 사용자가 명시 요청할 때만.
