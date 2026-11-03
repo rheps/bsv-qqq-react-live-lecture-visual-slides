@@ -91,7 +91,7 @@ Animation : left fade-in → right fade-in → 핵심 차이 highlight-sweep
 | 반복 개선 루프 | `cycle` | `loop-diagram`, `cycle-diagram` | `vertical-step-flow` ✅ |
 | 원인 → 결과 | `cause-effect` | `cause-effect-chain` | `flow` ✅ |
 | 두 가지 비교 | `contrast` | `split-compare`, `contrast` | `before-after-panel` |
-| 변화 전·후 | `before-after` | `before-after-panel` | `slope-chart` |
+| 변화 전·후 | `before-after` | `before-after-panel` ✅ | `versus` ✅, `slope-chart` |
 | 찬반·장단점 | `pros-cons` | `pros-cons-board`, `debate-board` | `split-compare` |
 | 관점 여러 개 | `perspective` | `perspective-cards` | `card-grid` |
 | 수치 비교 | `data-compare` | `bar-chart`, `lollipop-chart` | `big-number` |
@@ -115,7 +115,14 @@ Animation : left fade-in → right fade-in → 핵심 차이 highlight-sweep
 | A→B 전환의 원동력 + 용어 설명 | `mechanism` | `bridge` ✅ | `flow` ✅ |
 | 단점 + 그래도 쓰는 큰 장점 | `pros-cons` | `tradeoff` ✅ | `pros-cons-board` |
 
-> 75~81 (`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff`)는 ✅ 실제 구현·검증됨. 코드는 `added-templates.md`.
+| 실습 프롬프트를 그대로 복사시키기 | `practice` | `prompt-box` ✅ | — |
+| 설치·실행 명령 한 줄 복사 | `install` | `command-box` ✅ | `vertical-step-flow` ✅ (단계 설명) |
+| 결과 화면 캡처 보여 주기 | `result` | `screenshot-slot` ✅ | `video` ✅ |
+| "그러나…" 흐름 뒤집기 | `reversal` | `pink-reversal` ✅ | `key-message` + dark |
+
+> 75~81 (`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff`)와 83~86 (`prompt-box`·`screenshot-slot`·`pink-reversal`·`command-box`), 15 `before-after-panel`은 ✅ 실제 구현·검증됨. 코드는 `added-templates.md`.
+>
+> **type 개수 규칙은 새 type에도 같다**: 같은 type 2장 연속 금지, 덱 전체 5장 이하. 실습 덱은 `prompt-box` ↔ `screenshot-slot`을 번갈아 두고, 프롬프트가 5개를 넘으면 설치 명령은 `command-box`로 뺀다. `pink-reversal`은 덱당 1~2장(시나리오 기본 1장)이며 텍스트 중심 장으로 센다(3장 연속 금지에 포함).
 
 ---
 
@@ -157,7 +164,7 @@ Intent: question → big-question
 
 ```
 - 같은 slide type을 2장 연속 사용하지 않는다
-- 텍스트 중심 슬라이드(key-message, big-title)는 3장 이상 연속 금지
+- 텍스트 중심 슬라이드(key-message, keymsg, big-title, big-question, pink-reversal)는 3장 이상 연속 금지
 - 비교 내용은 반드시 비교 컴포넌트로 만든다 (bullet list 변환 금지)
 - 순서·과정은 반드시 흐름도 컴포넌트로 만든다
 - 원인-결과는 반드시 화살표·체인으로 표현한다

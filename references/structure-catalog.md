@@ -27,6 +27,11 @@
 | **항목 × 속성 표** | `table-slide` ✅ | 카드 여러 장으로 쪼개기 |
 | **흩어진 용어 무리 (관계 약함)** | `keyword-cluster` ✅ | 표, 카드 |
 | **영상** | `video` ✅ | 캡처 이미지 |
+| **변화 전 → 후 (방향이 핵심)** | `before-after-panel` ✅ (로즈→블루) | `versus`의 VS로 대결처럼 보이기 |
+| **복사해서 쓸 프롬프트 전문** | `prompt-box` ✅ | 3줄로 줄이기·notes로 빼기 |
+| **설치·실행 명령 한 줄** | `command-box` ✅ | 프롬프트 상자에 섞기 |
+| **결과 화면 캡처** (영상 없음) | `screenshot-slot` ✅ | 장식 이미지 |
+| **"그러나…" 반전** | `pink-reversal` ✅ (bling) | key-message에 "그러나" 붙이기 |
 | **부/장 시작, 표지** | `section-divider` / `hero-title` ✅ | key-message |
 | **마무리·행동 촉구** | `closing-prompt` ✅ | key-message |
 | **상위→하위로 가지치는 위계/분기** | `tree` 🔨 (없으면 만든다) | 카드로 평평하게 펴기 |
@@ -123,6 +128,10 @@
 - **전체 코드·좌표·스키마는 `trinity-template.md`** 참고.
 
 공통 장식: `Eyebrow`(페이드 라인 + 자간 넓힌 작은 라벨) — 칩/알약 대신 슬라이드 상단 분류표시. light/dark/warm 테마.
+
+---
+
+> 위 14개 외에 `added-templates.md`의 75~81·83~86과 15 `before-after-panel`도 ✅ 구현됐다(코드 포함).
 
 ---
 

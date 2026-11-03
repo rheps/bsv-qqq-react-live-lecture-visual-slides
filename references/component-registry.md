@@ -43,7 +43,7 @@
 | # | type | 이름 | 언제 쓰나 | 비고 |
 |---|---|---|---|---|
 | 14 | `split-compare` | SplitCompare | A vs B 반반 비교 | |
-| 15 | `before-after-panel` | BeforeAfterPanel | 변화 전·후 | |
+| 15 | `before-after-panel` | BeforeAfterPanel | 변화 전·후 (왼 로즈 → 화살표 → 오른 블루, 항목 2~4) | ✅ 구현 — 코드 `added-templates.md` 11절 |
 | 16 | `pros-cons-board` | ProsConsBoard | 장단점·찬반 | |
 | 17 | `contrast` | ContrastKeyword | 키워드 수준 VS 대비 | |
 | 18 | `two-by-two-matrix` | TwoByTwoMatrix | 2축 4분면 분류 | |
@@ -173,11 +173,22 @@ PowerPoint 기본 차트를 옮겨온 것. `요청시` 표시는 발표 화면�
 | 80 | `bridge` | Bridge | A →(라벨)→ B + 설명 카드. 전환의 *원동력*을 화살표에 | `flow` 설명-카드 변형 |
 | 81 | `tradeoff` | Tradeoff | 단점 N(로즈) + 큰 장점 1(블루·넓게). "그래도 쓰는 이유" | `pros-cons` 강조형 |
 
+## O. 강의 시나리오 템플릿 (83~86)
+
+`bsv-qqq-lecture-scenario`의 SLIDES.md(실습형 연수)를 위해 추가. 코드·스키마는 `added-templates.md` 8~12절, SLIDES.md 읽기는 `scenario-input.md`. 15번 `before-after-panel`도 같은 묶음에서 구현됐다(11절). 이 넷과 15번은 복사 버튼·이미지 상태가 있는 **React 템플릿**이라 모션 키트 `QQQ.mount(n)`로 그리지 않는다 — 덱에는 `added-templates.md` 코드를 넣는다(갤러리·키트 속 그림은 모양 확인용).
+
+| # | type | 이름 | 언제 쓰나 | 비고 |
+|---|---|---|---|---|
+| 83 | `prompt-box` | PromptBox | 실습 프롬프트 전문 + 복사 버튼. 긴 글은 상자 안 스크롤 | NEW · "본문 3줄" 예외 |
+| 84 | `screenshot-slot` | ScreenshotSlot | 결과 캡처. 빈 칸·깨진 경로면 점선 자리 표시 틀 | NEW |
+| 85 | `pink-reversal` | PinkReversal | "그러나…" 반전 한 장. 항상 bling(핑크) 테마 | NEW · 덱당 1~2장 |
+| 86 | `command-box` | CommandBox | 설치·실행 명령 한 줄 + 복사 버튼 | NEW · 시나리오의 `NEW command-box`로 추가 |
+
 ---
 
 ## 사용 흐름
 
-1. 사용자가 번호로 지시 → 이 표에서 `type`·이름·용도 확인.
+1. 사용자가 번호로 지시 → 이 표에서 `type`·이름·용도 확인. (다음 새 번호는 87.)
 2. SmartArt 계열은 `visual-component-library.md`, 차트 계열은 `chart-components.md`에서 상세 규격(SVG 패턴·등장 순서) 확인.
 3. `요청시` 항목을 고르면, 더 읽기 쉬운 대안(비고에 적힌 번호)을 **한 번 안내한 뒤** 사용자가 그대로 원하면 그 번호로 만든다.
 4. 모든 컴포넌트는 Modern Glassy Light 토큰(`design-and-readability.md`)과 spring-pop 등장, 24px+ 글자 규칙을 따른다.

@@ -147,6 +147,8 @@ useEffect(() => {
 
 ## 4. Speaker Notes 처리
 
+> 시나리오(SLIDES.md)에서 온 장에 `skipIfShort:true`가 있으면 console 출력 앞에 `[skip_if_short]`를 붙인다(짧은 버전에서 건너뛸 수 있는 장이라는 강사용 표시, 화면엔 안 보임).
+
 발표형에서는 `notes`가 거의 필수다. 각 슬라이드 데이터는 `notes` 필드를 가져야 한다.
 
 메인 화면에 표시할 것:
@@ -320,6 +322,7 @@ if ((e.key === 'e' || e.key === 'E') && !EMBED) setEdit(v => !v);
 - **하단 편집 폼**: 현재 슬라이드의 텍스트 필드를 input/textarea로 표시
   - 편집 가능: `title`, `subtitle`, `body`, `quote`, `notes`, `keywords[]`, `builds[].label`, `builds[].detail` 등 텍스트 계열 전부
   - 숨김: `id`, `type` (기술 필드)
+  - `prompt`(prompt-box)·`command`(command-box)는 줄바꿈이 보이는 큰 textarea로, `image`(screenshot-slot)는 경로 한 줄 입력칸으로 둔다(캡처 파일 이름을 넣으면 바로 바뀜). `role`(시나리오 꼬리표)은 읽기 전용으로 보여도 된다.
   - 배열 항목은 항목별 textarea로 각각 표시
   - **영상(`video`) 슬라이드**: `videoId`를 그대로 노출하지 말고 **"유튜브 주소" 입력칸**을 둔다. 링크(`watch?v=` · `youtu.be/` · `shorts/` · `embed/` · 원시 11자)를 붙여넣으면 ID를 추출(`parseYouTubeId`)해 즉시 교체. 인식 실패 시 빨간 테두리로 알림. (강사가 11자 ID를 알 필요 없게.)
 - **"수정된 HTML 다운로드" 버튼**: 패널 최하단 고정, 포인트 컬러 배경 흰 텍스트

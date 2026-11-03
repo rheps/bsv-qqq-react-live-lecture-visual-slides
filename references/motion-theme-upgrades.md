@@ -399,6 +399,8 @@ SVG 연결선/화살표는 단순 페이드 대신 **선이 그어지듯** 등�
 
 ### bling 반짝이 + reduced-motion 가드
 
+> bling의 **배경 그라디언트·강조색**(`.app-wrap.theme-bling`)은 `design-and-readability.md` 3-e와 `added-templates.md`「8~12 공용 CSS」에 있다. 여기 오로라·블롭·✨는 그 위에 얹는 장식이다. bling은 `pink-reversal`("그러나…" 반전) 전용으로 쓴다.
+
 ```css
 .theme-bling .stage-box::after  { content:"✨"; position:absolute; top:7%; right:11%; font-size:44px; animation:shimmer 2.4s ease-in-out infinite; z-index:3; }
 .theme-bling .stage-box::before { content:"✨"; position:absolute; bottom:13%; left:9%; font-size:30px; animation:shimmer 3.1s ease-in-out infinite .6s; z-index:3; }

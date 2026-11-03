@@ -300,7 +300,7 @@ body {
 
 ---
 
-## 3-e. 다중 테마 (light / dark / warm)
+## 3-e. 다중 테마 (light / dark / warm / bling)
 
 같은 슬라이드 시스템 안에서 슬라이드별로 테마를 다르게 가져갈 수 있다.
 중요한 메시지·section divider·핵심 질문에 다크 테마를 쓰면 임팩트가 폭증한다.
@@ -318,6 +318,14 @@ body {
 .app-wrap.theme-warm {
   background: linear-gradient(135deg, #FFF1F2 0%, #FFF7ED 50%, #FEF3C7 100%);
 }
+/* 블링 = 강한 핑크 ("그러나…" 반전 장, pink-reversal). 강조색도 핑크 계열로 덮어쓴다(보라 금지 유지) */
+.app-wrap.theme-bling {
+  background: linear-gradient(135deg, #FFC2DD 0%, #FF9ECB 48%, #FFB8D7 100%);
+  color: #3F0A24;
+  --ink:#3F0A24; --muted:#831843; --blue:#BE185D; --sky:#E11D48; --rose:#9F1239; --emerald:#047857;
+}
+.theme-bling .t-hero, .theme-bling .t-title { color: #3F0A24; }
+.theme-bling .t-sub, .theme-bling .t-cap { color: #831843; }
 
 /* 다크 테마에서 자동 색상 반전 — 액센트는 블루/하늘 (보라 금지) */
 .theme-dark .t-hero, .theme-dark .t-title { color: #FFFFFF; }
@@ -332,7 +340,9 @@ body {
 App에서 현재 슬라이드의 `theme` 값을 읽어 동적 적용:
 
 ```jsx
-const theme = slides[idx]?.theme || "light";
+const cur = slides[idx];
+// pink-reversal은 존재 이유가 핑크 반전이라 theme 값과 무관하게 bling
+const theme = cur?.type === "pink-reversal" ? "bling" : (cur?.theme || "light");
 <div className={"app-wrap theme-" + theme}>
 ```
 
@@ -343,6 +353,8 @@ const theme = slides[idx]?.theme || "light";
 - key-message 중 가장 강조하고 싶은 한 장
 - big-question 중 결정적 질문
 - 너무 자주 쓰면 효과 떨어진다. 30장 슬라이드 중 3~5장 정도.
+
+블링(핑크) 권장 위치: "그러나…" 반전 한 장(`pink-reversal`)만. 덱당 1~2장. 배경 `#FF9ECB` 위 글자 `#3F0A24` 대비 약 8.6:1, 캡션 `#831843` 약 5:1. 블롭·오로라·✨ 장식은 `motion-theme-upgrades.md` 8번.
 
 ---
 
@@ -542,6 +554,8 @@ CDN:
 - 작은 캡션·각주
 - 복잡한 표 (4행 4열 초과)
 - 청중이 30초 이상 읽어야 하는 슬라이드
+
+예외 — `prompt-box`의 `prompt`, `command-box`의 `command`: 청중이 **읽는 글이 아니라 복사해 쓰는 재료**라 전문을 그대로 둔다. 대신 글자는 24px 그대로, 길면 **상자 안에서만** 스크롤한다(`added-templates.md` 8·12절).
 
 ---
 
