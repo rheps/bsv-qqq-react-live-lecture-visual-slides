@@ -96,7 +96,7 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 
 - `big-title` — 큰 제목 슬라이드
 - `key-message` — 핵심 문장 슬라이드. **Default look: editorial pull-quote** (kicker `lead`, SVG quote marks, highlighter on `*word*`, optional `by`); `variant:"classic"` = old look. Code: `added-templates.md` 17.
-- `question` — 발문·질문 슬라이드 (implemented as `big-question`: **default look is a kinetic display question** — words rise one by one, hand-drawn underline on `*word*`, faint giant `?`, optional `sub` line with a drawn arrow, no box; `variant:"classic"` = old look. Code: `added-templates.md` 16.)
+- `question` — 발문·질문 슬라이드 (implemented as `big-question`: **default look is a kinetic display question** — words rise one by one, hand-drawn underline on `*word*`, faint giant `?`, `title` (judging sentence) is the big line and a different `question` the arrow line under it, or only `question` big with an optional `sub` arrow line, no box; `variant:"classic"` = old look. Code: `added-templates.md` 16.)
 - `three-keywords` — 3개 키워드 glass-card
 - `contrast` — 좌/우 대조 (glass-card 양쪽)
 - `cause-effect` — 원인→결과 플로우

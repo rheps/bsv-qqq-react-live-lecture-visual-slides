@@ -39,7 +39,7 @@ ok("SKILL: no deleted audit skill reference", !/qqq-slide-emphasis-audit/.test(s
 // reader on the fixture
 const rep = parseSlidesMd(read("tests/fixtures/SLIDES.sample.md"));
 const byId = Object.fromEntries(rep.slides.map(s => [s.id, s]));
-ok("reader: 17 slides", rep.slides.length === 17);
+ok("reader: 18 slides", rep.slides.length === 18);
 ok("reader: deck title", rep.deckTitle === "QQQ 새 컴포넌트 시험");
 ok("reader: **x** -> *x*", byId.s03.title === "이 프롬프트를 *그대로* 붙여 넣으세요");
 ok("reader: prompt kept byte-for-byte", byId.s03.prompt.includes("**굵게**도.") && byId.s03.prompt.includes("\n\n[출력 형식]") && !byId.s03.prompt.startsWith(" "));
@@ -124,6 +124,20 @@ ok("key-message: quote default + classic variant", /function KeyMessageQuote\(/.
 ok("big-question / key-message: switch cases", /case "big-question":\s+return <BigQuestion /.test(tpl) && /case "key-message":\s+return <KeyMessage /.test(tpl));
 ok("key-message: quote marks drawn in SVG, by-line slot", /function KmMark\(/.test(code(s17)) && /s\.by &&/.test(code(s17)));
 ok("big-question: sub line drawn arrow, no box", /qqq-bq-arrow/.test(code(s16)) && !/className="glass/.test(code(s16)));
+ok("big-question: title is the big line, question the arrow line (bqLines in both variants)",
+  /function bqLines\(/.test(code(s16)) && (code(s16).match(/= bqLines\(s\)/g) || []).length === 2
+  && /text=\{head\}/.test(code(s16)) && /follow\.map\(/.test(code(s16)) && !/text=\{s\.question\}/.test(code(s16)));
+{ // run bqLines itself on the cases the reader and the template must agree on
+  const fn = new Function(code(s16).match(/const bqKey = [^\n]*\n/)[0] + code(s16).match(/function bqLines\([\s\S]*?\n\}\n/)[0] + "return bqLines;")();
+  const a = fn({ title: "Can we *trust* it?", question: "What do we check?", sub: "s" });
+  const b = fn({ title: "AI는 *대체*할까?", question: "AI는 대체할까?", sub: "s" });
+  const c = fn({ question: "Only a question?" }), d = fn({ title: "Only a title" });
+  ok("big-question: bqLines cases", a.head === "Can we *trust* it?" && JSON.stringify(a.follow) === JSON.stringify(["What do we check?", "s"])
+    && b.head === "AI는 대체할까?" && JSON.stringify(b.follow) === JSON.stringify(["s"])
+    && c.head === "Only a question?" && c.follow.length === 0 && d.head === "Only a title" && d.follow.length === 0);
+}
+ok("big-question: docs and slot mapping name title + question", /`title` \*\*and\*\* a different `question`/.test(s16)
+  && /\| `big-question` \| `title`, `question`†, `sub`, `variant`/.test(read("references/scenario-input.md")));
 ok("outcome-cards: all built-in visuals drawn", ["folder-sort", "mini-dashboard", "doc-year-flip", "checklist"].every(k => code(s18).includes(`kind === "${k}"`)) && /OC_VISUALS\.includes\(it\.visual\) \? it\.visual : "icon"/.test(code(s18)));
 ok("outcome-cards: icon keys or emoji", /const OC_ICON = \{/.test(code(s18)) && ["folder", "chart", "doc", "check", "calendar", "clock", "spark"].every(k => code(s18).includes(`  ${k}: "M`)));
 ok("15-18: no Korean UI strings in code", !/[가-힣]/.test(c1518.replace(/\/\/.*$/gm, "")));
@@ -135,6 +149,8 @@ ok("reader: outcome-cards", byId.s15.type === "outcome-cards" && byId.s15.items.
   && byId.s15.items[0].label === "Sorted *folders*" && byId.s15.items[2].visual === "doc-year-flip");
 ok("reader: outcome-cards builds", JSON.stringify(byId.s15.builds) === JSON.stringify(["title", "o0", "o1", "o2", "caption"]) && !rep.warnings.some(w => w.startsWith("s15")));
 ok("reader: big-question sub build", JSON.stringify(byId.s16.builds) === JSON.stringify(["question", "sub"]) && byId.s16.sub === "Or will it change *what* we teach?");
+ok("reader: big-question title + question builds", byId.s18.title === "Can we use AI worksheets *as they are*?" && byId.s18.question === "What do we check *first*?"
+  && JSON.stringify(byId.s18.builds) === JSON.stringify(["title", "question", "caption"]) && !rep.warnings.some(w => w.startsWith("s18")));
 ok("reader: key-message by + classic variant", byId.s17.variant === "classic" && byId.s17.by === "Lecturer" && JSON.stringify(byId.s17.builds) === JSON.stringify(["lead", "message", "by"]) && !rep.warnings.some(w => w.startsWith("s17")));
 const oc = parseSlidesMd(`# SLIDES — t
 ## S01 · one

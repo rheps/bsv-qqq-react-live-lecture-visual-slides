@@ -334,29 +334,31 @@ SVG 연결선/화살표는 단순 페이드 대신 **선이 그어지듯** 등�
 
 ### (B) 드리프트 글로우 블롭 — 6개 전부 + 큰 궤도 + multiply
 
+> **Scoped on purpose**: the size/colour rules are `.blob.b1`…`.blob.b6`, never a bare `.b1`. A bare `.b1` also hits any other element that has a `b1` class (it once drew outcome-cards' dashboard bars as 56vh circles over the slide). Keep every background class compound with `.blob` (or prefixed), and give component classes a component prefix (`tests/class-collision-guard.mjs`).
+
 ```css
 .blob { position:absolute; border-radius:50%; filter:blur(64px); mix-blend-mode:multiply; will-change:transform; }
 .theme-dark .blob { mix-blend-mode:screen; filter:blur(80px); opacity:.4; }
 /* 라이트/웜/블링: 색 구름을 더 진하고 또렷하게(채도 ↑) */
 .theme-light .blob, .theme-warm .blob, .theme-bling .blob { filter:blur(56px) saturate(1.5); }
 
-.b1 { top:-12vh; left:-8vw;   width:56vh; height:56vh; background:radial-gradient(circle,rgba(59,130,246,.66) 0%,transparent 70%); animation:orbit1 26s ease-in-out infinite; }
-.b2 { bottom:-16vh; right:-6vw; width:62vh; height:62vh; background:radial-gradient(circle,rgba(20,184,166,.6) 0%,transparent 70%);  animation:orbit2 32s ease-in-out infinite; }
-.b3 { top:26vh; right:16vw;   width:40vh; height:40vh; background:radial-gradient(circle,rgba(244,63,94,.54) 0%,transparent 70%);   animation:orbit3 30s ease-in-out infinite; }
-.b4 { bottom:8vh; left:12vw;  width:44vh; height:44vh; background:radial-gradient(circle,rgba(139,92,246,.54) 0%,transparent 70%);  animation:orbit1 38s ease-in-out infinite reverse; } /* ← 배경 한정 violet 예외 */
-.b5 { top:-6vh; right:28vw;   width:34vh; height:34vh; background:radial-gradient(circle,rgba(245,158,11,.46) 0%,transparent 70%);  animation:orbit2 28s ease-in-out infinite; }
-.b6 { bottom:22vh; left:40vw; width:38vh; height:38vh; background:radial-gradient(circle,rgba(14,165,233,.54) 0%,transparent 70%);  animation:orbit3 34s ease-in-out infinite reverse; }
+.blob.b1 { top:-12vh; left:-8vw;   width:56vh; height:56vh; background:radial-gradient(circle,rgba(59,130,246,.66) 0%,transparent 70%); animation:orbit1 26s ease-in-out infinite; }
+.blob.b2 { bottom:-16vh; right:-6vw; width:62vh; height:62vh; background:radial-gradient(circle,rgba(20,184,166,.6) 0%,transparent 70%);  animation:orbit2 32s ease-in-out infinite; }
+.blob.b3 { top:26vh; right:16vw;   width:40vh; height:40vh; background:radial-gradient(circle,rgba(244,63,94,.54) 0%,transparent 70%);   animation:orbit3 30s ease-in-out infinite; }
+.blob.b4 { bottom:8vh; left:12vw;  width:44vh; height:44vh; background:radial-gradient(circle,rgba(139,92,246,.54) 0%,transparent 70%);  animation:orbit1 38s ease-in-out infinite reverse; } /* ← 배경 한정 violet 예외 */
+.blob.b5 { top:-6vh; right:28vw;   width:34vh; height:34vh; background:radial-gradient(circle,rgba(245,158,11,.46) 0%,transparent 70%);  animation:orbit2 28s ease-in-out infinite; }
+.blob.b6 { bottom:22vh; left:40vw; width:38vh; height:38vh; background:radial-gradient(circle,rgba(14,165,233,.54) 0%,transparent 70%);  animation:orbit3 34s ease-in-out infinite reverse; }
 
 /* 다크: 블롭 6개 전부 톤다운(가장자리는 검정 유지) */
-.theme-dark .b1 { background:radial-gradient(circle,rgba(59,130,246,.42) 0%,transparent 72%); }
-.theme-dark .b2 { background:radial-gradient(circle,rgba(14,165,233,.36) 0%,transparent 72%); }
-.theme-dark .b3 { background:radial-gradient(circle,rgba(244,63,94,.3) 0%,transparent 72%); }
-.theme-dark .b4 { background:radial-gradient(circle,rgba(139,92,246,.34) 0%,transparent 72%); }
-.theme-dark .b5 { background:radial-gradient(circle,rgba(245,158,11,.24) 0%,transparent 72%); }
-.theme-dark .b6 { background:radial-gradient(circle,rgba(14,165,233,.34) 0%,transparent 72%); }
+.theme-dark .blob.b1 { background:radial-gradient(circle,rgba(59,130,246,.42) 0%,transparent 72%); }
+.theme-dark .blob.b2 { background:radial-gradient(circle,rgba(14,165,233,.36) 0%,transparent 72%); }
+.theme-dark .blob.b3 { background:radial-gradient(circle,rgba(244,63,94,.3) 0%,transparent 72%); }
+.theme-dark .blob.b4 { background:radial-gradient(circle,rgba(139,92,246,.34) 0%,transparent 72%); }
+.theme-dark .blob.b5 { background:radial-gradient(circle,rgba(245,158,11,.24) 0%,transparent 72%); }
+.theme-dark .blob.b6 { background:radial-gradient(circle,rgba(14,165,233,.34) 0%,transparent 72%); }
 /* 블링: b1·b3을 핑크/로즈로 */
-.theme-bling .b1 { background:radial-gradient(circle,rgba(244,114,182,.55) 0%,transparent 70%); }
-.theme-bling .b3 { background:radial-gradient(circle,rgba(251,113,133,.5) 0%,transparent 70%); }
+.theme-bling .blob.b1 { background:radial-gradient(circle,rgba(244,114,182,.55) 0%,transparent 70%); }
+.theme-bling .blob.b3 { background:radial-gradient(circle,rgba(251,113,133,.5) 0%,transparent 70%); }
 
 @keyframes orbit1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(13vw,10vh) scale(1.18)} 66%{transform:translate(-9vw,15vh) scale(.9)} }
 @keyframes orbit2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-15vw,-11vh) scale(1.22)} }

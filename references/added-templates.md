@@ -770,7 +770,7 @@ function KineticText({ text, show, mark = "swipe", delay = 0, as = "div", classN
     <Tag className={"qqq-kt" + (on ? " is-on" : "") + (className ? " " + className : "")}
       style={{ ...(style || {}), "--kd": delay + "s", "--kn": n }}>
       {toks.map((t, j) => t.k === "br" ? <br key={j}/> : t.k === "sp" ? " " :
-        <span key={j} className={"qqq-kw" + (t.m ? " qqq-mk is-" + t.m + " mk-" + mark : "")} style={{ "--i": t.i }}>
+        <span key={j} className={"qqq-kw" + (t.m ? " qqq-mk is-" + t.m + " qqq-mark-" + mark : "")} style={{ "--i": t.i }}>
           {t.m ? <span className="qqq-mk-ink">{nl(t.s)}</span> : t.s}
           {t.m && mark === "underline" &&
             <svg className="qqq-mk-line" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true">
@@ -817,40 +817,67 @@ function CountText({ value, show, seconds = 0.9, suffix = "" }) {
 
 ## 16. `big-question` — kinetic display question (No. 7, new default look)
 
-**When**: the one question thrown to the audience. Same type and slots as before (`question`, plus the optional `sub` and the common `eyebrow`/`caption`), so existing SLIDES.md still works. The new look is the **default**. `variant:"classic"` keeps the old look (big blue `?` above the sentence).
+**When**: the one question thrown to the audience. Slots: `title` (the judging sentence, `**emphasis**` in SLIDES.md), `question`, the optional `sub` and the common `eyebrow`/`caption`. Old SLIDES.md and decks with only `question` still work. The new look is the **default**. `variant:"classic"` keeps the old look (big blue `?` above the sentence).
 
-- **Kinetic (default)**: no box. The question is display type (80px/900, tight tracking, `text-wrap:balance`) and rises word by word. The `*emphasized*` word gets the gradient fill plus a **hand-drawn underline** drawn after the words land (`~x~` rose, `_x_` emerald). A huge faint gradient `?` sits behind the sentence and breathes (decoration). Three `Sparkle4` pop in after the question.
-- `sub` (optional): the follow-up line, **not in a box** — a hand-drawn curved arrow draws itself, then the line appears in 36px with a slight tilt, like a note written beside the question. It is its own build step.
-- builds: `["question", "sub"?, "caption"?]` (the reader adds `sub`/`caption` only when present).
+- **Which line is big** (`bqLines`, used by both variants and mirrored by the reader's `buildsFor`):
+  - `title` **and** a different `question` → `title` is the big line and `question` is the arrow line under it. `sub` (if any) follows as a second arrow line.
+  - only one of them, or both the same sentence (markers and spaces ignored) → that sentence is the big line and `sub` is the arrow line.
+- **Kinetic (default)**: no box. The big line is display type (80px/900, tight tracking, `text-wrap:balance`) and rises word by word. The `*emphasized*` word gets the gradient fill plus a **hand-drawn underline** drawn after the words land (`~x~` rose, `_x_` emerald). A huge faint gradient `?` sits behind the sentence and breathes (decoration). Three `Sparkle4` pop in after the big line.
+- Arrow lines: **not in a box** — a hand-drawn curved arrow draws itself, then the line appears in 36px with a slight tilt, like a note written beside the big line. Each arrow line is its own build step (the second one has no arrow of its own).
+- builds: `["title", "question", "sub"?, "caption"?]` when `title` and `question` differ, else `["question", "sub"?, "caption"?]` (the reader adds `sub`/`caption` only when present). The component reads steps by index, so the names are labels.
 - `variant`: `"kinetic"` (default, also when empty) or `"classic"`. The editor may change it; the two variants are separate components, so switching remounts cleanly.
 
 Data:
 ```js
 { id, type:"big-question", theme:"dark", eyebrow,
-  question:"AI는 교사를 *대체*할 수 있을까?",
-  sub:"",                      // optional follow-up line, e.g. "Or will it change what we teach?"
+  title:"Can we use AI worksheets *as they are*?",   // big line (judging sentence)
+  question:"What do we check first?",              // arrow line under it ("" -> title only)
+  sub:"",                      // optional extra arrow line
   caption:"", variant:"",      // "" = kinetic; "classic" = old look
-  builds:["question"] }        // + "sub" / "caption" when present
+  builds:["title","question"] }  // only question (or title == question): ["question"]; + "sub" / "caption" when present
 ```
 ```jsx
+// title + a different question -> title is the big line, question (then sub) the arrow lines.
+// Only one of them, or the same sentence twice -> that sentence is the big line, sub the arrow line.
+const bqKey = x => String(x == null ? "" : x).replace(/[*~_\s]/g, "");
+function bqLines(s) {
+  const t = String(s.title || "").trim(), q = String(s.question || "").trim();
+  const both = !!(t && q && bqKey(t) !== bqKey(q));
+  return { head: both ? t : (q || t), follow: [both ? q : "", s.sub].filter(x => String(x || "").trim()) };
+}
+
 function BigQuestionClassic({ s, step }) {
+  const { head, follow } = bqLines(s);
   return (
     <div className="box">
       {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
       <MI show={vF(0, step)} anim="pop" style={{ marginBottom: 18 }}>
         <Idle kind="breathe" style={{ fontSize: 120, fontWeight: 900, color: "var(--blue)" }}>?</Idle>
       </MI>
-      <MI show={vF(0, step)} className="t-hero" style={{ fontSize: 64, lineHeight: 1.3, maxWidth: 1000 }}>{hl(s.question)}</MI>
-      {s.sub && <MI show={vF(1, step)} className="t-sub" style={{ fontSize: 32, marginTop: 24 }}>{hl(s.sub)}</MI>}
-      {s.caption && <MI show={vF(s.sub ? 2 : 1, step)} className="t-cap" style={{ marginTop: 28 }}>{hl(s.caption)}</MI>}
+      <MI show={vF(0, step)} className="t-hero" style={{ fontSize: 64, lineHeight: 1.3, maxWidth: 1000 }}>{hl(head)}</MI>
+      {follow.map((f, k) => <MI key={k} show={vF(1 + k, step)} className="t-sub" style={{ fontSize: 32, marginTop: k ? 10 : 24 }}>{hl(f)}</MI>)}
+      {s.caption && <MI show={vF(1 + follow.length, step)} className="t-cap" style={{ marginTop: 28 }}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+
+function BqFollow({ text, show, first }) {
+  const on = useOn(show);
+  return (
+    <div className={"qqq-bq-sub" + (first ? "" : " qqq-bq-sub2") + (on ? " is-on" : "")}>
+      {first ? <svg className="qqq-bq-arrow" viewBox="0 0 90 60" aria-hidden="true">
+        <path d="M8 6 C 6 30, 26 48, 72 46" pathLength="1"/>
+        <path d="M60 34 L74 46 L58 56" pathLength="1"/>
+      </svg> : <span className="qqq-bq-arrow" aria-hidden="true"/>}
+      <KineticText as="span" className="t-sub qqq-bq-subt" text={text} show={show} delay={first ? 0.3 : 0} mark="ink"/>
     </div>
   );
 }
 
 function BigQuestionKinetic({ s, step }) {
-  const q = vF(0, step), sub = vF(1, step);
+  const { head, follow } = bqLines(s);
+  const q = vF(0, step);
   const qOn = useOn(q);
-  const subOn = useOn(!!s.sub && sub);
   return (
     <div className="box qqq-bq">
       {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
@@ -861,18 +888,10 @@ function BigQuestionKinetic({ s, step }) {
         <Sparkle4 size={44} tone="sky" delay={0.9} style={{ left: "4%", top: "6%" }}/>
         <Sparkle4 size={28} tone="blue" delay={1.2} style={{ right: "16%", top: "-2%" }}/>
         <Sparkle4 size={34} tone="amber" delay={1.5} style={{ right: "3%", bottom: "4%" }}/>
-        <KineticText className="t-hero qqq-bq-q" text={s.question} show={q} mark="underline"/>
+        <KineticText className="t-hero qqq-bq-q" text={head} show={q} mark="underline"/>
       </div>
-      {s.sub && (
-        <div className={"qqq-bq-sub" + (subOn ? " is-on" : "")}>
-          <svg className="qqq-bq-arrow" viewBox="0 0 90 60" aria-hidden="true">
-            <path d="M8 6 C 6 30, 26 48, 72 46" pathLength="1"/>
-            <path d="M60 34 L74 46 L58 56" pathLength="1"/>
-          </svg>
-          <KineticText as="span" className="t-sub qqq-bq-subt" text={s.sub} show={sub} delay={0.3} mark="ink"/>
-        </div>
-      )}
-      {s.caption && <MI show={vF(s.sub ? 2 : 1, step)} className="t-cap" style={{ marginTop: 30 }}>{hl(s.caption)}</MI>}
+      {follow.map((f, k) => <BqFollow key={k} text={f} show={vF(1 + k, step)} first={k === 0}/>)}
+      {s.caption && <MI show={vF(1 + follow.length, step)} className="t-cap" style={{ marginTop: 30 }}>{hl(s.caption)}</MI>}
     </div>
   );
 }
@@ -1012,21 +1031,21 @@ function OcIcon({ icon, size = 40 }) {
 
 function OcVisual({ kind, icon, n }) {
   if (kind === "folder-sort") return (
-    <svg className="qqq-oc-svg v-folder" viewBox="0 0 280 160" aria-hidden="true">
-      {[0, 1, 2].map(k => <path key={"b" + k} className={"oc-fback k" + k} transform={`translate(${28 + k * 84} 86)`}
+    <svg className="qqq-oc-svg oc-v-folder" viewBox="0 0 280 160" aria-hidden="true">
+      {[0, 1, 2].map(k => <path key={"b" + k} className={"oc-fback oc-k" + k} transform={`translate(${28 + k * 84} 86)`}
         d="M0 8Q0 0 8 0H26L34 8H62Q70 8 70 16V62Q70 70 62 70H8Q0 70 0 62Z"/>)}
-      {[0, 1, 2].map(k => <g key={"f" + k} className={"oc-file f" + k}>
+      {[0, 1, 2].map(k => <g key={"f" + k} className={"oc-file oc-f" + k}>
         <path className="oc-sheet" d="M0 0H22L32 10V44H0Z"/><path className="oc-fold" d="M22 0V10H32"/>
         <path className="oc-ln" d="M6 20H26M6 28H26M6 36H18"/></g>)}
-      {[0, 1, 2].map(k => <path key={"c" + k} className={"oc-ffront k" + k} transform={`translate(${28 + k * 84} 86)`}
+      {[0, 1, 2].map(k => <path key={"c" + k} className={"oc-ffront oc-k" + k} transform={`translate(${28 + k * 84} 86)`}
         d="M0 28Q0 22 6 22H64Q70 22 70 28V62Q70 70 62 70H8Q0 70 0 62Z"/>)}
     </svg>);
   if (kind === "mini-dashboard") return (
-    <svg className="qqq-oc-svg v-dash" viewBox="0 0 280 160" aria-hidden="true">
+    <svg className="qqq-oc-svg oc-v-dash" viewBox="0 0 280 160" aria-hidden="true">
       <rect className="oc-win" x="14" y="6" width="252" height="148" rx="14"/>
       <path className="oc-winbar" d="M14 20Q14 6 28 6H252Q266 6 266 20V28H14Z"/>
-      {[0, 1, 2].map(k => <circle key={k} className={"oc-dot d" + k} cx={30 + k * 13} cy="17" r="4"/>)}
-      {[0.42, 0.68, 0.54, 0.9].map((h, k) => <rect key={k} className={"oc-bar b" + k} x={34 + k * 30} y={140 - h * 92} width="20" height={h * 92} rx="5"/>)}
+      {[0, 1, 2].map(k => <circle key={k} className={"oc-dot oc-d" + k} cx={30 + k * 13} cy="17" r="4"/>)}
+      {[0.42, 0.68, 0.54, 0.9].map((h, k) => <rect key={k} className={"oc-bar oc-b" + k} x={34 + k * 30} y={140 - h * 92} width="20" height={h * 92} rx="5"/>)}
       <path className="oc-base" d="M28 141H158"/>
       <circle className="oc-ring-bg" cx="214" cy="74" r="28"/>
       <circle className="oc-ring" cx="214" cy="74" r="28" pathLength="1" transform="rotate(-90 214 74)"/>
@@ -1036,18 +1055,18 @@ function OcVisual({ kind, icon, n }) {
     const y = new Date().getFullYear();
     return (
       <div className="qqq-oc-doc">
-        <svg className="qqq-oc-svg v-doc" viewBox="0 0 280 160" aria-hidden="true">
+        <svg className="qqq-oc-svg oc-v-doc" viewBox="0 0 280 160" aria-hidden="true">
           <path className="oc-page" d="M68 6H184L212 34V154H68Z"/><path className="oc-pfold" d="M184 6V34H212"/>
           <path className="oc-pln" d="M88 96H192M88 112H192M88 128H156"/>
           <circle className="oc-stamp" cx="194" cy="130" r="17"/>
           <path className="oc-tick" d="M185 130L191 136L203 123" pathLength="1"/>
         </svg>
-        <div className="qqq-oc-year" aria-hidden="true"><span className="y-old">{y - 1}</span><span className="y-new">{y}</span></div>
+        <div className="qqq-oc-year" aria-hidden="true"><span className="oc-y-old">{y - 1}</span><span className="oc-y-new">{y}</span></div>
       </div>);
   }
   if (kind === "checklist") return (
-    <svg className="qqq-oc-svg v-check" viewBox="0 0 280 160" aria-hidden="true">
-      {[0, 1, 2].map(k => <g key={k} className={"oc-row r" + k}>
+    <svg className="qqq-oc-svg oc-v-check" viewBox="0 0 280 160" aria-hidden="true">
+      {[0, 1, 2].map(k => <g key={k} className={"oc-row oc-r" + k}>
         <rect className="oc-box" x="54" y={20 + k * 44} width="30" height="30" rx="8"/>
         <path className="oc-tick" d={`M61 ${35 + k * 44}L67 ${41 + k * 44}L78 ${28 + k * 44}`} pathLength="1"/>
         <path className="oc-rl" d={`M98 ${35 + k * 44}H${k === 2 ? 188 : 226}`}/></g>)}
@@ -1065,7 +1084,7 @@ function OcCard({ it, i, n, show }) {
   const on = useOn(show);
   const v = OC_VISUALS.includes(it.visual) ? it.visual : "icon";
   return (
-    <MI show={show} anim={OC_ANIM(n)[i]} className={"glass qqq-oc-card t-" + OC_TONES[i % 4] + (on ? " is-on" : "")}>
+    <MI show={show} anim={OC_ANIM(n)[i]} className={"glass qqq-oc-card qqq-oc-t-" + OC_TONES[i % 4] + (on ? " is-on" : "")}>
       <div className="qqq-oc-vis"><OcVisual kind={v} icon={it.icon} n={n}/></div>
       <div className="qqq-oc-head">
         <span className="qqq-oc-num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
@@ -1084,7 +1103,7 @@ function OutcomeCards({s,step}){
     <div className="box">
       {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
       <MI show={vF(0,step)} className="t-title" style={{marginBottom:30}}>{hl(s.title)}</MI>
-      <div className={"qqq-oc n" + n}>
+      <div className={"qqq-oc qqq-oc-n" + n}>
         {items.map((it,i)=><OcCard key={i} it={it||{}} i={i} n={n} show={vF(1+i,step)}/>)}
       </div>
       {s.caption && <MI show={vF(1+n,step)} className="t-cap" style={{marginTop:26}}>{hl(s.caption)}</MI>}
@@ -1184,10 +1203,10 @@ function OutcomeCards({s,step}){
   -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 .qqq-mk.is-r .qqq-mk-ink{ color:var(--rose); -webkit-text-fill-color:var(--rose); }
 .qqq-mk.is-g .qqq-mk-ink{ color:var(--emerald); -webkit-text-fill-color:var(--emerald); }
-.qqq-mk.mk-swipe::before{ content:""; position:absolute; z-index:-1; left:-.1em; right:-.1em; bottom:.04em; height:.46em;
+.qqq-mk.qqq-mark-swipe::before{ content:""; position:absolute; z-index:-1; left:-.1em; right:-.1em; bottom:.04em; height:.46em;
   border-radius:.14em .3em .22em .12em; background:var(--mk); transform:scaleX(0); transform-origin:0 50%;
   transition:transform .6s var(--k-draw); transition-delay:calc(var(--kd,0s) + var(--kn,1) * 55ms + .4s); }
-.qqq-kt.is-on .qqq-mk.mk-swipe::before{ transform:scaleX(1); }
+.qqq-kt.is-on .qqq-mk.qqq-mark-swipe::before{ transform:scaleX(1); }
 .qqq-mk-line{ position:absolute; left:-3%; bottom:-.16em; width:106%; height:.3em; overflow:visible; pointer-events:none; }
 .qqq-mk-line path{ fill:none; stroke:var(--mkl); stroke-width:3.6; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1;
   transition:stroke-dashoffset .7s var(--k-draw); transition-delay:calc(var(--kd,0s) + var(--kn,1) * 55ms + .4s); }
@@ -1218,6 +1237,7 @@ function OutcomeCards({s,step}){
   stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset .5s cubic-bezier(.65,0,.35,1); }
 .qqq-bq-arrow path + path{ transition-delay:.42s; transition-duration:.25s; }
 .qqq-bq-sub.is-on .qqq-bq-arrow path{ stroke-dashoffset:0; }
+.qqq-bq-sub2{ margin-top:6px; }
 .qqq-bq-subt{ font-size:36px; font-weight:700; line-height:1.4; }
 
 /* 17. key-message (quote) */
@@ -1238,13 +1258,13 @@ function OutcomeCards({s,step}){
 
 /* 18. outcome-cards — colour hex in --och/--och2 (fills), text tone in --oc (theme-aware), --ochd for text on white */
 .qqq-oc{ display:grid; gap:22px; width:100%; max-width:1056px; grid-template-columns:repeat(3,minmax(0,1fr)); }
-.qqq-oc.n2{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:900px; }
-.qqq-oc.n4{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+.qqq-oc.qqq-oc-n2{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:900px; }
+.qqq-oc.qqq-oc-n4{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
 .qqq-oc-card{ --oc:var(--blue); --och:#3B82F6; --och2:#0EA5E9; --ochd:#1D4ED8; display:flex; flex-direction:column; align-items:flex-start;
   min-width:0; padding:14px 18px 22px; text-align:left; border-top:5px solid var(--och); }
-.qqq-oc-card.t-emerald{ --oc:var(--emerald); --och:#10B981; --och2:#14B8A6; --ochd:#047857; }
-.qqq-oc-card.t-amber{ --oc:var(--amber); --och:#F59E0B; --och2:#F97316; --ochd:#B45309; }
-.qqq-oc-card.t-sky{ --oc:var(--sky); --och:#0EA5E9; --och2:#14B8A6; --ochd:#0369A1; }
+.qqq-oc-card.qqq-oc-t-emerald{ --oc:var(--emerald); --och:#10B981; --och2:#14B8A6; --ochd:#047857; }
+.qqq-oc-card.qqq-oc-t-amber{ --oc:var(--amber); --och:#F59E0B; --och2:#F97316; --ochd:#B45309; }
+.qqq-oc-card.qqq-oc-t-sky{ --oc:var(--sky); --och:#0EA5E9; --och2:#14B8A6; --ochd:#0369A1; }
 .qqq-oc-vis{ position:relative; width:100%; aspect-ratio:280/160; margin-bottom:12px; border-radius:14px;
   background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.18)); }
 .theme-dark .qqq-oc-vis{ background:rgba(255,255,255,.06); }
@@ -1258,73 +1278,73 @@ function OutcomeCards({s,step}){
 .qqq-oc-emoji{ display:inline-block; line-height:1; font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; }
 .qqq-oc-label{ font-size:32px; font-weight:900; line-height:1.25; }
 .qqq-oc-desc{ margin-top:6px; font-size:26px; font-weight:600; line-height:1.4; }
-.qqq-oc.n4 .qqq-oc-label{ font-size:28px; }
-.qqq-oc.n4 .qqq-oc-desc{ font-size:24px; }
+.qqq-oc.qqq-oc-n4 .qqq-oc-label{ font-size:28px; }
+.qqq-oc.qqq-oc-n4 .qqq-oc-desc{ font-size:24px; }
 /* folder-sort */
-.v-folder .oc-fback.k0{ fill:#2563EB; } .v-folder .oc-fback.k1{ fill:#059669; } .v-folder .oc-fback.k2{ fill:#D97706; }
-.v-folder .oc-ffront.k0{ fill:#60A5FA; } .v-folder .oc-ffront.k1{ fill:#34D399; } .v-folder .oc-ffront.k2{ fill:#FBBF24; }
-.v-folder .oc-ffront{ filter:drop-shadow(0 -2px 3px rgba(15,23,42,.14)); }
-.v-folder .oc-sheet{ fill:#fff; stroke:#94A3B8; stroke-width:1.6; stroke-linejoin:round; }
-.v-folder .oc-fold{ fill:#E2E8F0; stroke:#94A3B8; stroke-width:1.6; stroke-linejoin:round; }
-.v-folder .oc-ln{ fill:none; stroke:#CBD5E1; stroke-width:3; stroke-linecap:round; }
-.v-folder .oc-file{ transform-box:fill-box; transform-origin:center; transition:transform .85s cubic-bezier(.34,1.3,.64,1); }
-.v-folder .oc-file.f0{ --fk:0; transform:translate(98px,12px) rotate(-16deg); }
-.v-folder .oc-file.f1{ --fk:1; transform:translate(124px,2px) rotate(7deg); }
-.v-folder .oc-file.f2{ --fk:2; transform:translate(150px,16px) rotate(19deg); }
-.is-on .v-folder .oc-file{ transition-delay:calc(.35s + var(--fk) * .18s); }
-.is-on .v-folder .oc-file.f0{ transform:translate(47px,66px) rotate(0deg); }
-.is-on .v-folder .oc-file.f1{ transform:translate(131px,66px) rotate(0deg); }
-.is-on .v-folder .oc-file.f2{ transform:translate(215px,66px) rotate(0deg); }
+.oc-v-folder .oc-fback.oc-k0{ fill:#2563EB; } .oc-v-folder .oc-fback.oc-k1{ fill:#059669; } .oc-v-folder .oc-fback.oc-k2{ fill:#D97706; }
+.oc-v-folder .oc-ffront.oc-k0{ fill:#60A5FA; } .oc-v-folder .oc-ffront.oc-k1{ fill:#34D399; } .oc-v-folder .oc-ffront.oc-k2{ fill:#FBBF24; }
+.oc-v-folder .oc-ffront{ filter:drop-shadow(0 -2px 3px rgba(15,23,42,.14)); }
+.oc-v-folder .oc-sheet{ fill:#fff; stroke:#94A3B8; stroke-width:1.6; stroke-linejoin:round; }
+.oc-v-folder .oc-fold{ fill:#E2E8F0; stroke:#94A3B8; stroke-width:1.6; stroke-linejoin:round; }
+.oc-v-folder .oc-ln{ fill:none; stroke:#CBD5E1; stroke-width:3; stroke-linecap:round; }
+.oc-v-folder .oc-file{ transform-box:fill-box; transform-origin:center; transition:transform .85s cubic-bezier(.34,1.3,.64,1); }
+.oc-v-folder .oc-file.oc-f0{ --fk:0; transform:translate(98px,12px) rotate(-16deg); }
+.oc-v-folder .oc-file.oc-f1{ --fk:1; transform:translate(124px,2px) rotate(7deg); }
+.oc-v-folder .oc-file.oc-f2{ --fk:2; transform:translate(150px,16px) rotate(19deg); }
+.is-on .oc-v-folder .oc-file{ transition-delay:calc(.35s + var(--fk) * .18s); }
+.is-on .oc-v-folder .oc-file.oc-f0{ transform:translate(47px,66px) rotate(0deg); }
+.is-on .oc-v-folder .oc-file.oc-f1{ transform:translate(131px,66px) rotate(0deg); }
+.is-on .oc-v-folder .oc-file.oc-f2{ transform:translate(215px,66px) rotate(0deg); }
 /* mini-dashboard */
-.v-dash .oc-win{ fill:rgba(255,255,255,.88); stroke:rgba(15,23,42,.14); stroke-width:1.5; }
-.v-dash .oc-winbar{ fill:rgba(15,23,42,.06); }
-.theme-dark .v-dash .oc-win{ fill:rgba(255,255,255,.08); stroke:rgba(255,255,255,.22); }
-.theme-dark .v-dash .oc-winbar{ fill:rgba(255,255,255,.08); }
-.v-dash .oc-dot.d0{ fill:#F43F5E; } .v-dash .oc-dot.d1{ fill:#F59E0B; } .v-dash .oc-dot.d2{ fill:#10B981; }
-.v-dash .oc-bar{ fill:var(--och); transform-box:fill-box; transform-origin:50% 100%; transform:scaleY(0); transition:transform .7s cubic-bezier(.22,1,.36,1); }
-.v-dash .oc-bar.b3{ fill:var(--och2); }
-.is-on .v-dash .oc-bar{ transform:scaleY(1); }
-.is-on .v-dash .oc-bar.b0{ transition-delay:.3s; } .is-on .v-dash .oc-bar.b1{ transition-delay:.42s; }
-.is-on .v-dash .oc-bar.b2{ transition-delay:.54s; } .is-on .v-dash .oc-bar.b3{ transition-delay:.66s; }
-.v-dash .oc-base{ stroke:rgba(15,23,42,.25); stroke-width:2; }
-.theme-dark .v-dash .oc-base{ stroke:rgba(255,255,255,.3); }
-.v-dash .oc-ring-bg{ fill:none; stroke:rgba(15,23,42,.1); stroke-width:10; }
-.theme-dark .v-dash .oc-ring-bg{ stroke:rgba(255,255,255,.14); }
-.v-dash .oc-ring{ fill:none; stroke:var(--och); stroke-width:10; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1;
+.oc-v-dash .oc-win{ fill:rgba(255,255,255,.88); stroke:rgba(15,23,42,.14); stroke-width:1.5; }
+.oc-v-dash .oc-winbar{ fill:rgba(15,23,42,.06); }
+.theme-dark .oc-v-dash .oc-win{ fill:rgba(255,255,255,.08); stroke:rgba(255,255,255,.22); }
+.theme-dark .oc-v-dash .oc-winbar{ fill:rgba(255,255,255,.08); }
+.oc-v-dash .oc-dot.oc-d0{ fill:#F43F5E; } .oc-v-dash .oc-dot.oc-d1{ fill:#F59E0B; } .oc-v-dash .oc-dot.oc-d2{ fill:#10B981; }
+.oc-v-dash .oc-bar{ fill:var(--och); transform-box:fill-box; transform-origin:50% 100%; transform:scaleY(0); transition:transform .7s cubic-bezier(.22,1,.36,1); }
+.oc-v-dash .oc-bar.oc-b3{ fill:var(--och2); }
+.is-on .oc-v-dash .oc-bar{ transform:scaleY(1); }
+.is-on .oc-v-dash .oc-bar.oc-b0{ transition-delay:.3s; } .is-on .oc-v-dash .oc-bar.oc-b1{ transition-delay:.42s; }
+.is-on .oc-v-dash .oc-bar.oc-b2{ transition-delay:.54s; } .is-on .oc-v-dash .oc-bar.oc-b3{ transition-delay:.66s; }
+.oc-v-dash .oc-base{ stroke:rgba(15,23,42,.25); stroke-width:2; }
+.theme-dark .oc-v-dash .oc-base{ stroke:rgba(255,255,255,.3); }
+.oc-v-dash .oc-ring-bg{ fill:none; stroke:rgba(15,23,42,.1); stroke-width:10; }
+.theme-dark .oc-v-dash .oc-ring-bg{ stroke:rgba(255,255,255,.14); }
+.oc-v-dash .oc-ring{ fill:none; stroke:var(--och); stroke-width:10; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1;
   transition:stroke-dashoffset 1s cubic-bezier(.65,0,.35,1) .6s; }
-.is-on .v-dash .oc-ring{ stroke-dashoffset:.28; }
-.v-dash .oc-spark{ fill:none; stroke:var(--och2); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
+.is-on .oc-v-dash .oc-ring{ stroke-dashoffset:.28; }
+.oc-v-dash .oc-spark{ fill:none; stroke:var(--och2); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
   transition:stroke-dashoffset .8s cubic-bezier(.65,0,.35,1) .95s; }
-.is-on .v-dash .oc-spark{ stroke-dashoffset:0; }
-.is-on .v-dash .oc-dot.d2{ animation:qqqLive 1.6s ease-in-out 1.8s infinite; }
+.is-on .oc-v-dash .oc-spark{ stroke-dashoffset:0; }
+.is-on .oc-v-dash .oc-dot.oc-d2{ animation:qqqLive 1.6s ease-in-out 1.8s infinite; }
 @keyframes qqqLive{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
 /* doc-year-flip */
 .qqq-oc-doc{ position:relative; width:100%; height:100%; }
-.v-doc .oc-page{ fill:#fff; stroke:#94A3B8; stroke-width:2; stroke-linejoin:round; }
-.v-doc .oc-pfold{ fill:#E2E8F0; stroke:#94A3B8; stroke-width:2; stroke-linejoin:round; }
-.v-doc .oc-pln{ fill:none; stroke:#CBD5E1; stroke-width:5; stroke-linecap:round; }
-.v-doc .oc-stamp{ fill:var(--och); opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.3);
+.oc-v-doc .oc-page{ fill:#fff; stroke:#94A3B8; stroke-width:2; stroke-linejoin:round; }
+.oc-v-doc .oc-pfold{ fill:#E2E8F0; stroke:#94A3B8; stroke-width:2; stroke-linejoin:round; }
+.oc-v-doc .oc-pln{ fill:none; stroke:#CBD5E1; stroke-width:5; stroke-linecap:round; }
+.oc-v-doc .oc-stamp{ fill:var(--och); opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.3);
   transition:opacity .3s ease 1.25s, transform .5s cubic-bezier(.34,1.56,.64,1) 1.25s; }
-.is-on .v-doc .oc-stamp{ opacity:1; transform:none; }
-.v-doc .oc-tick{ fill:none; stroke:#fff; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
+.is-on .oc-v-doc .oc-stamp{ opacity:1; transform:none; }
+.oc-v-doc .oc-tick{ fill:none; stroke:#fff; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
   transition:stroke-dashoffset .4s ease 1.6s; }
-.is-on .v-doc .oc-tick{ stroke-dashoffset:0; }
-.qqq-oc-year{ position:absolute; left:47%; top:19%; transform:translateX(-50%); display:grid; perspective:420px;
+.is-on .oc-v-doc .oc-tick{ stroke-dashoffset:0; }
+.qqq-oc-year{ position:absolute; left:47%; top:30%; transform:translateX(-50%); display:grid; perspective:420px;
   font-size:32px; font-weight:900; line-height:1.1; letter-spacing:.01em; font-variant-numeric:tabular-nums; }
 .qqq-oc-year span{ grid-area:1/1; backface-visibility:hidden; transition:transform .45s cubic-bezier(.65,0,.35,1), opacity .3s ease, color .3s ease; }
-.qqq-oc-year .y-old{ color:#64748B; }
-.qqq-oc-year .y-new{ color:var(--ochd); transform:rotateX(90deg); opacity:0; }
-.is-on .qqq-oc-year .y-old{ transform:translate(-64%,-96%) scale(.78); color:#E11D48; text-decoration:line-through 3px; transition-delay:.55s; }
-.is-on .qqq-oc-year .y-new{ transform:none; opacity:1; transition-delay:.85s; }
+.qqq-oc-year .oc-y-old{ color:#64748B; }
+.qqq-oc-year .oc-y-new{ color:var(--ochd); transform:rotateX(90deg); opacity:0; }
+.is-on .qqq-oc-year .oc-y-old{ transform:translate(-64%,-80%) scale(.78); color:#E11D48; text-decoration:line-through 3px; transition-delay:.55s; }
+.is-on .qqq-oc-year .oc-y-new{ transform:none; opacity:1; transition-delay:.85s; }
 /* checklist */
-.v-check .oc-box{ fill:rgba(255,255,255,.9); stroke:#94A3B8; stroke-width:2; transition:fill .3s ease, stroke .3s ease; }
-.v-check .oc-tick{ fill:none; stroke:#fff; stroke-width:4.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
+.oc-v-check .oc-box{ fill:rgba(255,255,255,.9); stroke:#94A3B8; stroke-width:2; transition:fill .3s ease, stroke .3s ease; }
+.oc-v-check .oc-tick{ fill:none; stroke:#fff; stroke-width:4.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
   transition:stroke-dashoffset .35s ease; }
-.v-check .oc-rl{ fill:none; stroke:#CBD5E1; stroke-width:7; stroke-linecap:round; }
-.theme-dark .v-check .oc-rl{ stroke:rgba(255,255,255,.28); }
-.is-on .v-check .oc-box{ fill:var(--och); stroke:var(--och); }
-.is-on .v-check .oc-tick{ stroke-dashoffset:0; }
-.is-on .v-check .r0 *{ transition-delay:.4s; } .is-on .v-check .r1 *{ transition-delay:.75s; } .is-on .v-check .r2 *{ transition-delay:1.1s; }
+.oc-v-check .oc-rl{ fill:none; stroke:#CBD5E1; stroke-width:7; stroke-linecap:round; }
+.theme-dark .oc-v-check .oc-rl{ stroke:rgba(255,255,255,.28); }
+.is-on .oc-v-check .oc-box{ fill:var(--och); stroke:var(--och); }
+.is-on .oc-v-check .oc-tick{ stroke-dashoffset:0; }
+.is-on .oc-v-check .oc-r0 *{ transition-delay:.4s; } .is-on .oc-v-check .oc-r1 *{ transition-delay:.75s; } .is-on .oc-v-check .oc-r2 *{ transition-delay:1.1s; }
 /* icon (default) */
 .qqq-oc-orbwrap{ position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
 .qqq-oc-orb{ position:relative; z-index:1; height:72%; aspect-ratio:1; border-radius:50%; display:flex; align-items:center; justify-content:center;
@@ -1376,3 +1396,4 @@ case "outcome-cards":      return <OutcomeCards s={s} step={step}/>;
 - **bling 배경은 위 "8~18 공용 CSS"의 `.app-wrap.theme-bling`이 정의한다**(예전엔 오로라·블롭·✨만 있고 배경 그라디언트가 없었다). 다른 type에 `theme:"bling"`을 줘도 같은 핑크 배경·강조색이 된다.
 - `prompt-box`·`command-box`·`screenshot-slot`·`before-after-panel`은 light/dark 모두 확인했다. `command-list` was checked in light and dark at 1920×1080 and 1280×720. `capture-compare` was checked in light at 1920×1080 and 1280×720 (rows, enlarge dialog, keyboard open and close). 다크에선 프롬프트 상자·자리 표시 틀이 투명 톤으로 바뀐다(공용 CSS의 `.theme-dark` 줄).
 - Sections 15–18 (`big-question` kinetic and classic, `key-message` quote and classic, `outcome-cards` with 2, 3 and 4 items and every built-in visual) were rendered from this file's code in headless Chromium at 1920×1080 and 1280×720, in light and dark, mid-animation, and with reduced motion (final state at once). No text under 24px, content height ≤ 792px, no console errors.
+- Class names: component classes carry a prefix (`qqq-`, `oc-`; outcome-cards modifiers are `oc-b0`, `oc-f0`, `oc-k0`, `oc-d0`, `oc-r0`, `oc-y-old`, `oc-v-dash`, `qqq-oc-t-blue`, `qqq-oc-n4`; kinetic marks are `qqq-mark-swipe`). The background blobs are scoped as `.blob.b1`…`.blob.b6` (`motion-theme-upgrades.md` 8). `tests/class-collision-guard.mjs` fails on a bare short class rule or a class one reference uses that another styles bare. Checked with the blob background, outcome-cards (3 and 4 items) and `big-question` with `title` + `question` at 1920×1080 and 1280×720: bars stay inside their window, the struck-through old year stays inside the visual.

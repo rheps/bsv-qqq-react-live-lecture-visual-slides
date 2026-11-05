@@ -25,7 +25,7 @@
 | 4 | `key-message` | KeyMessage | 핵심 주장 한 문장 | Default look since No. 89: editorial pull-quote (`added-templates.md` 17). `variant:"classic"` = old look. Optional `by` |
 | 5 | `quote-focus` | QuoteFocus | 인용문·명언·선언 | |
 | 6 | `section-divider` | SectionDivider | 파트 전환 | |
-| 7 | `big-question` | BigQuestion | 수업 핵심 발문 | Default look since No. 89: kinetic display question (`added-templates.md` 16). `variant:"classic"` = old look. Optional `sub` |
+| 7 | `big-question` | BigQuestion | 수업 핵심 발문 | Default look since No. 89: kinetic display question (`added-templates.md` 16). `variant:"classic"` = old look. `title` = big line, a different `question` = arrow line (only `question` → big line). Optional `sub` |
 
 ## B. 키워드·목록 (8~13) — PPT SmartArt "목록(List)"
 

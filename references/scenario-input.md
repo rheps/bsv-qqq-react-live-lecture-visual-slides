@@ -46,7 +46,7 @@ node scripts/slides-md-to-json.mjs path/to/SLIDES.md --slides   # slides 배열�
 | SLIDES.md | slide 필드 | 규칙 |
 |---|---|---|
 | `## Snn · 역할` | `id:"snn"`, `role` | `role`은 편집기 목록용 꼬리표. 화면에 그리지 않는다(Eyebrow로 쓰지 않는다 — 화면 글은 slots에서만 온다) |
-| `title` | `title` | `**x**`→`*x*`. `key-message`·`closing-prompt`·`video`는 제목을 화면에 안 그리고 편집기 이름표로만 쓴다(보이는 문장은 `message`) |
+| `title` | `title` | `**x**`→`*x*`. `key-message`·`closing-prompt`·`video`는 제목을 화면에 안 그리고 편집기 이름표로만 쓴다(보이는 문장은 `message`). `big-question` draws `title` as the big line (4절) |
 | `composition` | (저장 안 함) | builds 리듬·레이아웃 판단에만 쓴다 |
 | `component` | `type` | `NEW <name>`이면 `type:"<name>"` + 5절 절차 |
 | `theme` | `theme` | 그대로. 단 `pink-reversal`은 무엇을 적어도 `bling`(경고 남김) |
@@ -70,7 +70,7 @@ node scripts/slides-md-to-json.mjs path/to/SLIDES.md --slides   # slides 배열�
 | `hero-title` | `label`† | `eyebrow` | 제목 위 라벨("LECTURE 01" 자리) |
 | | `subtitle`† | `subtitle` | (옛 덱의 `sub`와 같은 칸) |
 | `key-message` | `lead`, `message`, `by`, `variant` | 같음 | `by` = attribution line under the quote (optional). `variant`: empty/`quote` = editorial pull-quote (default), `classic` = old look. builds: `lead`?, `message`, `by`?, `caption`? |
-| `big-question` | `question`†, `sub`, `variant` | 같음 | 질문 한 문장. `sub` = follow-up line (optional, no box). `variant`: empty/`kinetic` = kinetic display question (default), `classic` = old look (big `?` above). builds: `question`, `sub`?, `caption`? |
+| `big-question` | `title`, `question`†, `sub`, `variant` | 같음 | `title` (the judging sentence, `**emphasis**`) and a **different** `question` → `title` is the big kinetic line (hand-drawn underline on the emphasized word) and `question` is the arrow line under it; `sub` (optional) follows as a second arrow line. Only `question` (or `title` = `question`, markers ignored) → that sentence is the big line and `sub` the arrow line. `variant`: empty/`kinetic` = kinetic display question (default), `classic` = old look (big `?` above), same line mapping. builds: `title`, `question` when both differ, else `question`; then `sub`?, `caption`? |
 | `section-divider` | `part`†, `prev`†, `next`† | 같음 | `part`=파트 번호·이름, `title`=파트 제목, `prev`/`next`=이전·다음 파트 이름. build 없음 |
 | `closing-prompt` | `message`† | `message` | 마무리 문장 |
 | | `action`† | `sub` | 행동 지시 한 줄 |

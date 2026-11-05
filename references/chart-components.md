@@ -94,12 +94,13 @@ const barY = (v) => PAD.top + chartH - barHeight(v);
 
 ### 애니메이션
 ```css
-.bar {
+/* class prefixed (chart-) so it never meets another component's "bar" class */
+.chart-bar {
   transform-origin: bottom;
   transform: scaleY(0);
   transition: transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
-.bar.visible { transform: scaleY(1); }
+.chart-bar.visible { transform: scaleY(1); }
 ```
 
 ### 반드시 포함할 요소
@@ -226,11 +227,11 @@ structure   : Y축에 항목명, X축에 수치, 막대 끝에 수치 레이블
 ```
 
 ```css
-.h-bar {
+.chart-hbar {
   width: 0;
   transition: width 0.6s ease-out;
 }
-.h-bar.visible { width: var(--target-width); }
+.chart-hbar.visible { width: var(--target-width); }
 ```
 
 ---

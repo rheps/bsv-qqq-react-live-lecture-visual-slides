@@ -259,3 +259,14 @@
   - by: Lecturer
   - variant: classic
 - notes: key-message by-line and classic variant
+
+## S18 · Judging question
+- title: Can we use AI worksheets **as they are**?
+- composition: 질문
+- component: big-question
+- theme: light
+- slots:
+  - eyebrow: Before class
+  - question: What do we check **first**?
+  - caption: Two minutes with your neighbour
+- notes: big-question title as the big line, question as the arrow line

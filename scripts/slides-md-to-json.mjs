@@ -45,13 +45,21 @@ const NUMERIC_KEYS = new Set(["value", "start", "end", "side", "fontScale"]);
 const len = a => (Array.isArray(a) ? a.length : 0);
 const opt = (cond, name) => (cond ? [name] : []);
 
+// big-question (added-templates 16, bqLines): a title plus a *different* question -> title is the big
+// line and question the arrow line under it. Same sentence (markers and spaces ignored) -> one big line.
+const bqKey = x => String(x == null ? "" : x).replace(/[*~_\s]/g, "");
+export function bqBoth(s) {
+  const t = String(s.title || "").trim(), q = String(s.question || "").trim();
+  return !!(t && q && bqKey(t) !== bqKey(q));
+}
+
 // builds = sequential reveal steps. Order matters: component code reads them by index.
 export function buildsFor(s) {
   const cap = opt(s.caption, "caption");
   switch (s.type) {
     case "hero-title": return [...opt(s.eyebrow, "eyebrow"), "title", ...opt(s.subtitle, "subtitle")];
     case "key-message": return [...opt(s.lead, "lead"), "message", ...opt(s.by, "by"), ...cap];
-    case "big-question": return ["question", ...opt(s.sub, "sub"), ...cap];
+    case "big-question": return [...(bqBoth(s) ? ["title", "question"] : ["question"]), ...opt(s.sub, "sub"), ...cap];
     case "section-divider": return [];
     case "closing-prompt": return ["message", ...opt(s.sub, "sub"), ...opt(len(s.items), "items")];
     case "flow": return ["s0", "s1", "s2", ...cap];
