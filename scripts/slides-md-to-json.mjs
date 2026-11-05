@@ -7,7 +7,7 @@
 //
 // The reader does not rewrite content. It only converts markup:
 //   **word** -> *word* (QQQ blue marker), `code` -> code, literal \n -> line break.
-// prompt / command text is copied byte-for-byte (no marker conversion).
+// prompt / command text (incl. command-list items.N.command) is copied byte-for-byte (no marker conversion).
 
 import { readFileSync } from "node:fs";
 
@@ -17,7 +17,7 @@ export const KNOWN_TYPES = new Set([
   "vertical-step-flow", "icon-versus", "four-card", "trinity", "animated-bar-chart",
   "table-slide", "keyword-cluster", "video",
   "reproduce", "platforms", "reasons", "keymsg", "versus", "bridge", "tradeoff",
-  "prompt-box", "screenshot-slot", "pink-reversal", "before-after-panel", "command-box",
+  "prompt-box", "screenshot-slot", "pink-reversal", "before-after-panel", "command-box", "command-list",
 ]);
 
 // Template code (75~81) passes these fields through hl() without a guard; an absent value would
@@ -69,6 +69,7 @@ export function buildsFor(s) {
     case "pink-reversal": return ["eyebrow", "title", ...cap];
     case "before-after-panel": return ["title", "before", "arrow", "after", ...cap];
     case "command-box": return ["title", "box", ...opt(s.hint, "hint"), ...cap];
+    case "command-list": return ["title", ...(s.items || []).map((_, i) => "i" + i), ...opt(s.hint, "hint"), ...cap];
     default: return []; // NEW type: the new template defines its own builds
   }
 }
@@ -179,14 +180,22 @@ export function parseSlidesMd(text) {
         else path = [ren[first], ...path.split(".").slice(1)].join(".");
       }
       const leaf = path.split(".").pop();
-      const isRaw = path === "prompt" || path === "command";
+      // prompt-box prompt, command-box command, command-list items.N.command: copied byte-for-byte
+      const isRaw = path === "prompt" || leaf === "command";
       let v = isRaw ? val : screenText(val);
       if (!isRaw && /^\[강사/.test(v.trim()) && path !== "image")
         report.warnings.push(`${raw.id}: lecturer marker on screen slot "${path}"`);
-      setPath(s, path, coerce(leaf, v));
+      setPath(s, path, isRaw ? v : coerce(leaf, v));
     }
     if (r.prompt !== undefined) s.prompt = r.prompt;  // byte-for-byte
     for (const f of ALWAYS_RENDERED[comp] || []) if (s[f] === undefined) s[f] = "";
+    if (comp === "command-list") {
+      const n = len(s.items);
+      if (n < 2 || n > 4) report.warnings.push(`${raw.id}: command-list has ${n} items (expected 2-4)`);
+      (s.items || []).forEach((it, i) => {
+        if (!it || typeof it !== "object" || !String(it.command || "").trim()) report.warnings.push(`${raw.id}: command-list items.${i}.command missing`);
+      });
+    }
     if (r.skip_if_short === "true") s.skipIfShort = true;
     s.builds = buildsFor(s);
     s.notes = r.notes || "";

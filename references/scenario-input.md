@@ -90,6 +90,7 @@ node scripts/slides-md-to-json.mjs path/to/SLIDES.md --slides   # slides 배열�
 | `pink-reversal` | `eyebrow`, `caption` | 같음 | theme 강제 bling |
 | `before-after-panel` | `before.label`, `before.items.N`, `after.label`, `after.items.N`, `caption` | 같음 | |
 | `command-box` | `command`, `hint`, `caption` | 같음 | `command`는 원문 그대로 복사 |
+| `command-list` | `items.N.label`, `items.N.command`, `hint`, `caption` | `items[N].label`, `items[N].command`, `hint`, `caption` | 2–4 items (the reader warns otherwise). Each `command` is copied byte for byte; `label` gets marker conversion |
 
 공통 선택 칸: `eyebrow`, `emoji`, `caption`. 이름이 둘 다 오면(`label`과 `eyebrow`) 정식 이름 쪽을 남기고 경고한다.
 

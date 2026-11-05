@@ -1,6 +1,6 @@
-# 추가 템플릿 12종 (복붙용 스펙)
+# 추가 템플릿 13종 (복붙용 스펙)
 
-`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
+`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`), plus 13 `command-list` (multi-line command copy). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
 
 전제 헬퍼(생성기 본문에 이미 있는 것):
 ```js
@@ -523,7 +523,66 @@ function CommandBox({s,step}){
 
 ---
 
-## 8~12 공용 CSS (덱 `<style>`에 추가)
+## 13. `command-list` — copyable command list (No. 87)
+**When**: 2–4 install or setup commands that the audience runs in order, each with a short label — for example on Windows cmd: the `winget` lines first, then the CLI install lines. A single command stays `command-box` (12). A prompt stays `prompt-box` (8). Requested by the scenario as `component: command-list` (slots: `title`·`caption`·`items[]`(`label`·`command`)·`hint`).
+
+- Each row is a glass card with the same styling as `command-box`: left 6px blue border, the decorative `>` sign, monospace command text and its own copy button. Each row has its own `useCopy` state, so `복사됨` shows only on the row that was copied.
+- `items[i].command` does not go through `hl()` and is copied byte for byte. `label`, `title`, `hint` and `caption` go through `hl()` as usual. The `>` sign and the row number are decoration and are not copied.
+- Command text is 26px. With 2–3 items a long command wraps inside the row (`pre-wrap` + `overflow-wrap:anywhere`) and scrolls vertically inside the row after two lines (`max-height`). With 4 items the list is dense (`.qqq-cmdl-dense`): each command stays on one line and scrolls horizontally inside the row, like `command-box`. Either way the slide never overflows and the font size never shrinks. Labels are 26px, the button and row number 24px.
+- 2–4 items. The reader warns outside that range. With 5 or more commands, split the slide in the scenario.
+- Row clicks call `stopPropagation()` like `command-box`, so selecting text or pressing a button does not move the slide. The component reuses the copy labels (`QQQ_UI.copy` / `copied` / `copyManual`) and adds no new UI strings. It needs the section 8 helpers (`useCopy`, `MONO`, `stopNav`).
+
+Data:
+```js
+{ id, type:"command-list", theme:"light", eyebrow, title:"Install in *two steps*",
+  items:[
+    { label:"Node.js", command:"winget install --id OpenJS.NodeJS.LTS -e" },
+    { label:"Git",     command:"winget install --id Git.Git -e" },
+    { label:"Claude Code", command:"npm install -g @anthropic-ai/claude-code" },
+  ],
+  hint:"Paste each line into cmd and press Enter",
+  caption, builds:["title","i0","i1","i2","hint","caption"] }   // one "i<n>" per item; hint/caption only when present
+```
+```jsx
+function CommandRow({it,i,show}){
+  const codeRef=React.useRef(null);
+  const cmd=String((it&&it.command)||"");
+  const {st,label,onCopy}=useCopy(cmd,codeRef);
+  return (
+    <MI show={show} className="glass qqq-cmd qqq-cmdl-row" style={{width:"100%",padding:"10px 16px 10px 20px",borderLeft:"6px solid var(--blue)",textAlign:"left"}}>
+      <div onClick={stopNav} style={{display:"flex",alignItems:"center",gap:12,marginBottom:2}}>
+        <span aria-hidden="true" className="qqq-cmdl-num">{i+1}</span>
+        <span className="t-label qqq-cmdl-label">{hl((it&&it.label)||"")}</span>
+        <button type="button" className={"qqq-copy qqq-cmdl-copy"+(st==="done"?" is-done":"")} onClick={onCopy} aria-live="polite">{label}</button>
+      </div>
+      <div style={{display:"flex",alignItems:"flex-start",gap:12}}>
+        <span aria-hidden="true" className="qqq-cmd-sign qqq-cmdl-sign">&gt;</span>
+        <code ref={codeRef} className="qqq-cmdl-code" onClick={stopNav} onMouseDown={stopNav} onTouchStart={stopNav} onTouchEnd={stopNav}
+          style={{fontFamily:MONO}}>{cmd}</code>
+      </div>
+    </MI>
+  );
+}
+function CommandList({s,step}){
+  const items=s.items||[];
+  const n=items.length;
+  return (
+    <div className="box">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      <MI show={vF(0,step)} className="t-title" style={{marginBottom:24}}>{hl(s.title)}</MI>
+      <div className={n>=4?"qqq-cmdl-dense":""} style={{display:"flex",flexDirection:"column",gap:12,width:"100%",maxWidth:1040}}>
+        {items.map((it,i)=><CommandRow key={i} it={it} i={i} show={vF(1+i,step)}/>)}
+      </div>
+      {s.hint && <MI show={vF(1+n,step)} className="t-sub" style={{fontSize:26,marginTop:18}}>{hl(s.hint)}</MI>}
+      {s.caption && <MI show={vF(1+n+(s.hint?1:0),step)} className="t-cap" style={{marginTop:14}}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+```
+
+---
+
+## 8~13 공용 CSS (덱 `<style>`에 추가)
 ```css
 /* prompt-box */
 .qqq-prompt-pre{ margin:0; font-size:24px; line-height:1.6; font-weight:600; white-space:pre-wrap; word-break:break-word;
@@ -543,6 +602,18 @@ function CommandBox({s,step}){
   padding:10px 4px; color:inherit; cursor:text; user-select:text; text-align:left; }
 .qqq-cmd-code::-webkit-scrollbar{ height:10px; }
 .qqq-cmd-code::-webkit-scrollbar-thumb{ background:rgba(59,130,246,.45); border-radius:8px; }
+/* command-list (uses .qqq-cmd-sign and .qqq-copy above) */
+.qqq-cmdl-num{ flex-shrink:0; width:38px; height:38px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center;
+  font-size:24px; font-weight:900; color:#fff; background:linear-gradient(135deg,#3B82F6,#0EA5E9); box-shadow:0 4px 12px rgba(59,130,246,.3); }
+.qqq-cmdl-label{ flex:1; min-width:0; font-size:26px; font-weight:800; color:var(--blue); }
+.qqq-cmdl-copy{ padding:4px 16px; line-height:1.25; }
+.qqq-cmdl-sign{ font-size:28px; line-height:1.45; }
+.qqq-cmdl-code{ flex:1; min-width:0; display:block; font-size:26px; line-height:1.45; font-weight:700; color:inherit; text-align:left;
+  white-space:pre-wrap; word-break:normal; overflow-wrap:anywhere; max-height:calc(2 * 1.45em + 4px); overflow-y:auto;
+  overscroll-behavior:contain; padding:2px 4px; cursor:text; user-select:text; }
+.qqq-cmdl-dense .qqq-cmdl-code{ white-space:pre; overflow-wrap:normal; max-height:none; overflow-x:auto; overflow-y:hidden; }
+.qqq-cmdl-code::-webkit-scrollbar{ width:10px; height:10px; }
+.qqq-cmdl-code::-webkit-scrollbar-thumb{ background:rgba(59,130,246,.45); border-radius:8px; }
 /* screenshot-slot */
 .qqq-shot-empty{ display:block; border:4px dashed rgba(59,130,246,.45); border-radius:22px; background:rgba(255,255,255,.35);
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
@@ -576,10 +647,11 @@ case "screenshot-slot":    return <ScreenshotSlot s={s} step={step}/>;
 case "pink-reversal":      return <PinkReversal s={s} step={step}/>;
 case "before-after-panel": return <BeforeAfterPanel s={s} step={step}/>;
 case "command-box":        return <CommandBox s={s} step={step}/>;
+case "command-list":       return <CommandList s={s} step={step}/>;
 ```
 
 ## 다크/핑크 테마 메모
 - 다 light/dark/bling 모두에서 동작(글자색·glass는 테마 CSS가 처리). 단 `platforms`/`keymsg`의 칩 배경이 옅은 블루라 다크에서 약하면 칩 배경을 `rgba(255,255,255,.08)`로.
 - 섹션 전환·강조 한 장은 dark, "그러나/반전" 한 장은 `pink-reversal`(항상 bling 핑크)로 쓰면 리듬이 산다.
 - **bling 배경은 위 "8~12 공용 CSS"의 `.app-wrap.theme-bling`이 정의한다**(예전엔 오로라·블롭·✨만 있고 배경 그라디언트가 없었다). 다른 type에 `theme:"bling"`을 줘도 같은 핑크 배경·강조색이 된다.
-- `prompt-box`·`command-box`·`screenshot-slot`·`before-after-panel`은 light/dark 모두 확인했다. 다크에선 프롬프트 상자·자리 표시 틀이 투명 톤으로 바뀐다(공용 CSS의 `.theme-dark` 줄).
+- `prompt-box`·`command-box`·`screenshot-slot`·`before-after-panel`은 light/dark 모두 확인했다. `command-list` was checked in light and dark at 1920×1080 and 1280×720. 다크에선 프롬프트 상자·자리 표시 틀이 투명 톤으로 바뀐다(공용 CSS의 `.theme-dark` 줄).

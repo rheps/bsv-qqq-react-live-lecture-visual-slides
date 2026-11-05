@@ -18,7 +18,7 @@ const ok = (name, cond) => checks.push({ name, pass: !!cond });
 const NEW = [
   ["prompt-box", "PromptBox", 83], ["screenshot-slot", "ScreenshotSlot", 84],
   ["pink-reversal", "PinkReversal", 85], ["command-box", "CommandBox", 86],
-  ["before-after-panel", "BeforeAfterPanel", 15],
+  ["before-after-panel", "BeforeAfterPanel", 15], ["command-list", "CommandList", 87],
 ];
 for (const [type, fn, n] of NEW) {
   ok(`${type}: component function`, new RegExp(`function ${fn}\\(\\{s,step\\}\\)`).test(tpl));
@@ -38,7 +38,7 @@ ok("SKILL: no deleted audit skill reference", !/qqq-slide-emphasis-audit/.test(s
 // reader on the fixture
 const rep = parseSlidesMd(read("tests/fixtures/SLIDES.sample.md"));
 const byId = Object.fromEntries(rep.slides.map(s => [s.id, s]));
-ok("reader: 12 slides", rep.slides.length === 12);
+ok("reader: 13 slides", rep.slides.length === 13);
 ok("reader: deck title", rep.deckTitle === "QQQ 새 컴포넌트 시험");
 ok("reader: **x** -> *x*", byId.s03.title === "이 프롬프트를 *그대로* 붙여 넣으세요");
 ok("reader: prompt kept byte-for-byte", byId.s03.prompt.includes("**굵게**도.") && byId.s03.prompt.includes("\n\n[출력 형식]") && !byId.s03.prompt.startsWith(" "));
@@ -51,6 +51,30 @@ ok("reader: pink-reversal forced bling", byId.s05.theme === "bling" && rep.warni
 ok("reader: skip_if_short", byId.s05.skipIfShort === true);
 ok("reader: builds per type", JSON.stringify(byId.s06.builds) === JSON.stringify(["title", "before", "arrow", "after", "caption"]) && JSON.stringify(byId.s09.builds) === JSON.stringify(["title", "box"]));
 ok("reader: bracket image kept for placeholder", byId.s04.image === "[강사 캡처 예정]");
+ok("reader: command-list items", byId.s13.type === "command-list" && byId.s13.items.length === 3
+  && byId.s13.items[0].command === "winget install --id OpenJS.NodeJS.LTS -e --source winget" && byId.s13.items[2].label === "Claude *Code*");
+ok("reader: command-list builds", JSON.stringify(byId.s13.builds) === JSON.stringify(["title", "i0", "i1", "i2", "hint"]));
+ok("reader: command-list no warnings", !rep.warnings.some(w => w.startsWith("s13")));
+
+// command-list template details and reader edge cases
+const sec13 = tpl.slice(tpl.indexOf("## 13. `command-list`"), tpl.indexOf("## 8~13"));
+ok("command-list: per-row copy hook", /function CommandRow\(/.test(sec13) && /useCopy\(cmd,codeRef\)/.test(sec13) && /<CommandRow /.test(sec13));
+ok("command-list: command not passed through hl()", !/hl\(cmd/.test(sec13) && !/hl\(it\.command/.test(sec13));
+const code13 = sec13.slice(sec13.indexOf("```jsx"));
+ok("command-list: no new UI strings (labels come from useCopy)", !/QQQ_UI\./.test(code13) && !/[가-힣]/.test(code13));
+ok("command-list: CSS wraps and scrolls inside the row", /\.qqq-cmdl-code\{[^}]*white-space:pre-wrap[^}]*overflow-wrap:anywhere[^}]*max-height:[^}]*overflow-y:auto/.test(tpl));
+ok("command-list: CSS font sizes >= 24px", [...tpl.matchAll(/\.qqq-cmdl[^{]*\{[^}]*\}/g)].every(m => [...m[0].matchAll(/font-size:(\d+)px/g)].every(f => +f[1] >= 24)));
+const cl = parseSlidesMd(`# SLIDES — t
+## S01 · one
+- title: t
+- component: command-list
+- slots:
+  - items.0.label: Raw
+  - items.0.command: echo \`a\` **b** \\n c
+- notes: n
+`);
+ok("reader: command-list command byte-for-byte", cl.slides[0].items[0].command === "echo `a` **b** \\n c");
+ok("reader: command-list warns outside 2-4", cl.warnings.some(w => /command-list has 1 items/.test(w)));
 
 // contract-name renames (hero-title label, closing-prompt action/chips, four-card cards)
 const ren = parseSlidesMd(`# SLIDES — t

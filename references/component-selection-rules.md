@@ -117,10 +117,11 @@ Animation : left fade-in → right fade-in → 핵심 차이 highlight-sweep
 
 | 실습 프롬프트를 그대로 복사시키기 | `practice` | `prompt-box` ✅ | — |
 | 설치·실행 명령 한 줄 복사 | `install` | `command-box` ✅ | `vertical-step-flow` ✅ (단계 설명) |
+| 2–4 install commands run in order (copy each) | `install` | `command-list` ✅ | `command-box` ✅ (one command) |
 | 결과 화면 캡처 보여 주기 | `result` | `screenshot-slot` ✅ | `video` ✅ |
 | "그러나…" 흐름 뒤집기 | `reversal` | `pink-reversal` ✅ | `key-message` + dark |
 
-> 75~81 (`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff`)와 83~86 (`prompt-box`·`screenshot-slot`·`pink-reversal`·`command-box`), 15 `before-after-panel`은 ✅ 실제 구현·검증됨. 코드는 `added-templates.md`.
+> 75~81 (`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff`)와 83~87 (`prompt-box`·`screenshot-slot`·`pink-reversal`·`command-box`·`command-list`), 15 `before-after-panel`은 ✅ 실제 구현·검증됨. 코드는 `added-templates.md`.
 >
 > **type 개수 규칙은 새 type에도 같다**: 같은 type 2장 연속 금지, 덱 전체 5장 이하. 실습 덱은 `prompt-box` ↔ `screenshot-slot`을 번갈아 두고, 프롬프트가 5개를 넘으면 설치 명령은 `command-box`로 뺀다. `pink-reversal`은 덱당 1~2장(시나리오 기본 1장)이며 텍스트 중심 장으로 센다(3장 연속 금지에 포함).
 

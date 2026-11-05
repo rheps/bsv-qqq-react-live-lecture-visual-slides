@@ -30,6 +30,7 @@
 | **변화 전 → 후 (방향이 핵심)** | `before-after-panel` ✅ (로즈→블루) | `versus`의 VS로 대결처럼 보이기 |
 | **복사해서 쓸 프롬프트 전문** | `prompt-box` ✅ | 3줄로 줄이기·notes로 빼기 |
 | **설치·실행 명령 한 줄** | `command-box` ✅ | 프롬프트 상자에 섞기 |
+| **2–4 install commands in order** | `command-list` ✅ | several `command-box` slides, or one prompt box |
 | **결과 화면 캡처** (영상 없음) | `screenshot-slot` ✅ | 장식 이미지 |
 | **"그러나…" 반전** | `pink-reversal` ✅ (bling) | key-message에 "그러나" 붙이기 |
 | **부/장 시작, 표지** | `section-divider` / `hero-title` ✅ | key-message |
@@ -131,7 +132,7 @@
 
 ---
 
-> 위 14개 외에 `added-templates.md`의 75~81·83~86과 15 `before-after-panel`도 ✅ 구현됐다(코드 포함).
+> 위 14개 외에 `added-templates.md`의 75~81·83~87과 15 `before-after-panel`도 ✅ 구현됐다(코드 포함).
 
 ---
 

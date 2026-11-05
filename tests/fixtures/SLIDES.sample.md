@@ -177,3 +177,19 @@
 - slots:
   - command: claude --dangerously-skip-permissions --model claude-opus-4-1 --add-dir C:/Users/teacher/Documents/수업자료/2026학년도/과학
 - notes: 긴 한 줄 가로 스크롤
+
+## S13 · 설치 목록
+- title: Install in **two steps**
+- composition: 설치
+- component: command-list
+- theme: light
+- slots:
+  - eyebrow: Setup
+  - items.0.label: Node.js
+  - items.0.command: winget install --id OpenJS.NodeJS.LTS -e --source winget
+  - items.1.label: Git
+  - items.1.command: winget install --id Git.Git -e --source winget
+  - items.2.label: Claude **Code**
+  - items.2.command: npm install -g @anthropic-ai/claude-code
+  - hint: Paste each line into cmd and press Enter
+- notes: command-list reader test
