@@ -33,6 +33,7 @@
 | **2–4 install commands in order** | `command-list` ✅ | several `command-box` slides, or one prompt box |
 | **결과 화면 캡처** (영상 없음) | `screenshot-slot` ✅ | 장식 이미지 |
 | **2–3 before → after capture pairs** | `capture-compare` ✅ | one `screenshot-slot` per capture, or text-only `before-after-panel` |
+| **"By the end you will…" 2–4 outcomes** | `outcome-cards` ✅ (drawn mini-visual per item) | `four-card` with emoji only, or a bullet list |
 | **"그러나…" 반전** | `pink-reversal` ✅ (bling) | key-message에 "그러나" 붙이기 |
 | **부/장 시작, 표지** | `section-divider` / `hero-title` ✅ | key-message |
 | **마무리·행동 촉구** | `closing-prompt` ✅ | key-message |
@@ -84,9 +85,11 @@
 내용 모양: **펀치라인 한 줄**.
 - `message`(크게, `hl`로 핵심어 그라디언트) + 선택 `lead`(위 작은 muted 줄, `hl` 적용).
 - 셋업은 `lead`(작게), 핵심은 `message`(크게) — **강조 역전 방지의 핵심 도구**.
+- Default look: editorial pull-quote — `lead` as the kicker, SVG quote marks, `message` in display type with a highlighter sweep on `*word*`, optional `by` attribution line. `variant:"classic"` = old centred look. Code: `added-templates.md` 17.
 
 ### 5. `big-question` — 질문 하나
 내용 모양: **청중에게 던지는 질문**. 큰 물음표/문장 중심.
+- Default look: kinetic display question — words rise one by one, `*word*` gets a hand-drawn underline, a faint giant `?` and sparkles behind; optional `sub` follow-up line with a drawn arrow (no box). `variant:"classic"` = old look. Code: `added-templates.md` 16.
 
 ### 6. `four-card` — 병렬 묶음 (위계 없음)
 내용 모양: **동등한 항목 3~4개**. 순서·인과·위계가 **없을 때만**.
@@ -133,7 +136,7 @@
 
 ---
 
-> 위 14개 외에 `added-templates.md`의 75~81·83~88과 15 `before-after-panel`도 ✅ 구현됐다(코드 포함).
+> 위 14개 외에 `added-templates.md`의 75~81·83~89과 15 `before-after-panel`도 ✅ 구현됐다(코드 포함).
 
 ---
 

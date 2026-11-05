@@ -18,7 +18,7 @@ export const KNOWN_TYPES = new Set([
   "table-slide", "keyword-cluster", "video",
   "reproduce", "platforms", "reasons", "keymsg", "versus", "bridge", "tradeoff",
   "prompt-box", "screenshot-slot", "pink-reversal", "before-after-panel", "command-box", "command-list",
-  "capture-compare",
+  "capture-compare", "outcome-cards",
 ]);
 
 // Template code (75~81) passes these fields through hl() without a guard; an absent value would
@@ -36,6 +36,11 @@ export const SLOT_RENAME = {
   "four-card": { cards: "items" },
 };
 
+// Optional look switch for the two opening frames (added-templates 16-17). "" = the new default look.
+export const VARIANTS = { "big-question": ["kinetic", "classic"], "key-message": ["quote", "classic"] };
+// outcome-cards items.N.visual keys (added-templates 18); anything else falls back to "icon".
+export const OC_VISUALS = ["folder-sort", "mini-dashboard", "doc-year-flip", "checklist", "icon"];
+
 const NUMERIC_KEYS = new Set(["value", "start", "end", "side", "fontScale"]);
 const len = a => (Array.isArray(a) ? a.length : 0);
 const opt = (cond, name) => (cond ? [name] : []);
@@ -45,8 +50,8 @@ export function buildsFor(s) {
   const cap = opt(s.caption, "caption");
   switch (s.type) {
     case "hero-title": return [...opt(s.eyebrow, "eyebrow"), "title", ...opt(s.subtitle, "subtitle")];
-    case "key-message": return [...opt(s.lead, "lead"), "message"];
-    case "big-question": return ["question"];
+    case "key-message": return [...opt(s.lead, "lead"), "message", ...opt(s.by, "by"), ...cap];
+    case "big-question": return ["question", ...opt(s.sub, "sub"), ...cap];
     case "section-divider": return [];
     case "closing-prompt": return ["message", ...opt(s.sub, "sub"), ...opt(len(s.items), "items")];
     case "flow": return ["s0", "s1", "s2", ...cap];
@@ -72,6 +77,7 @@ export function buildsFor(s) {
     case "command-box": return ["title", "box", ...opt(s.hint, "hint"), ...cap];
     case "command-list": return ["title", ...(s.items || []).map((_, i) => "i" + i), ...opt(s.hint, "hint"), ...cap];
     case "capture-compare": return ["title", ...(s.cases || []).map((_, i) => "c" + i), ...cap];
+    case "outcome-cards": return ["title", ...(s.items || []).map((_, i) => "o" + i), ...cap];
     default: return []; // NEW type: the new template defines its own builds
   }
 }
@@ -207,6 +213,21 @@ export function parseSlidesMd(text) {
         for (const k of ["label", "before", "after"])
           if (!c || typeof c !== "object" || !String(c[k] || "").trim()) report.warnings.push(`${raw.id}: capture-compare cases.${i}.${k} missing`);
       });
+    }
+    if (comp === "outcome-cards") {
+      const n = len(s.items);
+      if (n < 2 || n > 4) report.warnings.push(`${raw.id}: outcome-cards has ${n} items (expected 2-4)`);
+      (s.items || []).forEach((it, i) => {
+        for (const k of ["icon", "label"])
+          if (!it || typeof it !== "object" || !String(it[k] || "").trim()) report.warnings.push(`${raw.id}: outcome-cards items.${i}.${k} missing`);
+        if (it && it.visual && !OC_VISUALS.includes(it.visual))
+          report.warnings.push(`${raw.id}: outcome-cards items.${i}.visual "${it.visual}" unknown (drawn as icon)`);
+      });
+    }
+    if (s.variant !== undefined) {
+      const ok = VARIANTS[comp];
+      if (!ok) report.warnings.push(`${raw.id}: variant is only read by big-question and key-message`);
+      else if (s.variant && !ok.includes(s.variant)) report.warnings.push(`${raw.id}: ${comp} variant "${s.variant}" unknown (expected ${ok.join(" or ")})`);
     }
     if (r.skip_if_short === "true") s.skipIfShort = true;
     s.builds = buildsFor(s);

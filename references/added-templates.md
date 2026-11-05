@@ -1,6 +1,6 @@
-# 추가 템플릿 14종 (복붙용 스펙)
+# 추가 템플릿 + kinetic type kit (복붙용 스펙, 1~18절)
 
-`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`), plus 13 `command-list` (multi-line command copy) and 14 `capture-compare` (before → after capture pairs with enlarge). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
+`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`), plus 13 `command-list` (multi-line command copy), 14 `capture-compare` (before → after capture pairs with enlarge), 15 the kinetic type kit (ported from the user's video skill), 16 `big-question` and 17 `key-message` (new default looks for two base templates, `variant:"classic"` keeps the old look) and 18 `outcome-cards` (No. 89, learning outcomes with built-in mini-visuals). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
 
 전제 헬퍼(생성기 본문에 이미 있는 것):
 ```js
@@ -704,7 +704,398 @@ function CaptureCompare({s,step}){
 
 ---
 
-## 8~14 공용 CSS (덱 `<style>`에 추가)
+## 15. Kinetic type kit — shared pieces for 16–18 (ported from the video skill)
+
+**What it is**: a small set of module-level pieces that design the *letters themselves* — staggered word reveal, marker sweeps and hand-drawn underlines on emphasized words, 4-point sparkles and a count-up number. Sections 16 (`big-question`), 17 (`key-message`) and 18 (`outcome-cards`) use them. Any other template may use `KineticText` for a hero sentence too (one line swap from `<MI className="t-hero">{hl(x)}</MI>`).
+
+**Source**: the ideas come from the user's own video skill `youtube-longform-maker` / `youtube-shorts-maker` (repo `rheps/youtube-maker`, private, no licence file). Nothing was copied verbatim. The patterns were re-implemented in QQQ's style (CSS transitions on a `show` class, `hl()` marker syntax, Pretendard, 24px+):
+
+| Video skill pattern | QQQ piece |
+|---|---|
+| Sequential build-up: items appear one by one, item stagger 15–18 frames, ease-out cubic, small moves ≤ 30px (`DESIGN_GUIDE` motion table, `lib/anim.ts` `appear`/`rise`) | `KineticText` — words rise 0.38em with a blur-off, 55ms apart, `cubic-bezier(.22,1,.36,1)` |
+| "Data gets drawn": lines draw from start to end (`strokeDashoffset`, 30 frames) | `mark="underline"` hand-drawn underline, the sub-question arrow, the checklist ticks, the dashboard ring and sparkline |
+| Key number inline in the title, blue accent only (pattern 20 intro) | `mark="swipe"` highlighter band behind `*word*` after the words land |
+| 4-point sparkle cluster around the hero, appearing after the title (pattern 18) | `Sparkle4` |
+| Counter 0 → N, ease-out cubic, 30–40 frames (motion table) | `CountText` (reserves its final width, no layout shift) |
+| Layout stability: reserve the space before the reveal (`Reveal` keeps its place) | every piece is laid out at full size from the start; only opacity/transform/filter animate |
+| Theme tokens with meaning (`theme.ts` tone helpers) | the existing `--blue`/`--rose`/`--emerald` variables: `*x*` blue, `~x~` rose, `_x_` emerald, in light, dark and bling |
+
+Rules kept from QQQ: reading text gets an **entrance only, never an idle loop** (sparkles, quote marks and the big `?` are decoration and may breathe). `hl()` itself is unchanged — the global "no marker sweep inside `hl()`" rule still holds; the sweep lives only inside `KineticText`. **Reduced motion and review mode** (`html[data-review]`): every piece shows its final state at once (CSS `@media (prefers-reduced-motion: reduce)` plus `KSTILL()`). No new UI strings.
+
+```jsx
+// still mode: reduced motion or review stills -> final state, no transitions
+const KSTILL = () => { try {
+  return document.documentElement.hasAttribute("data-review") || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+} catch (e) { return false; } };
+
+// show -> on one frame later, so CSS transitions also run on the first mount
+function useOn(show) {
+  const [on, setOn] = React.useState(false);
+  React.useEffect(() => {
+    if (!show) { setOn(false); return; }
+    if (KSTILL()) { setOn(true); return; }
+    let r2 = 0;
+    const r1 = requestAnimationFrame(() => { r2 = requestAnimationFrame(() => setOn(true)); });
+    return () => { cancelAnimationFrame(r1); cancelAnimationFrame(r2); };
+  }, [show]);
+  return on;
+}
+
+// hl() markup -> word tokens. A marked phrase (*a b*) stays one token so its marker is one band.
+const K_MARK = /^(\*[^*]+\*|~[^~]+~|_[^_]+_)$/;
+function kTokens(text) {
+  const out = []; let i = 0;
+  String(text == null ? "" : text).split(/(\*[^*]+\*|~[^~]+~|_[^_]+_)/).forEach(seg => {
+    if (!seg) return;
+    if (K_MARK.test(seg)) { out.push({ k: "w", s: seg.slice(1, -1), m: seg[0] === "*" ? "b" : seg[0] === "~" ? "r" : "g", i: i++ }); return; }
+    seg.split(/(\n)/).forEach(part => {
+      if (part === "\n") { out.push({ k: "br" }); return; }
+      part.split(/(\s+)/).forEach(w => {
+        if (!w) return;
+        if (/^\s+$/.test(w)) out.push({ k: "sp" }); else out.push({ k: "w", s: w, m: null, i: i++ });
+      });
+    });
+  });
+  return out;
+}
+
+// Kinetic sentence: staggered word reveal; marked words get a marker. mark: "swipe" | "underline" | "ink"
+function KineticText({ text, show, mark = "swipe", delay = 0, as = "div", className, style }) {
+  const on = useOn(show);
+  const toks = kTokens(text);
+  const n = toks.filter(t => t.k === "w").length;
+  const Tag = as;
+  const nl = s => String(s).split("\n").map((x, j) => j ? [<br key={"b" + j}/>, x] : x);
+  return (
+    <Tag className={"qqq-kt" + (on ? " is-on" : "") + (className ? " " + className : "")}
+      style={{ ...(style || {}), "--kd": delay + "s", "--kn": n }}>
+      {toks.map((t, j) => t.k === "br" ? <br key={j}/> : t.k === "sp" ? " " :
+        <span key={j} className={"qqq-kw" + (t.m ? " qqq-mk is-" + t.m + " mk-" + mark : "")} style={{ "--i": t.i }}>
+          {t.m ? <span className="qqq-mk-ink">{nl(t.s)}</span> : t.s}
+          {t.m && mark === "underline" &&
+            <svg className="qqq-mk-line" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M2 8 C 20 3, 44 11, 66 6 S 90 4, 98 7" pathLength="1"/>
+            </svg>}
+        </span>)}
+    </Tag>
+  );
+}
+
+// 4-point sparkle (decoration): pops in when an ancestor gets .is-on, then twinkles
+function Sparkle4({ size = 34, tone = "sky", delay = 0, style }) {
+  return (
+    <svg className={"qqq-spk is-" + tone} width={size} height={size} viewBox="0 0 24 24" aria-hidden="true"
+      style={{ ...(style || {}), "--sd": delay + "s" }}>
+      <path d="M12 0C12.9 7.6 16.4 11.1 24 12C16.4 12.9 12.9 16.4 12 24C11.1 16.4 7.6 12.9 0 12C7.6 11.1 11.1 7.6 12 0Z"/>
+    </svg>
+  );
+}
+
+// Count-up number (ease-out cubic). Width is reserved for the final value, so nothing shifts.
+function CountText({ value, show, seconds = 0.9, suffix = "" }) {
+  const target = Number(value) || 0;
+  const [v, setV] = React.useState(0);
+  React.useEffect(() => {
+    if (!show) { setV(0); return; }
+    if (KSTILL()) { setV(target); return; }
+    let raf = 0, t0 = null;
+    const tick = t => {
+      if (t0 === null) t0 = t;
+      const p = Math.min(1, (t - t0) / (seconds * 1000));
+      setV(Math.round(target * (1 - Math.pow(1 - p, 3))));
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [show, target, seconds]);
+  const full = target.toLocaleString() + suffix;
+  return <span className="qqq-count" style={{ minWidth: full.length + "ch" }}>{v.toLocaleString()}{suffix}</span>;
+}
+```
+
+---
+
+## 16. `big-question` — kinetic display question (No. 7, new default look)
+
+**When**: the one question thrown to the audience. Same type and slots as before (`question`, plus the optional `sub` and the common `eyebrow`/`caption`), so existing SLIDES.md still works. The new look is the **default**. `variant:"classic"` keeps the old look (big blue `?` above the sentence).
+
+- **Kinetic (default)**: no box. The question is display type (80px/900, tight tracking, `text-wrap:balance`) and rises word by word. The `*emphasized*` word gets the gradient fill plus a **hand-drawn underline** drawn after the words land (`~x~` rose, `_x_` emerald). A huge faint gradient `?` sits behind the sentence and breathes (decoration). Three `Sparkle4` pop in after the question.
+- `sub` (optional): the follow-up line, **not in a box** — a hand-drawn curved arrow draws itself, then the line appears in 36px with a slight tilt, like a note written beside the question. It is its own build step.
+- builds: `["question", "sub"?, "caption"?]` (the reader adds `sub`/`caption` only when present).
+- `variant`: `"kinetic"` (default, also when empty) or `"classic"`. The editor may change it; the two variants are separate components, so switching remounts cleanly.
+
+Data:
+```js
+{ id, type:"big-question", theme:"dark", eyebrow,
+  question:"AI는 교사를 *대체*할 수 있을까?",
+  sub:"",                      // optional follow-up line, e.g. "Or will it change what we teach?"
+  caption:"", variant:"",      // "" = kinetic; "classic" = old look
+  builds:["question"] }        // + "sub" / "caption" when present
+```
+```jsx
+function BigQuestionClassic({ s, step }) {
+  return (
+    <div className="box">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      <MI show={vF(0, step)} anim="pop" style={{ marginBottom: 18 }}>
+        <Idle kind="breathe" style={{ fontSize: 120, fontWeight: 900, color: "var(--blue)" }}>?</Idle>
+      </MI>
+      <MI show={vF(0, step)} className="t-hero" style={{ fontSize: 64, lineHeight: 1.3, maxWidth: 1000 }}>{hl(s.question)}</MI>
+      {s.sub && <MI show={vF(1, step)} className="t-sub" style={{ fontSize: 32, marginTop: 24 }}>{hl(s.sub)}</MI>}
+      {s.caption && <MI show={vF(s.sub ? 2 : 1, step)} className="t-cap" style={{ marginTop: 28 }}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+
+function BigQuestionKinetic({ s, step }) {
+  const q = vF(0, step), sub = vF(1, step);
+  const qOn = useOn(q);
+  const subOn = useOn(!!s.sub && sub);
+  return (
+    <div className="box qqq-bq">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      <div className={"qqq-bq-stage" + (qOn ? " is-on" : "")}>
+        <div className="qqq-bq-glyph" aria-hidden="true">
+          <MI show={q} anim="zoom"><Idle kind="breathe"><span className="qqq-bq-qm">?</span></Idle></MI>
+        </div>
+        <Sparkle4 size={44} tone="sky" delay={0.9} style={{ left: "4%", top: "6%" }}/>
+        <Sparkle4 size={28} tone="blue" delay={1.2} style={{ right: "16%", top: "-2%" }}/>
+        <Sparkle4 size={34} tone="amber" delay={1.5} style={{ right: "3%", bottom: "4%" }}/>
+        <KineticText className="t-hero qqq-bq-q" text={s.question} show={q} mark="underline"/>
+      </div>
+      {s.sub && (
+        <div className={"qqq-bq-sub" + (subOn ? " is-on" : "")}>
+          <svg className="qqq-bq-arrow" viewBox="0 0 90 60" aria-hidden="true">
+            <path d="M8 6 C 6 30, 26 48, 72 46" pathLength="1"/>
+            <path d="M60 34 L74 46 L58 56" pathLength="1"/>
+          </svg>
+          <KineticText as="span" className="t-sub qqq-bq-subt" text={s.sub} show={sub} delay={0.3} mark="ink"/>
+        </div>
+      )}
+      {s.caption && <MI show={vF(s.sub ? 2 : 1, step)} className="t-cap" style={{ marginTop: 30 }}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+
+function BigQuestion({ s, step }) {
+  return s.variant === "classic" ? <BigQuestionClassic s={s} step={step}/> : <BigQuestionKinetic s={s} step={step}/>;
+}
+```
+
+---
+
+## 17. `key-message` — editorial pull-quote (No. 4, new default look)
+
+**When**: one sentence the lecturer stands behind — a claim, or their own words ("학교 일을 하며 제가 느낀 것"). Same type and slots as before (`lead`, `message`) plus the optional `by` (attribution line) and the common `eyebrow`/`caption`. The new look is the **default**. `variant:"classic"` keeps the old look (small muted `lead` over a centred 58px `message`).
+
+- **Quote (default)**: an editorial pull-quote, **no box**. `lead` becomes the kicker above the quote (28px/800 in `--blue`, after a 56px gradient rule). Large gradient quotation marks are drawn in SVG (not a font glyph): the opening mark pops in at the top left, a small closing mark follows at the bottom right. `message` is display type (62px/800, left-aligned, max 980px) and rises word by word. `*emphasized*` words get a **highlighter sweep** behind them after the words land. `by` is the attribution line under the quote (`— name`, 28px muted).
+- builds: `["lead"?, "message", "by"?, "caption"?]`. Hint: for the lecturer's own words, put the setup in `lead` ("학교 일을 하며 제가 느낀 것") and the point in `message` (SKILL #17: the point is the hero).
+- `variant`: `"quote"` (default, also when empty) or `"classic"`.
+
+Data:
+```js
+{ id, type:"key-message", theme:"light", eyebrow,
+  title:"",                                  // editor label only (not drawn)
+  lead:"What I learned at school",            // kicker: the setup (e.g. the lecturer's "what I felt doing school work")
+  message:"The *structure* does the work",
+  by:"", caption:"", variant:"",             // "" = quote; "classic" = old look
+  builds:["lead","message"] }                // + "by" / "caption" when present
+```
+```jsx
+function KeyMessageClassic({ s, step }) {
+  const iMsg = s.lead ? 1 : 0;
+  return (
+    <div className="box">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      {s.lead && <MI show={vF(0, step)} className="t-sub" style={{ marginBottom: 18 }}>{hl(s.lead)}</MI>}
+      <MI show={vF(iMsg, step)} className="t-hero" style={{ fontSize: 58 }}>{hl(s.message)}</MI>
+      {s.by && <MI show={vF(iMsg + 1, step)} className="t-sub" style={{ fontSize: 28, marginTop: 24 }}>{hl(s.by)}</MI>}
+      {s.caption && <MI show={vF(iMsg + (s.by ? 2 : 1), step)} className="t-cap" style={{ marginTop: 28 }}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+
+const KM_MARK = "M10 66C10 38 22 18 46 6L51 14C36 24 29 36 28 46C41 44 52 54 52 67C52 81 41 91 28 91C17 91 10 81 10 66Z";
+function KmMark({ className }) {
+  return (
+    <svg className={className} viewBox="0 0 120 96" aria-hidden="true">
+      <defs><linearGradient id="qqq-km-g" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" style={{ stopColor: "var(--blue)" }}/><stop offset="1" style={{ stopColor: "var(--sky)" }}/>
+      </linearGradient></defs>
+      <path d={KM_MARK} fill="url(#qqq-km-g)"/>
+      <path d={KM_MARK} transform="translate(58 0)" fill="url(#qqq-km-g)"/>
+    </svg>
+  );
+}
+
+function KeyMessageQuote({ s, step }) {
+  const iMsg = s.lead ? 1 : 0;
+  const msgOn = useOn(vF(iMsg, step));
+  return (
+    <div className="box qqq-km">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      <figure className={"qqq-km-fig" + (msgOn ? " is-on" : "")}>
+        {s.lead && <MI show={vF(0, step)} anim="left" className="qqq-km-lead">{hl(s.lead)}</MI>}
+        <div className="qqq-km-body">
+          <KmMark className="qqq-km-open"/>
+          <KineticText as="blockquote" className="t-hero qqq-km-msg" text={s.message} show={vF(iMsg, step)} mark="swipe" delay={0.15}/>
+          <KmMark className="qqq-km-close"/>
+        </div>
+        {s.by && <MI show={vF(iMsg + 1, step)} anim="rise" className="qqq-km-by"><span className="qqq-km-dash" aria-hidden="true"/>{hl(s.by)}</MI>}
+      </figure>
+      {s.caption && <MI show={vF(iMsg + (s.by ? 2 : 1), step)} className="t-cap" style={{ marginTop: 34 }}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+
+function KeyMessage({ s, step }) {
+  return s.variant === "classic" ? <KeyMessageClassic s={s} step={step}/> : <KeyMessageQuote s={s} step={step}/>;
+}
+```
+
+> **Replacing the base templates**: `KeyMessage` and `BigQuestion` were part of the 13 base templates (`structure-catalog.md`). When a deck uses these sections, delete the deck's old `KeyMessage`/`BigQuestion` functions and paste 15–17. The old `chips` row of some decks' `KeyMessage` (an older variant) is not part of the contract: use `keymsg` (No. 78) for a sentence with chips.
+
+---
+
+## 18. `outcome-cards` — what the audience will be able to do (No. 89)
+
+**When**: "연수를 다 마치면, 이 세 가지를 배우게 됩니다" — 2–4 learning outcomes, each shown as a **designed mini-visual drawn in CSS/SVG** (not a screenshot) above a label and a short description. Ordered or unordered, but each outcome is a *result*, so the visual shows the result happening. Plain parallel items without a result stay `four-card`. Requested by the scenario as `component: outcome-cards` (slots: `title` · `items.N.icon` · `items.N.label` · `items.N.desc` · `items.N.visual` · `caption`).
+
+- `items.N.icon`: an emoji (`📁`) or a built-in icon key: `folder`, `chart`, `doc`, `check`, `calendar`, `clock`, `spark` (white-on-colour line icons). Shown next to the card number; with the `icon` visual it is drawn big in the orb instead.
+- `items.N.visual` (optional): one key from the built-in set. Unknown or empty → `icon`.
+
+  | key | what it draws (plays once when the card appears) |
+  |---|---|
+  | `folder-sort` | three loose files drop into three coloured sub-folders |
+  | `mini-dashboard` | a small window: four bars grow, a ring fills, a sparkline draws |
+  | `doc-year-flip` | a document whose year flips from last year to this year (calendar year from the viewer's clock); last year moves up, struck through in rose, then a check stamp is drawn |
+  | `checklist` (generic) | three rows tick off one after another |
+  | `icon` (generic, default) | the icon in a glossy orb with a slowly turning dashed ring and two sparkles |
+
+- Card: glass, a 5px top accent in the card's colour (blue, emerald, amber, sky in order), the visual (aspect 280:160), then `01` number + icon, `label` (32px/900; 28px with 4 cards) and `desc` (26px; 24px with 4 cards). `label`, `desc`, `title` and `caption` go through `hl()`.
+- Motion: cards enter from left / flip / right (`["left","flipX","right"]`, 4 cards `["left","flipX","flipX","right"]`); the visual plays after its card lands. Only the decorative parts keep a light idle (the orb ring, the dashboard's live dot). Reduced motion / review: final state at once.
+- 2–4 items. The reader warns outside that range and when `label` is missing. No new UI strings (numbers and years are drawn, not words).
+
+Data:
+```js
+{ id, type:"outcome-cards", theme:"light", eyebrow,
+  title:"By the end, you will have *three* things",
+  items:[
+    { icon:"📁", label:"Sorted folders", desc:"Files land in the right place", visual:"folder-sort" },
+    { icon:"chart", label:"A live dashboard", desc:"See every task at a glance", visual:"mini-dashboard" },
+    { icon:"doc", label:"This year's documents", desc:"Last year's files, updated", visual:"doc-year-flip" },
+  ],
+  caption, builds:["title","o0","o1","o2","caption"] }   // one "o<n>" per item; caption only when present
+```
+```jsx
+const OC_ICON = {
+  folder: "M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z",
+  chart: "M5 20V11M11 20V5M17 20v-6M3 20h18",
+  doc: "M6 3h8l4 4v14H6zM14 3v4h4M9 12h6M9 16h4",
+  check: "M5 12.5l4.5 4.5L19 7",
+  calendar: "M4 6h16v14H4zM4 10h16M9 3v5M15 3v5",
+  clock: "M12 3a9 9 0 1 0 0.01 0zM12 7v5l3.5 2.5",
+  spark: "M12 3l2.3 6.4L21 12l-6.7 2.6L12 21l-2.3-6.4L3 12l6.7-2.6z",
+};
+const OC_VISUALS = ["folder-sort", "mini-dashboard", "doc-year-flip", "checklist", "icon"];
+const OC_TONES = ["blue", "emerald", "amber", "sky"];
+const OC_ANIM = n => n >= 4 ? ["left", "flipX", "flipX", "right"] : n === 2 ? ["left", "right"] : ["left", "flipX", "right"];
+
+function OcIcon({ icon, size = 40 }) {
+  const k = String(icon || "").trim();
+  if (OC_ICON[k]) return (
+    <span className="qqq-oc-ico" style={{ width: size, height: size }} aria-hidden="true">
+      <svg viewBox="0 0 24 24" width={size * 0.62} height={size * 0.62}><path d={OC_ICON[k]}/></svg>
+    </span>);
+  return k ? <span className="qqq-oc-emoji" style={{ fontSize: size }} aria-hidden="true">{k}</span> : null;
+}
+
+function OcVisual({ kind, icon, n }) {
+  if (kind === "folder-sort") return (
+    <svg className="qqq-oc-svg v-folder" viewBox="0 0 280 160" aria-hidden="true">
+      {[0, 1, 2].map(k => <path key={"b" + k} className={"oc-fback k" + k} transform={`translate(${28 + k * 84} 86)`}
+        d="M0 8Q0 0 8 0H26L34 8H62Q70 8 70 16V62Q70 70 62 70H8Q0 70 0 62Z"/>)}
+      {[0, 1, 2].map(k => <g key={"f" + k} className={"oc-file f" + k}>
+        <path className="oc-sheet" d="M0 0H22L32 10V44H0Z"/><path className="oc-fold" d="M22 0V10H32"/>
+        <path className="oc-ln" d="M6 20H26M6 28H26M6 36H18"/></g>)}
+      {[0, 1, 2].map(k => <path key={"c" + k} className={"oc-ffront k" + k} transform={`translate(${28 + k * 84} 86)`}
+        d="M0 28Q0 22 6 22H64Q70 22 70 28V62Q70 70 62 70H8Q0 70 0 62Z"/>)}
+    </svg>);
+  if (kind === "mini-dashboard") return (
+    <svg className="qqq-oc-svg v-dash" viewBox="0 0 280 160" aria-hidden="true">
+      <rect className="oc-win" x="14" y="6" width="252" height="148" rx="14"/>
+      <path className="oc-winbar" d="M14 20Q14 6 28 6H252Q266 6 266 20V28H14Z"/>
+      {[0, 1, 2].map(k => <circle key={k} className={"oc-dot d" + k} cx={30 + k * 13} cy="17" r="4"/>)}
+      {[0.42, 0.68, 0.54, 0.9].map((h, k) => <rect key={k} className={"oc-bar b" + k} x={34 + k * 30} y={140 - h * 92} width="20" height={h * 92} rx="5"/>)}
+      <path className="oc-base" d="M28 141H158"/>
+      <circle className="oc-ring-bg" cx="214" cy="74" r="28"/>
+      <circle className="oc-ring" cx="214" cy="74" r="28" pathLength="1" transform="rotate(-90 214 74)"/>
+      <path className="oc-spark" d="M182 134L198 122L212 128L230 110L248 116" pathLength="1"/>
+    </svg>);
+  if (kind === "doc-year-flip") {
+    const y = new Date().getFullYear();
+    return (
+      <div className="qqq-oc-doc">
+        <svg className="qqq-oc-svg v-doc" viewBox="0 0 280 160" aria-hidden="true">
+          <path className="oc-page" d="M68 6H184L212 34V154H68Z"/><path className="oc-pfold" d="M184 6V34H212"/>
+          <path className="oc-pln" d="M88 96H192M88 112H192M88 128H156"/>
+          <circle className="oc-stamp" cx="194" cy="130" r="17"/>
+          <path className="oc-tick" d="M185 130L191 136L203 123" pathLength="1"/>
+        </svg>
+        <div className="qqq-oc-year" aria-hidden="true"><span className="y-old">{y - 1}</span><span className="y-new">{y}</span></div>
+      </div>);
+  }
+  if (kind === "checklist") return (
+    <svg className="qqq-oc-svg v-check" viewBox="0 0 280 160" aria-hidden="true">
+      {[0, 1, 2].map(k => <g key={k} className={"oc-row r" + k}>
+        <rect className="oc-box" x="54" y={20 + k * 44} width="30" height="30" rx="8"/>
+        <path className="oc-tick" d={`M61 ${35 + k * 44}L67 ${41 + k * 44}L78 ${28 + k * 44}`} pathLength="1"/>
+        <path className="oc-rl" d={`M98 ${35 + k * 44}H${k === 2 ? 188 : 226}`}/></g>)}
+    </svg>);
+  return (
+    <div className="qqq-oc-orbwrap">
+      <span className="qqq-oc-ring" aria-hidden="true"/>
+      <span className="qqq-oc-orb"><OcIcon icon={icon} size={n >= 4 ? 52 : 68}/></span>
+      <Sparkle4 size={26} tone="sky" delay={0.6} style={{ left: "22%", top: "10%" }}/>
+      <Sparkle4 size={20} tone="amber" delay={1.0} style={{ right: "22%", bottom: "12%" }}/>
+    </div>);
+}
+
+function OcCard({ it, i, n, show }) {
+  const on = useOn(show);
+  const v = OC_VISUALS.includes(it.visual) ? it.visual : "icon";
+  return (
+    <MI show={show} anim={OC_ANIM(n)[i]} className={"glass qqq-oc-card t-" + OC_TONES[i % 4] + (on ? " is-on" : "")}>
+      <div className="qqq-oc-vis"><OcVisual kind={v} icon={it.icon} n={n}/></div>
+      <div className="qqq-oc-head">
+        <span className="qqq-oc-num" aria-hidden="true">{String(i + 1).padStart(2, "0")}</span>
+        {v !== "icon" && <OcIcon icon={it.icon} size={n >= 4 ? 36 : 40}/>}
+      </div>
+      <div className="t-label qqq-oc-label">{hl(it.label || "")}</div>
+      {it.desc && <div className="t-body qqq-oc-desc">{hl(it.desc)}</div>}
+    </MI>
+  );
+}
+
+function OutcomeCards({s,step}){
+  const items = (s.items || []).slice(0, 4);
+  const n = items.length;
+  return (
+    <div className="box">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      <MI show={vF(0,step)} className="t-title" style={{marginBottom:30}}>{hl(s.title)}</MI>
+      <div className={"qqq-oc n" + n}>
+        {items.map((it,i)=><OcCard key={i} it={it||{}} i={i} n={n} show={vF(1+i,step)}/>)}
+      </div>
+      {s.caption && <MI show={vF(1+n,step)} className="t-cap" style={{marginTop:26}}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+```
+
+---
+
+## 8~18 공용 CSS (덱 `<style>`에 추가)
 ```css
 /* prompt-box */
 .qqq-prompt-pre{ margin:0; font-size:24px; line-height:1.6; font-weight:600; white-space:pre-wrap; word-break:break-word;
@@ -778,6 +1169,181 @@ function CaptureCompare({s,step}){
   --ink:#3F0A24; --muted:#831843; --blue:#BE185D; --sky:#E11D48; --rose:#9F1239; --emerald:#047857; }
 .theme-bling .t-hero, .theme-bling .t-title{ color:#3F0A24; }
 .theme-bling .t-sub, .theme-bling .t-cap{ color:#831843; }
+
+/* 15. kinetic type kit — words rise 55ms apart; markers land after the last word */
+.qqq-kt{ --k-ease:cubic-bezier(.22,1,.36,1); --k-draw:cubic-bezier(.65,0,.35,1); }
+.qqq-kw{ display:inline-block; opacity:0; transform:translateY(.38em); filter:blur(6px);
+  transition:opacity .5s var(--k-ease), transform .75s var(--k-ease), filter .5s ease;
+  transition-delay:calc(var(--kd,0s) + var(--i,0) * 55ms); }
+.qqq-kt.is-on .qqq-kw{ opacity:1; transform:none; filter:none; }
+.qqq-mk{ position:relative; isolation:isolate; font-weight:900; }
+.qqq-mk.is-b{ --mk:rgba(59,130,246,.2);  --mkl:#0EA5E9; }
+.qqq-mk.is-r{ --mk:rgba(244,63,94,.17);  --mkl:#F43F5E; }
+.qqq-mk.is-g{ --mk:rgba(16,185,129,.2);  --mkl:#10B981; }
+.qqq-mk.is-b .qqq-mk-ink{ color:var(--blue); background:linear-gradient(135deg,var(--blue),var(--sky));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.qqq-mk.is-r .qqq-mk-ink{ color:var(--rose); -webkit-text-fill-color:var(--rose); }
+.qqq-mk.is-g .qqq-mk-ink{ color:var(--emerald); -webkit-text-fill-color:var(--emerald); }
+.qqq-mk.mk-swipe::before{ content:""; position:absolute; z-index:-1; left:-.1em; right:-.1em; bottom:.04em; height:.46em;
+  border-radius:.14em .3em .22em .12em; background:var(--mk); transform:scaleX(0); transform-origin:0 50%;
+  transition:transform .6s var(--k-draw); transition-delay:calc(var(--kd,0s) + var(--kn,1) * 55ms + .4s); }
+.qqq-kt.is-on .qqq-mk.mk-swipe::before{ transform:scaleX(1); }
+.qqq-mk-line{ position:absolute; left:-3%; bottom:-.16em; width:106%; height:.3em; overflow:visible; pointer-events:none; }
+.qqq-mk-line path{ fill:none; stroke:var(--mkl); stroke-width:3.6; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1;
+  transition:stroke-dashoffset .7s var(--k-draw); transition-delay:calc(var(--kd,0s) + var(--kn,1) * 55ms + .4s); }
+.qqq-kt.is-on .qqq-mk-line path{ stroke-dashoffset:0; }
+.theme-dark .qqq-mk.is-b{ --mk:rgba(122,184,255,.26); --mkl:#4FD0FF; }
+.theme-dark .qqq-mk.is-r{ --mk:rgba(255,128,149,.24); --mkl:#FF8095; }
+.theme-dark .qqq-mk.is-g{ --mk:rgba(62,224,163,.22);  --mkl:#3EE0A3; }
+.theme-bling .qqq-mk.is-b{ --mk:rgba(255,255,255,.6); --mkl:#BE185D; }
+.qqq-spk{ position:absolute; z-index:2; pointer-events:none; opacity:0; transform:scale(.2) rotate(-40deg);
+  transition:opacity .4s ease, transform .6s cubic-bezier(.34,1.56,.64,1); transition-delay:var(--sd,0s); }
+.qqq-spk path{ fill:currentColor; transform-box:fill-box; transform-origin:center; }
+.qqq-spk.is-sky{ color:#0EA5E9; } .qqq-spk.is-blue{ color:#3B82F6; } .qqq-spk.is-amber{ color:#F59E0B; }
+.is-on .qqq-spk{ opacity:1; transform:none; }
+.is-on .qqq-spk path{ animation:qqqTwinkle 2.6s ease-in-out calc(var(--sd,0s) + .6s) infinite; }
+@keyframes qqqTwinkle{ 0%,100%{ transform:scale(1); opacity:1; } 50%{ transform:scale(.62) rotate(20deg); opacity:.55; } }
+.qqq-count{ display:inline-block; font-variant-numeric:tabular-nums; text-align:right; }
+
+/* 16. big-question (kinetic) */
+.qqq-bq-stage{ position:relative; width:100%; max-width:1020px; padding:36px 48px; }
+.qqq-bq-glyph{ position:absolute; z-index:0; right:-84px; top:50%; transform:translateY(-54%); pointer-events:none; }
+.qqq-bq-qm{ display:block; font-size:420px; font-weight:900; line-height:.9; color:transparent; opacity:.16;
+  background:linear-gradient(160deg,#3B82F6,#0EA5E9); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.theme-dark .qqq-bq-qm{ opacity:.26; background:linear-gradient(160deg,#7AB8FF,#4FD0FF); -webkit-background-clip:text; background-clip:text; }
+.qqq-bq-q{ position:relative; z-index:1; margin:0; font-size:80px; font-weight:900; line-height:1.2; letter-spacing:-.035em; text-wrap:balance; }
+.qqq-bq-sub{ display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px; transform:rotate(-1.2deg); }
+.qqq-bq-arrow{ width:84px; height:56px; flex-shrink:0; overflow:visible; }
+.qqq-bq-arrow path{ fill:none; stroke:var(--blue); stroke-width:4.5; stroke-linecap:round; stroke-linejoin:round;
+  stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset .5s cubic-bezier(.65,0,.35,1); }
+.qqq-bq-arrow path + path{ transition-delay:.42s; transition-duration:.25s; }
+.qqq-bq-sub.is-on .qqq-bq-arrow path{ stroke-dashoffset:0; }
+.qqq-bq-subt{ font-size:36px; font-weight:700; line-height:1.4; }
+
+/* 17. key-message (quote) */
+.qqq-km-fig{ position:relative; margin:0; width:fit-content; min-width:min(560px,100%); max-width:980px; text-align:left; }
+.qqq-km-lead{ display:flex; align-items:center; gap:16px; margin-bottom:14px; font-size:28px; font-weight:800; letter-spacing:.02em; color:var(--blue); }
+.qqq-km-lead::before{ content:""; flex-shrink:0; width:56px; height:6px; border-radius:9px; background:linear-gradient(90deg,var(--blue),var(--sky)); }
+.qqq-km-body{ position:relative; padding:82px 64px 6px 0; }
+.qqq-km-open{ position:absolute; left:-14px; top:-2px; width:108px; height:auto; opacity:0; transform:scale(.5) rotate(-14deg); transform-origin:30% 70%;
+  transition:opacity .35s ease, transform .7s cubic-bezier(.34,1.56,.64,1); }
+.qqq-km-close{ position:absolute; right:0; bottom:-30px; width:62px; height:auto; opacity:0; transform:rotate(180deg) scale(.5);
+  transition:opacity .35s ease 1.1s, transform .7s cubic-bezier(.34,1.56,.64,1) 1.1s; }
+.qqq-km-fig.is-on .qqq-km-open{ opacity:.95; transform:none; }
+.qqq-km-fig.is-on .qqq-km-close{ opacity:.5; transform:rotate(180deg); }
+.qqq-km-msg{ margin:0; font-size:62px; font-weight:800; line-height:1.34; letter-spacing:-.025em; text-wrap:pretty; }
+.qqq-km-by{ display:flex; align-items:center; gap:14px; margin-top:38px; font-size:28px; font-weight:700; color:var(--muted,#475569); }
+.qqq-km-dash{ width:40px; height:4px; border-radius:4px; background:currentColor; }
+.theme-dark .qqq-km-by{ color:#CBD5E1; }
+
+/* 18. outcome-cards — colour hex in --och/--och2 (fills), text tone in --oc (theme-aware), --ochd for text on white */
+.qqq-oc{ display:grid; gap:22px; width:100%; max-width:1056px; grid-template-columns:repeat(3,minmax(0,1fr)); }
+.qqq-oc.n2{ grid-template-columns:repeat(2,minmax(0,1fr)); max-width:900px; }
+.qqq-oc.n4{ grid-template-columns:repeat(4,minmax(0,1fr)); gap:16px; }
+.qqq-oc-card{ --oc:var(--blue); --och:#3B82F6; --och2:#0EA5E9; --ochd:#1D4ED8; display:flex; flex-direction:column; align-items:flex-start;
+  min-width:0; padding:14px 18px 22px; text-align:left; border-top:5px solid var(--och); }
+.qqq-oc-card.t-emerald{ --oc:var(--emerald); --och:#10B981; --och2:#14B8A6; --ochd:#047857; }
+.qqq-oc-card.t-amber{ --oc:var(--amber); --och:#F59E0B; --och2:#F97316; --ochd:#B45309; }
+.qqq-oc-card.t-sky{ --oc:var(--sky); --och:#0EA5E9; --och2:#14B8A6; --ochd:#0369A1; }
+.qqq-oc-vis{ position:relative; width:100%; aspect-ratio:280/160; margin-bottom:12px; border-radius:14px;
+  background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,.18)); }
+.theme-dark .qqq-oc-vis{ background:rgba(255,255,255,.06); }
+.qqq-oc-svg{ display:block; width:100%; height:100%; overflow:visible; }
+.qqq-oc-head{ display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.qqq-oc-num{ font-size:24px; font-weight:900; letter-spacing:.04em; color:var(--oc); }
+.qqq-oc-ico{ display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; border-radius:12px;
+  background:linear-gradient(180deg,rgba(255,255,255,.3),rgba(255,255,255,0) 48%),linear-gradient(135deg,var(--och),var(--och2));
+  box-shadow:0 6px 14px rgba(15,23,42,.18), inset 0 1px 0 rgba(255,255,255,.55); }
+.qqq-oc-ico svg{ fill:none; stroke:#fff; stroke-width:2.2; stroke-linecap:round; stroke-linejoin:round; }
+.qqq-oc-emoji{ display:inline-block; line-height:1; font-family:"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; }
+.qqq-oc-label{ font-size:32px; font-weight:900; line-height:1.25; }
+.qqq-oc-desc{ margin-top:6px; font-size:26px; font-weight:600; line-height:1.4; }
+.qqq-oc.n4 .qqq-oc-label{ font-size:28px; }
+.qqq-oc.n4 .qqq-oc-desc{ font-size:24px; }
+/* folder-sort */
+.v-folder .oc-fback.k0{ fill:#2563EB; } .v-folder .oc-fback.k1{ fill:#059669; } .v-folder .oc-fback.k2{ fill:#D97706; }
+.v-folder .oc-ffront.k0{ fill:#60A5FA; } .v-folder .oc-ffront.k1{ fill:#34D399; } .v-folder .oc-ffront.k2{ fill:#FBBF24; }
+.v-folder .oc-ffront{ filter:drop-shadow(0 -2px 3px rgba(15,23,42,.14)); }
+.v-folder .oc-sheet{ fill:#fff; stroke:#94A3B8; stroke-width:1.6; stroke-linejoin:round; }
+.v-folder .oc-fold{ fill:#E2E8F0; stroke:#94A3B8; stroke-width:1.6; stroke-linejoin:round; }
+.v-folder .oc-ln{ fill:none; stroke:#CBD5E1; stroke-width:3; stroke-linecap:round; }
+.v-folder .oc-file{ transform-box:fill-box; transform-origin:center; transition:transform .85s cubic-bezier(.34,1.3,.64,1); }
+.v-folder .oc-file.f0{ --fk:0; transform:translate(98px,12px) rotate(-16deg); }
+.v-folder .oc-file.f1{ --fk:1; transform:translate(124px,2px) rotate(7deg); }
+.v-folder .oc-file.f2{ --fk:2; transform:translate(150px,16px) rotate(19deg); }
+.is-on .v-folder .oc-file{ transition-delay:calc(.35s + var(--fk) * .18s); }
+.is-on .v-folder .oc-file.f0{ transform:translate(47px,66px) rotate(0deg); }
+.is-on .v-folder .oc-file.f1{ transform:translate(131px,66px) rotate(0deg); }
+.is-on .v-folder .oc-file.f2{ transform:translate(215px,66px) rotate(0deg); }
+/* mini-dashboard */
+.v-dash .oc-win{ fill:rgba(255,255,255,.88); stroke:rgba(15,23,42,.14); stroke-width:1.5; }
+.v-dash .oc-winbar{ fill:rgba(15,23,42,.06); }
+.theme-dark .v-dash .oc-win{ fill:rgba(255,255,255,.08); stroke:rgba(255,255,255,.22); }
+.theme-dark .v-dash .oc-winbar{ fill:rgba(255,255,255,.08); }
+.v-dash .oc-dot.d0{ fill:#F43F5E; } .v-dash .oc-dot.d1{ fill:#F59E0B; } .v-dash .oc-dot.d2{ fill:#10B981; }
+.v-dash .oc-bar{ fill:var(--och); transform-box:fill-box; transform-origin:50% 100%; transform:scaleY(0); transition:transform .7s cubic-bezier(.22,1,.36,1); }
+.v-dash .oc-bar.b3{ fill:var(--och2); }
+.is-on .v-dash .oc-bar{ transform:scaleY(1); }
+.is-on .v-dash .oc-bar.b0{ transition-delay:.3s; } .is-on .v-dash .oc-bar.b1{ transition-delay:.42s; }
+.is-on .v-dash .oc-bar.b2{ transition-delay:.54s; } .is-on .v-dash .oc-bar.b3{ transition-delay:.66s; }
+.v-dash .oc-base{ stroke:rgba(15,23,42,.25); stroke-width:2; }
+.theme-dark .v-dash .oc-base{ stroke:rgba(255,255,255,.3); }
+.v-dash .oc-ring-bg{ fill:none; stroke:rgba(15,23,42,.1); stroke-width:10; }
+.theme-dark .v-dash .oc-ring-bg{ stroke:rgba(255,255,255,.14); }
+.v-dash .oc-ring{ fill:none; stroke:var(--och); stroke-width:10; stroke-linecap:round; stroke-dasharray:1; stroke-dashoffset:1;
+  transition:stroke-dashoffset 1s cubic-bezier(.65,0,.35,1) .6s; }
+.is-on .v-dash .oc-ring{ stroke-dashoffset:.28; }
+.v-dash .oc-spark{ fill:none; stroke:var(--och2); stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
+  transition:stroke-dashoffset .8s cubic-bezier(.65,0,.35,1) .95s; }
+.is-on .v-dash .oc-spark{ stroke-dashoffset:0; }
+.is-on .v-dash .oc-dot.d2{ animation:qqqLive 1.6s ease-in-out 1.8s infinite; }
+@keyframes qqqLive{ 0%,100%{ opacity:1; } 50%{ opacity:.3; } }
+/* doc-year-flip */
+.qqq-oc-doc{ position:relative; width:100%; height:100%; }
+.v-doc .oc-page{ fill:#fff; stroke:#94A3B8; stroke-width:2; stroke-linejoin:round; }
+.v-doc .oc-pfold{ fill:#E2E8F0; stroke:#94A3B8; stroke-width:2; stroke-linejoin:round; }
+.v-doc .oc-pln{ fill:none; stroke:#CBD5E1; stroke-width:5; stroke-linecap:round; }
+.v-doc .oc-stamp{ fill:var(--och); opacity:0; transform-box:fill-box; transform-origin:center; transform:scale(.3);
+  transition:opacity .3s ease 1.25s, transform .5s cubic-bezier(.34,1.56,.64,1) 1.25s; }
+.is-on .v-doc .oc-stamp{ opacity:1; transform:none; }
+.v-doc .oc-tick{ fill:none; stroke:#fff; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
+  transition:stroke-dashoffset .4s ease 1.6s; }
+.is-on .v-doc .oc-tick{ stroke-dashoffset:0; }
+.qqq-oc-year{ position:absolute; left:47%; top:19%; transform:translateX(-50%); display:grid; perspective:420px;
+  font-size:32px; font-weight:900; line-height:1.1; letter-spacing:.01em; font-variant-numeric:tabular-nums; }
+.qqq-oc-year span{ grid-area:1/1; backface-visibility:hidden; transition:transform .45s cubic-bezier(.65,0,.35,1), opacity .3s ease, color .3s ease; }
+.qqq-oc-year .y-old{ color:#64748B; }
+.qqq-oc-year .y-new{ color:var(--ochd); transform:rotateX(90deg); opacity:0; }
+.is-on .qqq-oc-year .y-old{ transform:translate(-64%,-96%) scale(.78); color:#E11D48; text-decoration:line-through 3px; transition-delay:.55s; }
+.is-on .qqq-oc-year .y-new{ transform:none; opacity:1; transition-delay:.85s; }
+/* checklist */
+.v-check .oc-box{ fill:rgba(255,255,255,.9); stroke:#94A3B8; stroke-width:2; transition:fill .3s ease, stroke .3s ease; }
+.v-check .oc-tick{ fill:none; stroke:#fff; stroke-width:4.5; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:1; stroke-dashoffset:1;
+  transition:stroke-dashoffset .35s ease; }
+.v-check .oc-rl{ fill:none; stroke:#CBD5E1; stroke-width:7; stroke-linecap:round; }
+.theme-dark .v-check .oc-rl{ stroke:rgba(255,255,255,.28); }
+.is-on .v-check .oc-box{ fill:var(--och); stroke:var(--och); }
+.is-on .v-check .oc-tick{ stroke-dashoffset:0; }
+.is-on .v-check .r0 *{ transition-delay:.4s; } .is-on .v-check .r1 *{ transition-delay:.75s; } .is-on .v-check .r2 *{ transition-delay:1.1s; }
+/* icon (default) */
+.qqq-oc-orbwrap{ position:relative; width:100%; height:100%; display:flex; align-items:center; justify-content:center; }
+.qqq-oc-orb{ position:relative; z-index:1; height:72%; aspect-ratio:1; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.7),rgba(255,255,255,0) 42%),linear-gradient(135deg,var(--och),var(--och2));
+  box-shadow:0 14px 30px rgba(15,23,42,.18), inset 0 -6px 14px rgba(0,0,0,.14);
+  opacity:0; transform:scale(.6); transition:transform .7s cubic-bezier(.34,1.56,.64,1) .25s, opacity .3s ease .25s; }
+.is-on .qqq-oc-orb{ opacity:1; transform:none; }
+.qqq-oc-orb .qqq-oc-ico{ background:none; box-shadow:none; }
+.qqq-oc-ring{ position:absolute; height:92%; aspect-ratio:1; border-radius:50%; border:3px dashed var(--och); opacity:.45; }
+.is-on .qqq-oc-ring{ animation:qqqSpin 18s linear infinite; }
+@keyframes qqqSpin{ to{ transform:rotate(360deg); } }
+/* 15~18: reduced motion and review stills show the final state at once */
+@media (prefers-reduced-motion: reduce){
+  .qqq-kw, .qqq-mk::before, .qqq-mk-line path, .qqq-spk, .qqq-spk path, .qqq-bq-arrow path, .qqq-km-open, .qqq-km-close,
+  .qqq-oc-card *, .qqq-oc-year span{ transition:none !important; animation:none !important; }
+}
+html[data-review] .qqq-kw, html[data-review] .qqq-mk::before, html[data-review] .qqq-mk-line path, html[data-review] .qqq-spk,
+html[data-review] .qqq-spk path, html[data-review] .qqq-bq-arrow path, html[data-review] .qqq-km-open, html[data-review] .qqq-km-close,
+html[data-review] .qqq-oc-card *, html[data-review] .qqq-oc-year span{ transition:none !important; animation:none !important; }
 ```
 > bling은 `--blue`를 진한 핑크로 덮어써 `*단어*`·Eyebrow 밑줄·카드 강조가 핑크 계열이 된다(핑크 장에서만). 보라 금지 규칙은 그대로 — 핑크·로즈만 쓴다. 배경 `#FF9ECB` 위 `#3F0A24` 글자 대비 ≈ 8.6:1, `#831843`(캡션) ≈ 5:1, `#BE185D` ≈ 3.2:1(56px 굵은 글씨라 큰 글자 기준 통과).
 
@@ -799,10 +1365,14 @@ case "before-after-panel": return <BeforeAfterPanel s={s} step={step}/>;
 case "command-box":        return <CommandBox s={s} step={step}/>;
 case "command-list":       return <CommandList s={s} step={step}/>;
 case "capture-compare":    return <CaptureCompare s={s} step={step}/>;
+case "big-question":       return <BigQuestion s={s} step={step}/>;   // 16 — replaces the base template
+case "key-message":        return <KeyMessage s={s} step={step}/>;    // 17 — replaces the base template
+case "outcome-cards":      return <OutcomeCards s={s} step={step}/>;
 ```
 
 ## 다크/핑크 테마 메모
 - 다 light/dark/bling 모두에서 동작(글자색·glass는 테마 CSS가 처리). 단 `platforms`/`keymsg`의 칩 배경이 옅은 블루라 다크에서 약하면 칩 배경을 `rgba(255,255,255,.08)`로.
 - 섹션 전환·강조 한 장은 dark, "그러나/반전" 한 장은 `pink-reversal`(항상 bling 핑크)로 쓰면 리듬이 산다.
-- **bling 배경은 위 "8~14 공용 CSS"의 `.app-wrap.theme-bling`이 정의한다**(예전엔 오로라·블롭·✨만 있고 배경 그라디언트가 없었다). 다른 type에 `theme:"bling"`을 줘도 같은 핑크 배경·강조색이 된다.
+- **bling 배경은 위 "8~18 공용 CSS"의 `.app-wrap.theme-bling`이 정의한다**(예전엔 오로라·블롭·✨만 있고 배경 그라디언트가 없었다). 다른 type에 `theme:"bling"`을 줘도 같은 핑크 배경·강조색이 된다.
 - `prompt-box`·`command-box`·`screenshot-slot`·`before-after-panel`은 light/dark 모두 확인했다. `command-list` was checked in light and dark at 1920×1080 and 1280×720. `capture-compare` was checked in light at 1920×1080 and 1280×720 (rows, enlarge dialog, keyboard open and close). 다크에선 프롬프트 상자·자리 표시 틀이 투명 톤으로 바뀐다(공용 CSS의 `.theme-dark` 줄).
+- Sections 15–18 (`big-question` kinetic and classic, `key-message` quote and classic, `outcome-cards` with 2, 3 and 4 items and every built-in visual) were rendered from this file's code in headless Chromium at 1920×1080 and 1280×720, in light and dark, mid-animation, and with reduced motion (final state at once). No text under 24px, content height ≤ 792px, no console errors.

@@ -120,9 +120,12 @@ Animation : left fade-in → right fade-in → 핵심 차이 highlight-sweep
 | 2–4 install commands run in order (copy each) | `install` | `command-list` ✅ | `command-box` ✅ (one command) |
 | 결과 화면 캡처 보여 주기 | `result` | `screenshot-slot` ✅ | `video` ✅ |
 | 2–3 before → after capture pairs (real results) | `result` | `capture-compare` ✅ | `screenshot-slot` ✅ (one capture) |
+| "By the end you will…" — 2–4 learning outcomes shown as results | `outcome` | `outcome-cards` ✅ (pick a built-in `visual` per item) | `four-card` ✅ (plain parallel items) |
 | "그러나…" 흐름 뒤집기 | `reversal` | `pink-reversal` ✅ | `key-message` + dark |
 
-> 75~81 (`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff`)와 83~88 (`prompt-box`·`screenshot-slot`·`pink-reversal`·`command-box`·`command-list`·`capture-compare`), 15 `before-after-panel`은 ✅ 실제 구현·검증됨. 코드는 `added-templates.md`.
+> 75~81 (`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff`)와 83~89 (`prompt-box`·`screenshot-slot`·`pink-reversal`·`command-box`·`command-list`·`capture-compare`·`outcome-cards`), 15 `before-after-panel`은 ✅ 실제 구현·검증됨. 코드는 `added-templates.md`.
+>
+> **Opening frames (since No. 89)**: `big-question` and `key-message` now draw the sentence itself as the design — kinetic display question with a hand-drawn underline (section 16) and an editorial pull-quote with a highlighter sweep (section 17). Use them instead of a plain glass text box for the opening question and for the lecturer's own words. `variant:"classic"` keeps the old look.
 >
 > **type 개수 규칙은 새 type에도 같다**: 같은 type 2장 연속 금지, 덱 전체 5장 이하. 실습 덱은 `prompt-box` ↔ `screenshot-slot`을 번갈아 두고, 프롬프트가 5개를 넘으면 설치 명령은 `command-box`로 뺀다. `pink-reversal`은 덱당 1~2장(시나리오 기본 1장)이며 텍스트 중심 장으로 센다(3장 연속 금지에 포함).
 

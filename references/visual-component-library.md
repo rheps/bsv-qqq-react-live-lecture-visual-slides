@@ -53,6 +53,7 @@ use-when    : 강한 주장 한 문장을 화면에 남길 때
 build       : 문장 등장 → 핵심 단어 highlight
 avoid-when  : 연속 3장 사용 금지, 문장이 2개 이상일 때
 structure   : 문장 40px+, 핵심 단어 bold + 색상 강조
+default     : editorial pull-quote (lead kicker, SVG quote marks, 62px message, highlighter sweep on *word*, optional by-line) — added-templates.md 17; variant:"classic" = old look. Also covers the lecturer's own words (quote-focus is not implemented)
 ```
 
 ### QuoteFocus
@@ -330,6 +331,7 @@ use-when    : 수업 핵심 질문, 토론 발문, 탐구 문제
 build       : 물음표 or 아이콘 → 질문 문장
 avoid-when  : 질문이 2개 이상일 때 (한 슬라이드 한 질문)
 structure   : 질문 문장 44px+, 중앙 배치, 강조 밑줄 or 색상
+default     : kinetic display question (80px, words rise one by one, hand-drawn underline on *word*, faint giant ?, sparkles, optional sub line with a drawn arrow) — added-templates.md 16; variant:"classic" = old look
 ```
 
 ### DiscussionPrompt

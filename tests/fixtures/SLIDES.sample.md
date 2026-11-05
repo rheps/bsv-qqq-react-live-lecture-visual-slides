@@ -215,3 +215,47 @@
   - purpose: 2-3 before/after capture pairs, one row each
   - slots: cases.N.label, cases.N.before, cases.N.after, cases.N.note, cases.N.alt, caption
 - notes: capture-compare reader test (synthetic paths, no real images)
+
+## S15 · 배울 것
+- title: By the end, you will have **three** things
+- composition: 결과 먼저
+- component: outcome-cards
+- theme: light
+- slots:
+  - eyebrow: Outcomes
+  - items.0.icon: 📁
+  - items.0.label: Sorted **folders**
+  - items.0.desc: Files land in the right place
+  - items.0.visual: folder-sort
+  - items.1.icon: chart
+  - items.1.label: A live dashboard
+  - items.1.desc: See every task at a glance
+  - items.1.visual: mini-dashboard
+  - items.2.icon: doc
+  - items.2.label: This year's documents
+  - items.2.desc: Last year's files, updated
+  - items.2.visual: doc-year-flip
+  - caption: All three in **one** afternoon
+- notes: outcome-cards reader test
+
+## S16 · 발문
+- title: AI는 교사를 **대체**할 수 있을까?
+- composition: 질문
+- component: big-question
+- theme: dark
+- slots:
+  - question: AI는 교사를 **대체**할 수 있을까?
+  - sub: Or will it change **what** we teach?
+- notes: big-question kinetic default with a follow-up line
+
+## S17 · 경험담
+- title: The **structure** does the work
+- composition: 경험담
+- component: key-message
+- theme: light
+- slots:
+  - lead: What I learned at school
+  - message: The **structure** does the work
+  - by: Lecturer
+  - variant: classic
+- notes: key-message by-line and classic variant

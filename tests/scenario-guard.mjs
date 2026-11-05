@@ -19,7 +19,7 @@ const NEW = [
   ["prompt-box", "PromptBox", 83], ["screenshot-slot", "ScreenshotSlot", 84],
   ["pink-reversal", "PinkReversal", 85], ["command-box", "CommandBox", 86],
   ["before-after-panel", "BeforeAfterPanel", 15], ["command-list", "CommandList", 87],
-  ["capture-compare", "CaptureCompare", 88],
+  ["capture-compare", "CaptureCompare", 88], ["outcome-cards", "OutcomeCards", 89],
 ];
 for (const [type, fn, n] of NEW) {
   ok(`${type}: component function`, new RegExp(`function ${fn}\\(\\{s,step\\}\\)`).test(tpl));
@@ -39,7 +39,7 @@ ok("SKILL: no deleted audit skill reference", !/qqq-slide-emphasis-audit/.test(s
 // reader on the fixture
 const rep = parseSlidesMd(read("tests/fixtures/SLIDES.sample.md"));
 const byId = Object.fromEntries(rep.slides.map(s => [s.id, s]));
-ok("reader: 14 slides", rep.slides.length === 14);
+ok("reader: 17 slides", rep.slides.length === 17);
 ok("reader: deck title", rep.deckTitle === "QQQ 새 컴포넌트 시험");
 ok("reader: **x** -> *x*", byId.s03.title === "이 프롬프트를 *그대로* 붙여 넣으세요");
 ok("reader: prompt kept byte-for-byte", byId.s03.prompt.includes("**굵게**도.") && byId.s03.prompt.includes("\n\n[출력 형식]") && !byId.s03.prompt.startsWith(" "));
@@ -78,9 +78,9 @@ ok("reader: command-list command byte-for-byte", cl.slides[0].items[0].command =
 ok("reader: command-list warns outside 2-4", cl.warnings.some(w => /command-list has 1 items/.test(w)));
 
 // capture-compare (No. 88): template, CSS, reader
-const sec14 = tpl.slice(tpl.indexOf("## 14. `capture-compare`"), tpl.indexOf("## 8~14"));
+const sec14 = tpl.slice(tpl.indexOf("## 14. `capture-compare`"), tpl.indexOf("## 15. Kinetic type kit"));
 const code14 = sec14.slice(sec14.indexOf("```jsx"));
-ok("capture-compare: section 14 and shared CSS heading", sec14.length > 200 && tpl.includes("## 8~14 공용 CSS"));
+ok("capture-compare: section 14 and shared CSS heading", sec14.length > 200 && tpl.includes("## 8~18 공용 CSS"));
 ok("capture-compare: row, cell and zoom components", /function CaptureRow\(/.test(code14) && /function CaptureCell\(/.test(code14) && /function CaptureZoom\(/.test(code14));
 ok("capture-compare: enlarge is a button opening a portal dialog", /<button type="button"[^>]*className="qqq-cc-pair"/.test(code14) && /ReactDOM\.createPortal\(/.test(code14) && /role="dialog"/.test(code14));
 ok("capture-compare: Esc closes and nav keys are stopped in capture phase", /addEventListener\("keydown", onKey, true\)/.test(code14) && /e\.key === "Escape"/.test(code14) && /e\.stopPropagation\(\)/.test(code14));
@@ -105,6 +105,56 @@ const cc = parseSlidesMd(`# SLIDES — t
 - notes: n
 `);
 ok("reader: capture-compare warns outside 2-3 and on missing after", cc.warnings.some(w => /capture-compare has 1 cases/.test(w)) && cc.warnings.some(w => /cases\.0\.after missing/.test(w)));
+
+// sections 15-18: kinetic type kit, big-question / key-message new looks, outcome-cards (No. 89)
+const sec = (a, b) => tpl.slice(tpl.indexOf(a), tpl.indexOf(b));
+const code = t => [...t.matchAll(/```jsx\n([\s\S]*?)```/g)].map(m => m[1]).join("\n");
+const s15 = sec("## 15. Kinetic type kit", "## 16. `big-question`"), s16 = sec("## 16. `big-question`", "## 17. `key-message`");
+const s17 = sec("## 17. `key-message`", "## 18. `outcome-cards`"), s18 = sec("## 18. `outcome-cards`", "## 8~18 공용 CSS");
+const c1518 = code(s15) + code(s16) + code(s17) + code(s18);
+const cssAll = tpl.slice(tpl.indexOf("## 8~18 공용 CSS"));
+ok("kit: KineticText, useOn, kTokens, Sparkle4, CountText", ["KineticText", "useOn", "kTokens", "Sparkle4", "CountText"].every(f => code(s15).includes(`function ${f}(`)));
+ok("kit: source and licence noted (ported, not copied)", /youtube-longform-maker/.test(s15) && /rheps\/youtube-maker/.test(s15) && /no licence/.test(s15) && /re-implemented/.test(s15));
+ok("kit: still mode honours reduced motion and review", /prefers-reduced-motion: reduce/.test(code(s15)) && /data-review/.test(code(s15)));
+ok("kit: hl() itself unchanged (no sweep in hl)", !/function hl\(/.test(c1518));
+ok("big-question: kinetic default + classic variant", /function BigQuestionKinetic\(/.test(code(s16)) && /function BigQuestionClassic\(/.test(code(s16))
+  && /s\.variant === "classic" \? <BigQuestionClassic/.test(code(s16)));
+ok("key-message: quote default + classic variant", /function KeyMessageQuote\(/.test(code(s17)) && /function KeyMessageClassic\(/.test(code(s17))
+  && /s\.variant === "classic" \? <KeyMessageClassic/.test(code(s17)));
+ok("big-question / key-message: switch cases", /case "big-question":\s+return <BigQuestion /.test(tpl) && /case "key-message":\s+return <KeyMessage /.test(tpl));
+ok("key-message: quote marks drawn in SVG, by-line slot", /function KmMark\(/.test(code(s17)) && /s\.by &&/.test(code(s17)));
+ok("big-question: sub line drawn arrow, no box", /qqq-bq-arrow/.test(code(s16)) && !/className="glass/.test(code(s16)));
+ok("outcome-cards: all built-in visuals drawn", ["folder-sort", "mini-dashboard", "doc-year-flip", "checklist"].every(k => code(s18).includes(`kind === "${k}"`)) && /OC_VISUALS\.includes\(it\.visual\) \? it\.visual : "icon"/.test(code(s18)));
+ok("outcome-cards: icon keys or emoji", /const OC_ICON = \{/.test(code(s18)) && ["folder", "chart", "doc", "check", "calendar", "clock", "spark"].every(k => code(s18).includes(`  ${k}: "M`)));
+ok("15-18: no Korean UI strings in code", !/[가-힣]/.test(c1518.replace(/\/\/.*$/gm, "")));
+ok("15-18: no inline fontSize under 24", !/fontSize:\s*(1\d|2[0-3])\b/.test(c1518) && !/size=\{(1\d|2[0-3])\}/.test(code(s18).replace(/Sparkle4[^>]*/g, "")));
+ok("15-18: CSS font sizes >= 24px", [...cssAll.matchAll(/\.qqq-(kt|kw|mk|bq|km|oc)[^{]*\{[^}]*\}/g)].every(m => [...m[0].matchAll(/font-size:(\d+)px/g)].every(f => +f[1] >= 24)));
+ok("15-18: titles >= 48px (question 80, quote 62)", /\.qqq-bq-q\{[^}]*font-size:80px/.test(cssAll) && /\.qqq-km-msg\{[^}]*font-size:62px/.test(cssAll));
+ok("15-18: reduced-motion and review blocks", /@media \(prefers-reduced-motion: reduce\)\{\s*\.qqq-kw/.test(cssAll) && /html\[data-review\] \.qqq-kw/.test(cssAll));
+ok("reader: outcome-cards", byId.s15.type === "outcome-cards" && byId.s15.items.length === 3 && byId.s15.items[1].icon === "chart"
+  && byId.s15.items[0].label === "Sorted *folders*" && byId.s15.items[2].visual === "doc-year-flip");
+ok("reader: outcome-cards builds", JSON.stringify(byId.s15.builds) === JSON.stringify(["title", "o0", "o1", "o2", "caption"]) && !rep.warnings.some(w => w.startsWith("s15")));
+ok("reader: big-question sub build", JSON.stringify(byId.s16.builds) === JSON.stringify(["question", "sub"]) && byId.s16.sub === "Or will it change *what* we teach?");
+ok("reader: key-message by + classic variant", byId.s17.variant === "classic" && byId.s17.by === "Lecturer" && JSON.stringify(byId.s17.builds) === JSON.stringify(["lead", "message", "by"]) && !rep.warnings.some(w => w.startsWith("s17")));
+const oc = parseSlidesMd(`# SLIDES — t
+## S01 · one
+- title: t
+- component: outcome-cards
+- slots:
+  - items.0.label: Only
+  - items.0.visual: rocket
+  - variant: classic
+- notes: n
+## S02 · two
+- title: t
+- component: big-question
+- slots:
+  - question: q?
+  - variant: fancy
+- notes: n
+`);
+ok("reader: outcome-cards warns outside 2-4, missing icon, unknown visual", oc.warnings.some(w => /outcome-cards has 1 items/.test(w)) && oc.warnings.some(w => /items\.0\.icon missing/.test(w)) && oc.warnings.some(w => /visual "rocket" unknown/.test(w)));
+ok("reader: variant warnings", oc.warnings.some(w => /s01: variant is only read by/.test(w)) && oc.warnings.some(w => /big-question variant "fancy" unknown/.test(w)));
 
 // contract-name renames (hero-title label, closing-prompt action/chips, four-card cards)
 const ren = parseSlidesMd(`# SLIDES — t

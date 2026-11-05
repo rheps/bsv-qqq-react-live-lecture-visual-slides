@@ -322,7 +322,7 @@ if ((e.key === 'e' || e.key === 'E') && !EMBED) setEdit(v => !v);
 - **하단 편집 폼**: 현재 슬라이드의 텍스트 필드를 input/textarea로 표시
   - 편집 가능: `title`, `subtitle`, `body`, `quote`, `notes`, `keywords[]`, `builds[].label`, `builds[].detail` 등 텍스트 계열 전부
   - 숨김: `id`, `type` (기술 필드)
-  - `prompt`(prompt-box)·`command`(command-box)·`items[].command`(command-list)는 줄바꿈이 보이는 큰 textarea로, `image`(screenshot-slot)·`cases[].before`/`cases[].after`(capture-compare)는 경로 한 줄 입력칸으로 둔다(캡처 파일 이름을 넣으면 바로 바뀜). `role`(시나리오 꼬리표)은 읽기 전용으로 보여도 된다.
+  - `prompt`(prompt-box)·`command`(command-box)·`items[].command`(command-list)는 줄바꿈이 보이는 큰 textarea로, `image`(screenshot-slot)·`cases[].before`/`cases[].after`(capture-compare)는 경로 한 줄 입력칸으로 둔다(캡처 파일 이름을 넣으면 바로 바뀜). `variant`(big-question·key-message)와 `items[].visual`(outcome-cards)은 정해진 값만 고르는 select로 둔다(빈 값 = 기본 모양). `role`(시나리오 꼬리표)은 읽기 전용으로 보여도 된다.
   - 배열 항목은 항목별 textarea로 각각 표시
   - **영상(`video`) 슬라이드**: `videoId`를 그대로 노출하지 말고 **"유튜브 주소" 입력칸**을 둔다. 링크(`watch?v=` · `youtu.be/` · `shorts/` · `embed/` · 원시 11자)를 붙여넣으면 ID를 추출(`parseYouTubeId`)해 즉시 교체. 인식 실패 시 빨간 테두리로 알림. (강사가 11자 ID를 알 필요 없게.)
 - **"수정된 HTML 다운로드" 버튼**: 패널 최하단 고정, 포인트 컬러 배경 흰 텍스트

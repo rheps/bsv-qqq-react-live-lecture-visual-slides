@@ -22,10 +22,10 @@
 | 1 | `hero-title` | HeroTitle | 덱 표지, 강한 첫인상 | |
 | 2 | `big-title` | BigTitle | 섹션 시작 알림 | |
 | 3 | `big-keyword` | BigKeyword | 핵심 단어 하나 각인 | |
-| 4 | `key-message` | KeyMessage | 핵심 주장 한 문장 | |
+| 4 | `key-message` | KeyMessage | 핵심 주장 한 문장 | Default look since No. 89: editorial pull-quote (`added-templates.md` 17). `variant:"classic"` = old look. Optional `by` |
 | 5 | `quote-focus` | QuoteFocus | 인용문·명언·선언 | |
 | 6 | `section-divider` | SectionDivider | 파트 전환 | |
-| 7 | `big-question` | BigQuestion | 수업 핵심 발문 | |
+| 7 | `big-question` | BigQuestion | 수업 핵심 발문 | Default look since No. 89: kinetic display question (`added-templates.md` 16). `variant:"classic"` = old look. Optional `sub` |
 
 ## B. 키워드·목록 (8~13) — PPT SmartArt "목록(List)"
 
@@ -173,9 +173,9 @@ PowerPoint 기본 차트를 옮겨온 것. `요청시` 표시는 발표 화면�
 | 80 | `bridge` | Bridge | A →(라벨)→ B + 설명 카드. 전환의 *원동력*을 화살표에 | `flow` 설명-카드 변형 |
 | 81 | `tradeoff` | Tradeoff | 단점 N(로즈) + 큰 장점 1(블루·넓게). "그래도 쓰는 이유" | `pros-cons` 강조형 |
 
-## O. 강의 시나리오 템플릿 (83~88)
+## O. 강의 시나리오 템플릿 (83~89)
 
-`bsv-qqq-lecture-scenario`의 SLIDES.md(실습형 연수)를 위해 추가. 코드·스키마는 `added-templates.md` 8~14절, SLIDES.md 읽기는 `scenario-input.md`. 15번 `before-after-panel`도 같은 묶음에서 구현됐다(11절). 이 넷과 15번은 복사 버튼·이미지 상태가 있는 **React 템플릿**이라 모션 키트 `QQQ.mount(n)`로 그리지 않는다 — 덱에는 `added-templates.md` 코드를 넣는다(갤러리·키트 속 그림은 모양 확인용).
+`bsv-qqq-lecture-scenario`의 SLIDES.md(실습형 연수)를 위해 추가. 코드·스키마는 `added-templates.md` 8~18절, SLIDES.md 읽기는 `scenario-input.md`. 15번 `before-after-panel`도 같은 묶음에서 구현됐다(11절). 이 넷과 15번은 복사 버튼·이미지 상태가 있는 **React 템플릿**이라 모션 키트 `QQQ.mount(n)`로 그리지 않는다 — 덱에는 `added-templates.md` 코드를 넣는다(갤러리·키트 속 그림은 모양 확인용).
 
 | # | type | 이름 | 언제 쓰나 | 비고 |
 |---|---|---|---|---|
@@ -185,12 +185,13 @@ PowerPoint 기본 차트를 옮겨온 것. `요청시` 표시는 발표 화면�
 | 86 | `command-box` | CommandBox | 설치·실행 명령 한 줄 + 복사 버튼 | NEW · 시나리오의 `NEW command-box`로 추가 |
 | 87 | `command-list` | CommandList | 2–4 labelled commands in order, one copy button per line (e.g. winget lines, then CLI installs) | NEW · `added-templates.md` section 13 |
 | 88 | `capture-compare` | CaptureCompare | 2–3 real result captures, one row each: label + note, before image → after image; click or Enter enlarges the pair | NEW · `added-templates.md` section 14 |
+| 89 | `outcome-cards` | OutcomeCards | 2–4 learning outcomes ("by the end you will…"), each a drawn mini-visual (`folder-sort`, `mini-dashboard`, `doc-year-flip`, `checklist`, `icon`) + label + desc | NEW · `added-templates.md` section 18 (uses the kinetic type kit, section 15) |
 
 ---
 
 ## 사용 흐름
 
-1. 사용자가 번호로 지시 → 이 표에서 `type`·이름·용도 확인. (다음 새 번호는 89.)
+1. 사용자가 번호로 지시 → 이 표에서 `type`·이름·용도 확인. (다음 새 번호는 90.)
 2. SmartArt 계열은 `visual-component-library.md`, 차트 계열은 `chart-components.md`에서 상세 규격(SVG 패턴·등장 순서) 확인.
 3. `요청시` 항목을 고르면, 더 읽기 쉬운 대안(비고에 적힌 번호)을 **한 번 안내한 뒤** 사용자가 그대로 원하면 그 번호로 만든다.
 4. 모든 컴포넌트는 Modern Glassy Light 토큰(`design-and-readability.md`)과 spring-pop 등장, 24px+ 글자 규칙을 따른다.
