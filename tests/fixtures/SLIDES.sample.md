@@ -193,3 +193,25 @@
   - items.2.command: npm install -g @anthropic-ai/claude-code
   - hint: Paste each line into cmd and press Enter
 - notes: command-list reader test
+
+## S14 · 전후 캡처
+- title: Dates move with the **weekday**
+- composition: 비교
+- component: NEW capture-compare
+- theme: light
+- slots:
+  - cases.0.label: Date and **weekday**
+  - cases.0.before: assets/case-a-before.png
+  - cases.0.after: assets/case-a-after.png
+  - cases.0.note: 3rd Tuesday stays 3rd Tuesday
+  - cases.0.alt: Left, last year's deadline in a red box. Right, the new date on the same line.
+  - cases.1.label: Linked dates
+  - cases.1.before: assets/case-b-before.png
+  - cases.1.after: [강사 캡처 예정]
+  - cases.1.note: The next day moves too
+  - cases.1.alt: A note line where both dates moved by the same number of days.
+  - caption: Real results, cropped
+- new_component:
+  - purpose: 2-3 before/after capture pairs, one row each
+  - slots: cases.N.label, cases.N.before, cases.N.after, cases.N.note, cases.N.alt, caption
+- notes: capture-compare reader test (synthetic paths, no real images)

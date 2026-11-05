@@ -1,6 +1,6 @@
-# 추가 템플릿 13종 (복붙용 스펙)
+# 추가 템플릿 14종 (복붙용 스펙)
 
-`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`), plus 13 `command-list` (multi-line command copy). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
+`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`), plus 13 `command-list` (multi-line command copy) and 14 `capture-compare` (before → after capture pairs with enlarge). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
 
 전제 헬퍼(생성기 본문에 이미 있는 것):
 ```js
@@ -365,7 +365,7 @@ function PromptBox({s,step}){
 ## 9. `screenshot-slot` — 결과 캡처 자리 (번호 84)
 **언제**: "이렇게 나옵니다" 같은 **결과 화면 캡처**를 보여 줄 때. `image`가 비어 있으면 **점선 자리 표시 틀**(🖼️ + `캡처 화면을 넣으세요` + `alt`에 적은 "무슨 화면인지")을 그려 강사가 나중에 캡처를 넣게 한다. 경로가 깨져도(`onError`) 같은 틀로 돌아간다.
 
-- `image`: 덱 HTML 기준 상대 경로(`img/s07-result.png`, 시나리오가 준 파일 이름 `실습1-결과.png` 그대로) 또는 `data:` URI. 편집기의 `image` 칸에 경로를 넣으면 바로 바뀐다. 비어 있거나 `[강사 캡처 예정]`처럼 **대괄호로 감싼 표시**면 자리 표시 틀을 그린다.
+- `image`: 덱 HTML 기준 상대 경로(`img/s07-result.png`, 시나리오가 준 파일 이름 `실습1-결과.png` 그대로) 또는 `data:` URI. Rendered through `imgSrc()` (section 14), so an image embedded in `<template id="qqq-images">` under the same path is used first (one-file offline deck). 편집기의 `image` 칸에 경로를 넣으면 바로 바뀐다. 비어 있거나 `[강사 캡처 예정]`처럼 **대괄호로 감싼 표시**면 자리 표시 틀을 그린다.
 - `alt`: 이미지 대체 텍스트이자, 비어 있을 때 틀 안에 보이는 "넣을 화면 설명". 시나리오가 준 문구 그대로.
 - 이미지는 `object-fit:contain`으로 비율 유지, 최대 1040×(캡션 있으면 520, 없으면 590)px. 의미 없는 장식 이미지 금지 규칙은 그대로 — **결과·화면 증거**에만 쓴다. 영상이 있으면 `video`가 우선.
 
@@ -389,7 +389,7 @@ function ScreenshotSlot({s,step}){
       <MI show={vF(0,step)} className="t-title" style={{marginBottom:22}}>{hl(s.title)}</MI>
       <MI show={vF(1,step)} className={has?"glass qqq-shot":"qqq-shot-empty"} style={has?{padding:12,display:"inline-flex"}:{width:960,height:Math.min(540,maxH)}}>
         {has
-          ? <img src={s.image} alt={s.alt||""} onError={()=>setBroken(true)}
+          ? <img src={imgSrc(s.image)} alt={s.alt||""} onError={()=>setBroken(true)}
               style={{display:"block",maxWidth:1016,maxHeight:maxH-24,width:"auto",height:"auto",objectFit:"contain",borderRadius:12}}/>
           : <div role="img" aria-label={s.alt||QQQ_UI.shotEmpty} style={{display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:14,height:"100%",padding:"0 40px"}}>
               <Idle kind="float" style={{fontSize:72}}>🖼️</Idle>
@@ -582,7 +582,129 @@ function CommandList({s,step}){
 
 ---
 
-## 8~13 공용 CSS (덱 `<style>`에 추가)
+## 14. `capture-compare` — before → after capture pairs (No. 88)
+**When**: 2–3 real result captures, each shown as a pair: the capture before the change → the capture after it. One row per case: a label and a one-line note, then the before image, an arrow and the after image. One whole-screen capture stays `screenshot-slot` (9). Text-only before/after lists stay `before-after-panel` (11). Requested by the scenario as `component: NEW capture-compare` (slots: `title`·`cases.N.label`·`cases.N.before`·`cases.N.after`·`cases.N.note`·`cases.N.alt`·`caption`).
+
+- `before`/`after` are image paths relative to the deck HTML (the scenario's `assets/…` names, kept as written) or `data:` URIs. `imgSrc()` (below) first looks for an embedded copy, so a one-file offline deck keeps the scenario paths in its data: put each image in `<template id="qqq-images"><img data-src="assets/x.png" src="data:image/png;base64,…"></template>` in `<body>`. A `<template>` is a DOM element, so the built-in editor's save keeps it. `screenshot-slot` uses the same `imgSrc()`.
+- Each row is a glass card. The before cell has a rose border, the after cell a blue border, with the arrow between them (the same colour code as `before-after-panel`). Images keep their aspect ratio inside a 456×120 cell. Small strips are scaled up to 2× at most, so thin crops stay readable without blurring. A missing or broken image shows a dashed cell with `QQQ_UI.shotEmpty`.
+- **Enlarge**: the whole pair is one `<button>`. A click, or Tab then Enter/Space, opens a full-viewport dialog (`ReactDOM.createPortal` to `document.body`, so the canvas scale does not shrink it). The dialog shows the label, the before image, ↓, the after image and the note, each image up to about 40vh. Esc, a click anywhere or the `✕ Esc` button closes it, and focus goes back to the pair. While it is open, a capture-phase key listener stops the slide navigation keys. Clicks inside call `stopPropagation()`, so neither the stage click nor the portal's React bubbling moves the slide.
+- `alt` is the button's accessible name, after the label (`label — alt`). It is not drawn on the slide. The images inside the button use `alt=""`, so screen readers do not read the case twice. `label`, `note`, `title` and `caption` go through `hl()`.
+- Text: label 28px, note 26px, the dialog's label 30px, note 26px and close button 24px. Rows: 3 cases fit in 792px with the title and caption. 4 or more cases: split the slide in the scenario (the reader warns outside 2–3).
+- No new UI strings: the component reuses `QQQ_UI.shotEmpty`. The close button is the symbol `✕` and the key name `Esc`. Needs `QQQ_UI` from section 8.
+
+Data:
+```js
+{ id, type:"capture-compare", theme:"light", eyebrow, title:"Dates move with the *weekday*",
+  cases:[
+    { label:"Date and weekday", before:"assets/case-a-before.png", after:"assets/case-a-after.png",
+      note:"3rd Tuesday stays 3rd Tuesday", alt:"Left: last year's deadline boxed in red. Right: this year's date on the same line." },
+    { label:"Linked dates", before:"assets/case-b-before.png", after:"assets/case-b-after.png", note:"The next day moves too", alt:"…" },
+  ],
+  caption, builds:["title","c0","c1","caption"] }   // one "c<n>" per case; caption only when present
+```
+```jsx
+// Embedded image lookup (shared with screenshot-slot): <template id="qqq-images"><img data-src="assets/x.png" src="data:…"></template>
+const QQQ_IMAGES = (() => { const o = {}; try {
+  const t = document.getElementById("qqq-images");
+  if (t) t.content.querySelectorAll("img[data-src]").forEach(im => { o[im.dataset.src] = im.getAttribute("src"); });
+} catch (e) {} return o; })();
+const imgSrc = p => { const k = String(p || "").trim(); return QQQ_IMAGES[k] || k; };
+const isShot = p => { const k = String(p || "").trim(); return !!k && !/^\[.*\]$/.test(k); };   // "[강사 캡처 예정]" = empty
+const CC_W = 456, CC_H = 120, CC_UP = 2;           // image box inside a cell; max upscale for thin strips
+
+function CaptureCell({ src, tone }) {
+  const [nat, setNat] = React.useState(null);
+  const [broken, setBroken] = React.useState(false);
+  React.useEffect(() => { setNat(null); setBroken(false); }, [src]);
+  const ok = isShot(src) && !broken;
+  const k = nat ? Math.min(CC_UP, CC_W / nat.w, CC_H / nat.h) : 1;
+  return (
+    <div className={"qqq-cc-cell " + (tone === "before" ? "is-before" : "is-after")}>
+      {ok
+        ? <img src={imgSrc(src)} alt="" draggable="false" onError={() => setBroken(true)}
+            onLoad={e => setNat({ w: e.currentTarget.naturalWidth || 1, h: e.currentTarget.naturalHeight || 1 })}
+            style={nat ? { width: Math.round(nat.w * k), height: Math.round(nat.h * k) } : { maxWidth: CC_W, maxHeight: CC_H }}/>
+        : <span className="qqq-cc-miss"><span aria-hidden="true">🖼️</span> {QQQ_UI.shotEmpty}</span>}
+    </div>
+  );
+}
+
+function CaptureZoom({ c, onClose }) {
+  const closeRef = React.useRef(null);
+  React.useEffect(() => {
+    const onKey = e => {                      // capture phase: runs before the deck's key navigation
+      e.stopPropagation();
+      if (e.key === "Escape" || e.key === "Enter" || e.key === " ") { e.preventDefault(); onClose(); }
+      else if (e.key !== "Tab") e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey, true);
+    if (closeRef.current) closeRef.current.focus();
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [onClose]);
+  const shot = p => isShot(p) ? <img src={imgSrc(p)} alt="" className="qqq-cc-zimg"/> : <span className="qqq-cc-miss">{QQQ_UI.shotEmpty}</span>;
+  const name = String(c.label || "").replace(/[*~_]/g, "");
+  return ReactDOM.createPortal(
+    <div className="qqq-cc-zoom" role="dialog" aria-modal="true" aria-label={name}
+      onClick={e => { e.stopPropagation(); onClose(); }} onMouseDown={stopNav} onTouchStart={stopNav} onTouchEnd={stopNav}>
+      <div className="qqq-cc-zhead">
+        <span className="qqq-cc-zlabel">{hl(c.label || "")}</span>
+        <button type="button" ref={closeRef} className="qqq-copy" onClick={e => { e.stopPropagation(); onClose(); }}>✕ Esc</button>
+      </div>
+      <div className="qqq-cc-zpair">
+        <div className="qqq-cc-zbox is-before">{shot(c.before)}</div>
+        <div className="qqq-cc-zarrow" aria-hidden="true">↓</div>
+        <div className="qqq-cc-zbox is-after">{shot(c.after)}</div>
+      </div>
+      {c.note && <div className="qqq-cc-znote">{hl(c.note)}</div>}
+    </div>, document.body);
+}
+
+function CaptureRow({ c, show }) {
+  const [open, setOpen] = React.useState(false);
+  const btnRef = React.useRef(null);
+  const close = React.useCallback(() => { setOpen(false); setTimeout(() => btnRef.current && btnRef.current.focus(), 0); }, []);
+  const name = [c.label, c.alt].filter(Boolean).map(x => String(x).replace(/[*~_]/g, "")).join(" — ");
+  return (
+    <MI show={show} className="glass qqq-cc-row" style={{ width: "100%", padding: "12px 18px 14px", textAlign: "left" }}>
+      <div className="qqq-cc-head">
+        <span className="t-label qqq-cc-label">{hl(c.label || "")}</span>
+        {c.note && <span className="t-body qqq-cc-note">{hl(c.note)}</span>}
+      </div>
+      <button type="button" ref={btnRef} className="qqq-cc-pair" aria-label={name} aria-haspopup="dialog"
+        onClick={e => { e.stopPropagation(); setOpen(true); }}
+        onKeyDown={e => { if (e.key === " " || e.key === "Enter") e.stopPropagation(); }}>
+        <CaptureCell src={c.before} tone="before"/>
+        <svg className="qqq-cc-arrow" width="48" height="40" viewBox="0 0 48 40" aria-hidden="true">
+          <defs><linearGradient id="cc-arrow" gradientUnits="userSpaceOnUse" x1="4" y1="20" x2="44" y2="20"><stop offset="0" stopColor="#F43F5E"/><stop offset="1" stopColor="#3B82F6"/></linearGradient></defs>
+          <path d="M4 20 H38" stroke="url(#cc-arrow)" strokeWidth="7" strokeLinecap="round" fill="none"/>
+          <path d="M28 8 L42 20 L28 32" stroke="#3B82F6" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+        </svg>
+        <CaptureCell src={c.after} tone="after"/>
+      </button>
+      {open && <CaptureZoom c={c} onClose={close}/>}
+    </MI>
+  );
+}
+
+function CaptureCompare({s,step}){
+  const cases = s.cases || [];
+  const n = cases.length;
+  return (
+    <div className="box">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      <MI show={vF(0,step)} className="t-title" style={{marginBottom:22}}>{hl(s.title)}</MI>
+      <div style={{display:"flex",flexDirection:"column",gap:12,width:"100%",maxWidth:1056}}>
+        {cases.map((c,i)=><CaptureRow key={i} c={c||{}} show={vF(1+i,step)}/>)}
+      </div>
+      {s.caption && <MI show={vF(1+n,step)} className="t-cap" style={{marginTop:18}}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+```
+
+---
+
+## 8~14 공용 CSS (덱 `<style>`에 추가)
 ```css
 /* prompt-box */
 .qqq-prompt-pre{ margin:0; font-size:24px; line-height:1.6; font-weight:600; white-space:pre-wrap; word-break:break-word;
@@ -614,6 +736,34 @@ function CommandList({s,step}){
 .qqq-cmdl-dense .qqq-cmdl-code{ white-space:pre; overflow-wrap:normal; max-height:none; overflow-x:auto; overflow-y:hidden; }
 .qqq-cmdl-code::-webkit-scrollbar{ width:10px; height:10px; }
 .qqq-cmdl-code::-webkit-scrollbar-thumb{ background:rgba(59,130,246,.45); border-radius:8px; }
+/* capture-compare (uses .qqq-copy above for the close button) */
+.qqq-cc-head{ display:flex; align-items:baseline; gap:18px; margin-bottom:8px; flex-wrap:wrap; }
+.qqq-cc-label{ font-size:28px; font-weight:900; color:var(--blue); }
+.qqq-cc-note{ font-size:26px; font-weight:700; line-height:1.35; }
+.qqq-cc-pair{ display:grid; grid-template-columns:1fr 48px 1fr; align-items:center; gap:12px; width:100%; padding:0; margin:0;
+  border:0; background:transparent; cursor:zoom-in; font:inherit; color:inherit; border-radius:14px; }
+.qqq-cc-pair:focus-visible{ outline:4px solid var(--blue); outline-offset:4px; }
+.qqq-cc-cell{ height:132px; display:flex; align-items:center; justify-content:center; padding:6px; border-radius:12px;
+  background:#fff; border:3px solid; overflow:hidden; transition:transform .2s ease, box-shadow .2s ease; }
+.qqq-cc-cell.is-before{ border-color:rgba(244,63,94,.7); }
+.qqq-cc-cell.is-after{ border-color:rgba(59,130,246,.75); }
+.qqq-cc-pair:hover .qqq-cc-cell{ transform:translateY(-3px); box-shadow:0 10px 24px rgba(59,130,246,.22); }
+.qqq-cc-cell img{ display:block; object-fit:contain; image-rendering:auto; }
+.qqq-cc-arrow{ justify-self:center; }
+.qqq-cc-miss{ font-size:24px; font-weight:800; color:#3B82F6; }
+.qqq-cc-zoom{ position:fixed; inset:0; z-index:40; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  padding:3vh 4vw; background:rgba(15,23,42,.86); cursor:zoom-out; color:#fff;
+  font-family:"Pretendard","Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif; }
+.qqq-cc-zhead{ display:flex; align-items:center; gap:24px; width:100%; max-width:92vw; justify-content:space-between; }
+.qqq-cc-zlabel{ font-size:30px; font-weight:900; color:#fff; }
+.qqq-cc-zlabel span{ color:#7AB8FF !important; -webkit-text-fill-color:#7AB8FF !important; }
+.qqq-cc-zpair{ display:flex; flex-direction:column; align-items:center; gap:8px; min-height:0; }
+.qqq-cc-zbox{ background:#fff; border-radius:14px; padding:8px; border:4px solid; display:flex; }
+.qqq-cc-zbox.is-before{ border-color:#F43F5E; }
+.qqq-cc-zbox.is-after{ border-color:#3B82F6; }
+.qqq-cc-zimg{ display:block; max-width:90vw; max-height:36vh; width:auto; height:auto; object-fit:contain; }
+.qqq-cc-zarrow{ font-size:36px; font-weight:900; line-height:1; color:#7AB8FF; }
+.qqq-cc-znote{ font-size:26px; font-weight:700; color:#E2E8F0; text-align:center; }
 /* screenshot-slot */
 .qqq-shot-empty{ display:block; border:4px dashed rgba(59,130,246,.45); border-radius:22px; background:rgba(255,255,255,.35);
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
@@ -648,10 +798,11 @@ case "pink-reversal":      return <PinkReversal s={s} step={step}/>;
 case "before-after-panel": return <BeforeAfterPanel s={s} step={step}/>;
 case "command-box":        return <CommandBox s={s} step={step}/>;
 case "command-list":       return <CommandList s={s} step={step}/>;
+case "capture-compare":    return <CaptureCompare s={s} step={step}/>;
 ```
 
 ## 다크/핑크 테마 메모
 - 다 light/dark/bling 모두에서 동작(글자색·glass는 테마 CSS가 처리). 단 `platforms`/`keymsg`의 칩 배경이 옅은 블루라 다크에서 약하면 칩 배경을 `rgba(255,255,255,.08)`로.
 - 섹션 전환·강조 한 장은 dark, "그러나/반전" 한 장은 `pink-reversal`(항상 bling 핑크)로 쓰면 리듬이 산다.
-- **bling 배경은 위 "8~12 공용 CSS"의 `.app-wrap.theme-bling`이 정의한다**(예전엔 오로라·블롭·✨만 있고 배경 그라디언트가 없었다). 다른 type에 `theme:"bling"`을 줘도 같은 핑크 배경·강조색이 된다.
-- `prompt-box`·`command-box`·`screenshot-slot`·`before-after-panel`은 light/dark 모두 확인했다. `command-list` was checked in light and dark at 1920×1080 and 1280×720. 다크에선 프롬프트 상자·자리 표시 틀이 투명 톤으로 바뀐다(공용 CSS의 `.theme-dark` 줄).
+- **bling 배경은 위 "8~14 공용 CSS"의 `.app-wrap.theme-bling`이 정의한다**(예전엔 오로라·블롭·✨만 있고 배경 그라디언트가 없었다). 다른 type에 `theme:"bling"`을 줘도 같은 핑크 배경·강조색이 된다.
+- `prompt-box`·`command-box`·`screenshot-slot`·`before-after-panel`은 light/dark 모두 확인했다. `command-list` was checked in light and dark at 1920×1080 and 1280×720. `capture-compare` was checked in light at 1920×1080 and 1280×720 (rows, enlarge dialog, keyboard open and close). 다크에선 프롬프트 상자·자리 표시 틀이 투명 톤으로 바뀐다(공용 CSS의 `.theme-dark` 줄).

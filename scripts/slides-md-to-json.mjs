@@ -18,6 +18,7 @@ export const KNOWN_TYPES = new Set([
   "table-slide", "keyword-cluster", "video",
   "reproduce", "platforms", "reasons", "keymsg", "versus", "bridge", "tradeoff",
   "prompt-box", "screenshot-slot", "pink-reversal", "before-after-panel", "command-box", "command-list",
+  "capture-compare",
 ]);
 
 // Template code (75~81) passes these fields through hl() without a guard; an absent value would
@@ -70,6 +71,7 @@ export function buildsFor(s) {
     case "before-after-panel": return ["title", "before", "arrow", "after", ...cap];
     case "command-box": return ["title", "box", ...opt(s.hint, "hint"), ...cap];
     case "command-list": return ["title", ...(s.items || []).map((_, i) => "i" + i), ...opt(s.hint, "hint"), ...cap];
+    case "capture-compare": return ["title", ...(s.cases || []).map((_, i) => "c" + i), ...cap];
     default: return []; // NEW type: the new template defines its own builds
   }
 }
@@ -183,7 +185,9 @@ export function parseSlidesMd(text) {
       // prompt-box prompt, command-box command, command-list items.N.command: copied byte-for-byte
       const isRaw = path === "prompt" || leaf === "command";
       let v = isRaw ? val : screenText(val);
-      if (!isRaw && /^\[강사/.test(v.trim()) && path !== "image")
+      // image slots may hold the "[강사 캡처 예정]" placeholder (screenshot-slot image, capture-compare cases.N.before/after)
+      const isImageSlot = path === "image" || (comp === "capture-compare" && (leaf === "before" || leaf === "after"));
+      if (!isRaw && /^\[강사/.test(v.trim()) && !isImageSlot)
         report.warnings.push(`${raw.id}: lecturer marker on screen slot "${path}"`);
       setPath(s, path, isRaw ? v : coerce(leaf, v));
     }
@@ -194,6 +198,14 @@ export function parseSlidesMd(text) {
       if (n < 2 || n > 4) report.warnings.push(`${raw.id}: command-list has ${n} items (expected 2-4)`);
       (s.items || []).forEach((it, i) => {
         if (!it || typeof it !== "object" || !String(it.command || "").trim()) report.warnings.push(`${raw.id}: command-list items.${i}.command missing`);
+      });
+    }
+    if (comp === "capture-compare") {
+      const n = len(s.cases);
+      if (n < 2 || n > 3) report.warnings.push(`${raw.id}: capture-compare has ${n} cases (expected 2-3)`);
+      (s.cases || []).forEach((c, i) => {
+        for (const k of ["label", "before", "after"])
+          if (!c || typeof c !== "object" || !String(c[k] || "").trim()) report.warnings.push(`${raw.id}: capture-compare cases.${i}.${k} missing`);
       });
     }
     if (r.skip_if_short === "true") s.skipIfShort = true;

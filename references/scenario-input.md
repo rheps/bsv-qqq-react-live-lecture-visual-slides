@@ -59,7 +59,7 @@ node scripts/slides-md-to-json.mjs path/to/SLIDES.md --slides   # slides 배열�
 
 값 변환: `true`/`false` → 불리언, `value`·`start`·`end`·`side`·`fontScale`의 숫자 → number. 나머지는 문자열.
 
-`slots.image`가 `[강사 캡처 예정]`처럼 **대괄호 표시**면 `screenshot-slot`이 자리 표시 틀을 그린다. 파일 이름(`결과-안내문.png`)은 덱 HTML과 같은 폴더 기준 상대 경로로 그대로 둔다.
+`slots.image`가 `[강사 캡처 예정]`처럼 **대괄호 표시**면 `screenshot-slot`이 자리 표시 틀을 그린다(`capture-compare`의 `cases.N.before`/`after`도 같다). 파일 이름(`결과-안내문.png`)은 덱 HTML과 같은 폴더 기준 상대 경로로 그대로 둔다.
 
 ## 4. type별 필드 이름 (계약 이름 → QQQ prop)
 
@@ -91,12 +91,13 @@ node scripts/slides-md-to-json.mjs path/to/SLIDES.md --slides   # slides 배열�
 | `before-after-panel` | `before.label`, `before.items.N`, `after.label`, `after.items.N`, `caption` | 같음 | |
 | `command-box` | `command`, `hint`, `caption` | 같음 | `command`는 원문 그대로 복사 |
 | `command-list` | `items.N.label`, `items.N.command`, `hint`, `caption` | `items[N].label`, `items[N].command`, `hint`, `caption` | 2–4 items (the reader warns otherwise). Each `command` is copied byte for byte; `label` gets marker conversion |
+| `capture-compare` | `cases.N.label`, `cases.N.before`, `cases.N.after`, `cases.N.note`, `cases.N.alt`, `caption` | `cases[N].label`, `cases[N].before`, `cases[N].after`, `cases[N].note`, `cases[N].alt`, `caption` | 2–3 cases (the reader warns otherwise, and when `label`, `before` or `after` is empty). `before`/`after` are image paths kept as written (`assets/…`); a `[강사 …]` placeholder there is allowed like `screenshot-slot.image`. builds: `title`, `c0`…, `caption` |
 
 공통 선택 칸: `eyebrow`, `emoji`, `caption`. 이름이 둘 다 오면(`label`과 `eyebrow`) 정식 이름 쪽을 남기고 경고한다.
 
 ## 5. `component: NEW <name>` — 새 컴포넌트를 먼저 만든다
 
-1. 보고서 `newComponents`에서 `type`·`purpose`·`slots`를 읽는다. `alreadyImplemented:true`면(예: `command-box`) 이미 추가된 것이니 그대로 쓴다.
+1. 보고서 `newComponents`에서 `type`·`purpose`·`slots`를 읽는다. `alreadyImplemented:true`면(예: `command-box`, `capture-compare`) 이미 추가된 것이니 그대로 쓴다.
 2. 없으면 **QQQ 저장소 원본**(`C:\AI\bsv-qqq-react-live-lecture-visual-slides`)에 추가한다. 설치본만 고치지 않는다.
    - `references/added-templates.md`에 새 절: 언제 쓰나 + 데이터 스키마(시나리오 slots 이름 그대로) + 모듈 레벨 컴포넌트 코드(`hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`, 글자 24px+, FM 등장/비텍스트만 idle) + `Slide` 스위치 `case`.
    - `references/component-registry.md`에 다음 번호로 등록, `component-gallery.html`에 축소 그림 추가, `component-selection-rules.md` intent 표에 한 줄.

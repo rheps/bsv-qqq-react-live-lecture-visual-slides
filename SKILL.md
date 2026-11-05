@@ -78,7 +78,7 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 
 - **내용을 다시 쓰지 않는다.** 장 순서·개수·type·theme·화면 글·notes를 그대로 옮긴다. 바꾸는 것은 표기뿐(`**x**`→`*x*`, 백틱 제거, 글자 그대로의 `\n`→줄바꿈). 24px로 안 들어가는 글은 고치지 말고 사용자에게 알린다.
 - 변환: `node scripts/slides-md-to-json.mjs SLIDES.md --slides` → 결과를 `const slides=`에 넣는다. 경고(`warnings`)를 먼저 본다.
-- **`component: NEW <name>`이 있으면 덱보다 먼저 그 컴포넌트를 QQQ에 추가**한다(added-templates 코드 + registry 번호 + 갤러리 + 리더 `KNOWN_TYPES`, 시험 렌더, 커밋, 설치본 동기화). `command-box`·`command-list`는 이미 추가됨.
+- **`component: NEW <name>`이 있으면 덱보다 먼저 그 컴포넌트를 QQQ에 추가**한다(added-templates 코드 + registry 번호 + 갤러리 + 리더 `KNOWN_TYPES`, 시험 렌더, 커밋, 설치본 동기화). `command-box`·`command-list`·`capture-compare`는 이미 추가됨.
 - 필드 대응표·NEW 절차·리더 점검은 `references/scenario-input.md`.
 
 ## 작업 순서
@@ -120,7 +120,7 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 - `bridge` — A →(라벨)→ B + 설명 카드. "A에서 B로, *무엇 때문에* 바뀌었나"의 원동력을 화살표에 얹고 아래에 용어/배경 설명. `flow`의 설명-카드 변형.
 - `tradeoff` — 단점 N + 큰 장점 1. "불편하지만 그래도 쓰는 이유" — 단점 카드(로즈) + 장점 카드(블루·넓게)로 결론을 더 크게. `pros-cons` 강조형.
 
-강의 시나리오용 템플릿 (코드·스키마는 같은 `references/added-templates.md` 8~13절):
+강의 시나리오용 템플릿 (코드·스키마는 같은 `references/added-templates.md` 8~14절):
 
 - `prompt-box` (83) — 실습 프롬프트 **전문 + 복사 버튼**. 긴 글은 상자 안에서만 스크롤(24px 유지). "본문 3줄" 규칙의 예외(복사할 재료). `prompt`는 `hl()` 비통과·원문 그대로.
 - `screenshot-slot` (84) — 결과 캡처 자리. `image`가 비었거나 `[강사 캡처 예정]`이면 점선 자리 표시 틀(+`alt` 설명).
@@ -128,13 +128,14 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 - `before-after-panel` (15) — 왼쪽 로즈(전) → 화살표 → 오른쪽 블루(후), 쪽마다 항목 2~4개.
 - `command-box` (86) — 설치·실행 명령 한 줄 + 복사 버튼(긴 명령은 가로 스크롤). `prompt-box`와 복사 코드 공유.
 - `command-list` (87) — 2–4 labelled commands in order (e.g. Windows cmd: winget lines, then CLI installs), one copy button per line. Long commands wrap, then scroll inside the row. Shares `useCopy` and the copy labels.
+- `capture-compare` (88) — 2–3 real result captures, one row each: label + note, before image → after image. Click or Tab+Enter opens the pair full-screen (Esc closes). Images resolve through `imgSrc()`, which prefers copies embedded in `<template id="qqq-images">` (one-file offline deck).
 
 ## 번호로 컴포넌트 고르기
 
 사용자가 **"23번으로 해줘", "62번 차트 써줘"처럼 번호로 지시**하면:
 
-- `references/component-registry.md` — **모든 컴포넌트(1~87)에 번호를 매긴 단일 기준표.** 번호 → `type`·이름·용도를 여기서 찾는다. (75~81·83~87과 15번 `before-after-panel`의 코드는 `references/added-templates.md`.)
-- `component-gallery.html` — 스킬 폴더의 **번호별 시각 카탈로그**(브라우저로 열면 1~74·82~87이 그려져 있음 — 75~81은 아직 갤러리 미수록, `added-templates.md` 참고). 사용자가 눈으로 보고 번호를 고르는 화면이며, 각 번호 카드 안에 **그대로 가져다 쓸 SVG/HTML 예시**가 들어 있다. **각 컴포넌트는 갤러리에서 짧은 루프 영상처럼 움직인다**(톱니 회전·선 위 흐르는 점·저울 흔들림·막대 자람·파이 순차 등). 이 움직임을 실제 슬라이드에도 1:1로 넣는 법은 아래 **"번호 컴포넌트는 '움직이는' 채로 만든다"** 항목과 `references/component-motion.md` 참고.
+- `references/component-registry.md` — **모든 컴포넌트(1~88)에 번호를 매긴 단일 기준표.** 번호 → `type`·이름·용도를 여기서 찾는다. (75~81·83~88과 15번 `before-after-panel`의 코드는 `references/added-templates.md`.)
+- `component-gallery.html` — 스킬 폴더의 **번호별 시각 카탈로그**(브라우저로 열면 1~74·82~88이 그려져 있음 — 75~81은 아직 갤러리 미수록, `added-templates.md` 참고). 사용자가 눈으로 보고 번호를 고르는 화면이며, 각 번호 카드 안에 **그대로 가져다 쓸 SVG/HTML 예시**가 들어 있다. **각 컴포넌트는 갤러리에서 짧은 루프 영상처럼 움직인다**(톱니 회전·선 위 흐르는 점·저울 흔들림·막대 자람·파이 순차 등). 이 움직임을 실제 슬라이드에도 1:1로 넣는 법은 아래 **"번호 컴포넌트는 '움직이는' 채로 만든다"** 항목과 `references/component-motion.md` 참고.
 - `요청시` 표시 컴포넌트(파이 60·도넛 61·레이더 62·버블 64·복합 69)는 발표 가독성 때문에 기본 추천에선 빠진다. 번호로 직접 고르면 **더 잘 읽히는 대안을 한 번 안내한 뒤** 사용자가 그대로 원하면 그 번호로 만든다.
 
 ## 번호 컴포넌트는 '움직이는' 채로 만든다 — 모션 키트 필수
@@ -153,11 +154,11 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 ## 세부 규칙은 references/에서
 
 - `references/scenario-input.md` — **BRIEF.md·SLIDES.md 읽기 규칙.** 키→필드 대응, 계약 slot 이름→QQQ prop 대응표, `NEW` 컴포넌트 추가 절차. 변환 도구 `scripts/slides-md-to-json.mjs`.
-- `references/component-registry.md` — **번호(1~87) ↔ 컴포넌트 기준표.** "n번으로 해줘"를 해석할 때 본다. 시각 카탈로그는 `component-gallery.html`(1~74·82~87), 75~81·83~87 코드는 `added-templates.md`.
+- `references/component-registry.md` — **번호(1~88) ↔ 컴포넌트 기준표.** "n번으로 해줘"를 해석할 때 본다. 시각 카탈로그는 `component-gallery.html`(1~74·82~88), 75~81·83~88 코드는 `added-templates.md`.
 - `references/component-motion.md` — **번호 컴포넌트를 갤러리처럼 '움직이게' 만드는 모션 키트(`qqq-component-kit.js`) 사용법.** `QQQ.mount(n, el)` · React 글루(`GalleryComponent`) · Framer Motion 공존 · reduced-motion · 번호별 시그니처 모션표 · `build-kit.js` 재생성. **시각 컴포넌트를 슬라이드에 넣을 때 반드시 본다.**
 - `references/structure-catalog.md` — **내용 모양 → 실제 구현된 구조 14개 매핑(STEP 0).** 카드로 뭉개지 않도록 구조를 끄집어낼 때 먼저 본다.
 - `references/trinity-template.md` — **`trinity`(삼위일체 삼각형) 전용 스펙.** 데이터 스키마 + 좌표 + 전체 컴포넌트 코드(복붙용) + 등장 순서.
-- `references/added-templates.md` — **추가 템플릿 13종**(`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff` + `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`·`command-list`) 데이터 스키마 + 컴포넌트 코드(복붙용) + 빌드 인덱스 + 공용 CSS(bling 배경 포함).
+- `references/added-templates.md` — **추가 템플릿 14종**(`reproduce`·`platforms`·`reasons`·`keymsg`·`versus`·`bridge`·`tradeoff` + `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`·`command-list`·`capture-compare`) 데이터 스키마 + 컴포넌트 코드(복붙용) + 빌드 인덱스 + 공용 CSS(bling 배경 포함).
 - `references/component-selection-rules.md` — **가장 먼저 읽는다.** 3-layer 모델, intent 선택표, 단조로움 방지
 - `references/visual-component-library.md` — 시각 컴포넌트 전체 목록
 - `references/chart-components.md` — SVG/CSS 차트 가이드
@@ -198,7 +199,7 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 27. **Eyebrow 밑줄형(6px) / 다크=밤하늘**: 제목 위 라벨이 양옆 줄·알약이 아니라 밑줄형(밑줄 6px)인가? 다크가 검정에 가깝고(가장자리) **은하수가 또렷**하고 별·별똥별(16~20개)이 자주 떨어지며 중앙 burst는 없는가? **다크 글래스 카드가 투명해 밤하늘이 카드 뒤로 비치는가?** (`motion-theme-upgrades.md` 5·6·7·8번)
 28. **모핑 기본 ON**: Eyebrow가 슬라이드 넘김에 이어지며 변형되고, 전환이 변형 없는 크로스페이드(`STAGE_FADE`)인가? (`motion-theme-upgrades.md` 2번)
 29. **복사 상자(`prompt-box`·`command-box`·`command-list`)**: 버튼을 누르면 클립보드에 원문이 그대로 들어가고 `복사됨`이 뜨는가? 버튼·상자 클릭이 슬라이드를 넘기지 않는가? 긴 프롬프트가 글자를 줄이지 않고 상자 안에서 스크롤되는가?
-30. **`screenshot-slot`**: 이미지가 비었거나 경로가 깨져도 자리 표시 틀이 보이는가? 이미지는 비율을 지키며 캔버스 안에 들어가는가?
+30. **`screenshot-slot`**: 이미지가 비었거나 경로가 깨져도 자리 표시 틀이 보이는가? 이미지는 비율을 지키며 캔버스 안에 들어가는가? **`capture-compare`**: each row shows label, note, before → after; click and Tab+Enter open the enlarged pair, Esc closes it, and neither moves the slide.
 31. **`pink-reversal`**: theme이 `bling`(강한 핑크 배경)으로 그려지는가? 반전 뒤 핵심이 hero 제목인가?
 32. **시나리오 덱**: SLIDES.md의 장 수·순서·type·화면 글·notes가 그대로 옮겨졌는가(리더 경고 0건 또는 사용자에게 보고)?
 
