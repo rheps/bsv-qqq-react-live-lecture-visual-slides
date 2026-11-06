@@ -4,29 +4,24 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>qqq-live 컴포넌트 카탈로그 (번호별)</title>
+<link rel="stylesheet" href="references/sky-background.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
 <style>
   :root{
     --blue:#3B82F6; --sky:#0EA5E9; --teal:#14B8A6; --emerald:#10B981;
-    --amber:#F59E0B; --rose:#F43F5E; --ink:#0F172A; --mut:#475569; --grid:#E2E8F0;
+    --amber:#F59E0B; --rose:#F43F5E; --ink:#0F172A; --mut:#334155; --grid:#E2E8F0;
   }
   *{box-sizing:border-box; word-break:keep-all; overflow-wrap:break-word;}
   html,body{margin:0; padding:0;}
   body{
     font-family:"Pretendard","Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;
     color:var(--ink);
-    background:linear-gradient(135deg,#EFF6FF 0%,#F0FDFA 50%,#F0F9FF 100%);
+    background:#A5CEEB linear-gradient(180deg,#93C2E6 0%,#A5CEEB 38%,#B7D9F1 70%,#C8E3F5 100%);
     background-attachment:fixed;
     min-height:100vh;
   }
-  /* 떠다니는 배경 blob */
-  .blob{position:fixed; border-radius:50%; filter:blur(60px); z-index:0; pointer-events:none;}
-  .blob1{top:-12vh; left:-8vw; width:46vh; height:46vh;
-    background:radial-gradient(circle,rgba(59,130,246,.22) 0%,transparent 70%); animation:float1 20s ease-in-out infinite;}
-  .blob2{bottom:-14vh; right:-6vw; width:52vh; height:52vh;
-    background:radial-gradient(circle,rgba(20,184,166,.18) 0%,transparent 70%); animation:float2 24s ease-in-out infinite;}
-  @keyframes float1{0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(40px,30px) scale(1.06)}}
-  @keyframes float2{0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-40px,-26px) scale(1.08)}}
+  /* 배경 = QQQ 기본 낮 하늘(비행기). references/sky-background.css·js */
+  #sky{position:fixed; inset:0; z-index:0; pointer-events:none;}
 
   .wrap{position:relative; z-index:1; max-width:1280px; margin:0 auto; padding:40px 28px 120px;}
 
@@ -155,15 +150,16 @@
 </style>
 </head>
 <body>
-<div class="blob blob1"></div>
-<div class="blob blob2"></div>
+<div id="sky"></div>
+<script src="references/sky-background.js"></script>
+<script>QQQSky.mount(document.getElementById("sky"), "light");</script>
 
 <div class="wrap">
   <header class="hero">
     <h1><span class="ac">qqq-live</span> 컴포넌트 카탈로그</h1>
     <p>강의용 슬라이드 스킬에서 쓸 수 있는 모든 시각 컴포넌트를 번호로 정리했어요.
        보고 마음에 드는 번호를 <b>"23번으로 해줘"</b>처럼 말하면 그대로 만들어 드립니다.</p>
-    <p style="font-size:14px;">테마는 <b>Modern Glassy Light</b> (블루·하늘·틸 파스텔 + 유리 카드 + spring-pop).
+    <p style="font-size:14px;">테마는 <b>Modern Glassy Light</b> (비행기 하늘 + 유리 카드 + spring-pop).
        아래 미리보기는 모양 확인용 축소판이라 글씨가 작지만, 실제 슬라이드는 모든 글자 24px 이상으로 만들어집니다.</p>
     <div class="legend">
       <span class="lg"><span class="nw">NEW</span> = 이번에 추가 (PowerPoint 기본 도표)</span>

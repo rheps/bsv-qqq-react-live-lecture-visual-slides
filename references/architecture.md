@@ -13,7 +13,7 @@
 
 ```
 fixed fullscreen app-wrap        ← viewport 전체. 테마 그라디언트 배경. flex 중앙 정렬
-├── bg-layer (absolute inset:0)  ← 전체화면 blob 레이어 (모니터 끝까지). overflow:hidden
+├── bg-layer (absolute inset:0)  ← 전체화면 하늘 레이어 (모니터 끝까지). overflow:hidden. QQQSky.Background
 ├── stage-box (고정 1200×900)    ← 4:3 내용 캔버스. 투명. transform:scale(var(--fit))
 │   ├── absolute stage           ← 슬라이드 (현재·±1만 렌더). px 좌표계
 │   │   └── box (내용)           ← 고정 px 사이즈, 세로 가운데
@@ -25,7 +25,7 @@ fixed fullscreen app-wrap        ← viewport 전체. 테마 그라디언트 배
 
 - 브라우저 **스크롤 금지**. `html, body`에 `overflow:hidden`. `html/body/#root` 배경은 현재 테마 그라디언트로 둔다(React `useEffect`로 테마 따라 갱신) — 캔버스 바깥/로드 중에도 빈 색이 안 보이게.
 - `app-wrap`: `position:fixed; inset:0`, 테마 그라디언트 배경, `display:flex; align-items:center; justify-content:center`로 캔버스를 중앙에.
-- `bg-layer`: `position:absolute; inset:0; overflow:hidden; z-index:0`. 떠다니는 blob은 **여기**(전체화면)에 둔다. 4:3 캔버스 안에 넣으면 경계에서 잘린다.
+- `bg-layer`: `position:absolute; inset:0; overflow:hidden; z-index:0`. 스킬 기본 배경 `QQQSky.Background`(`references/sky-background.css`·`.js`)가 **여기**(전체화면)에 하늘을 그린다 — **낮(라이트) 배경은 항상 비행기 하늘. 다른 배경으로 바꾸지 않는다**(사용자 결정 2026-11-06). 구름·비행기를 4:3 캔버스 안에 넣으면 경계에서 잘린다.
 - **`stage-box`는 고정 `width:1200px; height:900px`(4:3) 설계 캔버스**다. `transform:scale(var(--fit)); transform-origin:center; overflow:hidden; background:transparent; z-index:1`. `--fit`은 JS로 `min(innerWidth/1200, innerHeight/900)`, resize마다 갱신. 캔버스가 투명이라 뒤의 전체화면 배경이 그대로 비쳐 경계가 안 생긴다.
 - `stage-box` 안의 슬라이드는 `position:absolute; inset:0`. **내부 사이즈는 전부 고정 px**(캔버스 1200×900 좌표). `vh/vw` 쓰면 스케일이 이중 적용된다.
 - `progress bar`·`slide number`는 캔버스가 아니라 **`app-wrap` 직속**에 `position:absolute`로 둔다(스케일 안 받게, 모니터 전체 기준).
@@ -37,7 +37,7 @@ CSS 예시:
 .app-wrap {
   position: fixed; inset: 0;
   display: flex; align-items: center; justify-content: center;
-  /* 테마별 그라디언트는 .app-wrap.theme-light/dark/warm 로 */
+  /* 테마별 바탕색은 sky-background.css 가 정한다 — light·warm = 낮 하늘, dark = 밤, bling = 핑크 */
 }
 .bg-layer { position: absolute; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
 
@@ -73,10 +73,11 @@ CSS 예시:
 
 ```css
 :root {
-  /* 기본 배경 — 파스텔 메시 그라디언트 (블루/틸/하늘) */
-  --bg-start: #EFF6FF;   /* 블루 파스텔 */
-  --bg-mid:   #F0FDFA;   /* 틸 파스텔 */
-  --bg-end:   #F0F9FF;   /* 하늘 파스텔 */
+  /* 기본 배경 — 낮 하늘(비행기 하늘의 바탕 그라디언트). 낮(라이트) 배경은 항상 비행기 하늘이며
+     다른 배경으로 바꾸지 않는다(사용자 결정 2026-11-06). 구름·비행기는 QQQSky.Background 가 그린다. */
+  --bg-start: #93C2E6;   /* 위쪽 하늘 */
+  --bg-mid:   #A5CEEB;   /* 가운데 하늘 */
+  --bg-end:   #C8E3F5;   /* 지평선 쪽 하늘 */
 
   /* 기본 텍스트 */
   --ink:  #0F172A;
@@ -105,7 +106,7 @@ html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
+  background: linear-gradient(180deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%);
   color: var(--ink);
   font-family: 'Pretendard', -apple-system, sans-serif;
 }

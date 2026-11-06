@@ -2,18 +2,19 @@
 
 이 문서는 Modern Glassy Light 테마, glass-card CSS, spring-pop 애니메이션, 폰트, 가독성 규칙, 텍스트 밀도 규칙을 다룬다.
 
-> **함께 보기 — `references/motion-theme-upgrades.md` (충돌 시 우선)**: 아래 내용 중 일부는 거기서 업데이트된다. ① 3-g "등장은 spring-pop 하나로 통일" → **요소별 모션 다양화**(1번). ② 3-e/3-f 다크 테마·"blob 더 진하게" → **다크=진짜 어둡게 + 밤하늘**(6번). ③ 3-b `hl()` 강조색 → 다크에서 묻히면 **강조색 CSS 변수를 `.theme-dark`에서 밝게 override**(4번). ④ Eyebrow는 **밑줄형**(5번). ⑤ 라이트 글래스 **투명도 옵션**(7번).
+> **함께 보기 — `references/motion-theme-upgrades.md` (충돌 시 우선)**: 아래 내용 중 일부는 거기서 업데이트된다. ① 3-g "등장은 spring-pop 하나로 통일" → **요소별 모션 다양화**(1번). ② 3-e/3-f 다크 테마·"blob 더 진하게" → **다크=진짜 어둡게 + 밤하늘**(6번). 배경 전체는 **낮(라이트) = 항상 비행기 하늘**(8번, 사용자 결정 2026-11-06). ③ 3-b `hl()` 강조색 → 다크에서 묻히면 **강조색 CSS 변수를 `.theme-dark`에서 밝게 override**(4번). ④ Eyebrow는 **밑줄형**(5번). ⑤ 라이트 글래스 **투명도 옵션**(7번).
 
 ---
 
 ## 1. 기본 테마 — Modern Glassy Light (블루 중심, 보라 제외)
 
-**라이트 배경 위에 반투명 유리 카드.** 메인 색은 **블루(#3B82F6)** 와
+**낮 하늘(비행기 하늘) 위에 반투명 유리 카드.** 낮(라이트) 배경은 항상 비행기 하늘이며 다른 배경으로 바꾸지 않는다(사용자 결정 2026-11-06). 메인 색은 **블루(#3B82F6)** 와
 하늘(#0EA5E9)·틸(#14B8A6) 중심. 보라(violet/indigo/plum)는 사용하지 않는다.
 
 | 용도 | 값 |
 |---|---|
-| 기본 배경 | 블루/틸 파스텔 메시 그라디언트 (`linear-gradient(135deg, #EFF6FF 0%, #F0FDFA 50%, #F0F9FF 100%)`) |
+| 기본 배경 | **비행기 하늘** — `linear-gradient(180deg, #93C2E6 0%, #A5CEEB 38%, #B7D9F1 70%, #C8E3F5 100%)` + 오로라 + 흰 구름 11개 + 비행기와 비행운 (`references/sky-background.css`·`.js`) |
+| 하늘 위 글씨 강조색 | 낮 테마는 글씨용 변수를 한 단계 진하게: `--muted #334155`, `--blue #1D4ED8`, `--sky #075985`, `--emerald #065F46`, `--rose #BE123C`, `--amber #92400E`, `--teal #115E59` (`motion-theme-upgrades.md` 8번 대비표) |
 | 기본 텍스트 | `#0F172A` (딥 슬레이트) |
 | 포인트 컬러 | 블루 `#3B82F6` (메인), 하늘 `#0EA5E9`, 틸 `#14B8A6` |
 | glass-card 배경 | `rgba(255, 255, 255, 0.40)` + `backdrop-filter: blur(22px) saturate(1.3)` (실제 덱 값 — 뒤가 살짝 비치는 프로스트) |
@@ -307,16 +308,16 @@ body {
 
 ```css
 .app-wrap { transition: background 0.8s ease; }
-.app-wrap.theme-light {
-  background: linear-gradient(135deg, #EFF6FF 0%, #F0FDFA 50%, #F0F9FF 100%);
+.app-wrap.theme-light {      /* 낮 = 비행기 하늘의 바탕. 구름·비행기는 QQQSky.Background (sky-background.css·js) */
+  background: #A5CEEB linear-gradient(180deg, #93C2E6 0%, #A5CEEB 38%, #B7D9F1 70%, #C8E3F5 100%);
 }
 /* 다크 = 거의 순수 블랙 (보라 그라디언트 금지) */
 .app-wrap.theme-dark {
   background: linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #050505 100%);
   color: #F1F5F9;
 }
-.app-wrap.theme-warm {
-  background: linear-gradient(135deg, #FFF1F2 0%, #FFF7ED 50%, #FEF3C7 100%);
+.app-wrap.theme-warm {       /* warm도 낮 배경 → light와 같은 비행기 하늘 (옛 따뜻한 파스텔은 폐기) */
+  background: #A5CEEB linear-gradient(180deg, #93C2E6 0%, #A5CEEB 38%, #B7D9F1 70%, #C8E3F5 100%);
 }
 /* 블링 = 강한 핑크 ("그러나…" 반전 장, pink-reversal). 강조색도 핑크 계열로 덮어쓴다(보라 금지 유지) */
 .app-wrap.theme-bling {
@@ -354,40 +355,21 @@ const theme = cur?.type === "pink-reversal" ? "bling" : (cur?.theme || "light");
 - big-question 중 결정적 질문
 - 너무 자주 쓰면 효과 떨어진다. 30장 슬라이드 중 3~5장 정도.
 
-블링(핑크) 권장 위치: "그러나…" 반전 한 장(`pink-reversal`)만. 덱당 1~2장. 배경 `#FF9ECB` 위 글자 `#3F0A24` 대비 약 8.6:1, 캡션 `#831843` 약 5:1. 블롭·오로라·✨ 장식은 `motion-theme-upgrades.md` 8번.
+블링(핑크) 권장 위치: "그러나…" 반전 한 장(`pink-reversal`)만. 덱당 1~2장. 배경 `#FF9ECB` 위 글자 `#3F0A24` 대비 약 8.6:1, 캡션 `#831843` 약 5:1. 오로라·색 구름·반짝임·✨ 장식은 `sky-background.css`(`motion-theme-upgrades.md` 8번).
 
 ---
 
-## 3-f. 떠다니는 배경 blob (지속 애니메이션)
+## 3-f. 배경 = 스킬 기본 하늘 (낮은 무조건 비행기)
 
-stage-box 내부에 큰 radial-gradient blob을 떠다니게 한다. 슬라이드가
-정적이지 않고 항상 살아 움직이는 느낌을 준다.
+**낮(라이트) 배경은 항상 비행기 하늘. 다른 배경으로 바꾸지 않는다.** (사용자 결정 2026-11-06: "빨리 우리 스킬의 기본 재료로 써. 낮 배경은 무조건 비행기야")
 
-```css
-.bg-blob { position: absolute; pointer-events: none; z-index: 0;
-  border-radius: 50%; filter: blur(40px); }
-.bg-blob-1 { top: -15vh; left: -10vw; width: 55vh; height: 55vh;
-  background: radial-gradient(circle, rgba(99,102,241,0.28) 0%, transparent 70%);
-  animation: float1 18s ease-in-out infinite; }
-.bg-blob-2 { bottom: -18vh; right: -8vw; width: 60vh; height: 60vh;
-  background: radial-gradient(circle, rgba(244,63,94,0.22) 0%, transparent 70%);
-  animation: float2 22s ease-in-out infinite; }
+예전의 떠다니는 색 blob(`.bg-blob-1/2`, stage-box 안)은 폐기했다. 배경은 viewport 레벨 `.bg-layer`에서 스킬 기본 재료 `references/sky-background.css` + `references/sky-background.js`(`QQQSky.Background`)가 그린다.
 
-@keyframes float1 { 0%,100% { transform: translate(0,0) scale(1); }
-  50% { transform: translate(40px,30px) scale(1.05); } }
-@keyframes float2 { 0%,100% { transform: translate(0,0) scale(1); }
-  50% { transform: translate(-40px,-30px) scale(1.08); } }
-```
+- 낮(`light`·`warm`): 하늘 그라디언트 + 오로라 2겹 + 흰 구름 11개(큰 궤도로 계속 움직임) + 비행기 10노선(한 대씩 가로지르며 비행운을 남김).
+- 밤(`dark`): 검정 + 은하수·별먼지·별똥별·반짝임 + 톤 낮춘 색 구름.
+- 핑크(`bling`): bling 핑크 + 색 구름·흰 반짝임·✨.
 
-테마에 따라 blob 색도 자동 변경:
-
-```css
-.theme-dark .bg-blob-1 {
-  background: radial-gradient(circle, rgba(139,92,246,0.45) 0%, transparent 70%);
-}
-```
-
-다크 테마에서는 blob이 더 진하게 빛난다.
+전체 규칙·테마 대응표·낮 글씨 대비표는 `motion-theme-upgrades.md` 8번.
 
 ---
 
@@ -563,7 +545,7 @@ Exception — `code-window` `panes[].code`: a real file shown as it is (folder t
 
 ## 7. 왜 라이트 배경인가
 
-글래스모피즘은 **라이트 배경일 때** 유리 질감이 살아난다. 다크 배경에서는 카드의 반투명함과 blur가 잘 보이지 않아 glassmorphism의 효과가 사라진다. 파스텔 메시 그라디언트 + 흰색 반투명 카드 + 파스텔 glow 조합이 이 테마의 핵심이다.
+글래스모피즘은 **밝은 배경일 때** 유리 질감이 살아난다. 다크 배경에서는 카드의 반투명함과 blur가 잘 보이지 않아 glassmorphism의 효과가 사라진다. **비행기 하늘(흰 구름이 흐르고 비행기가 지나는 낮 하늘) + 흰색 반투명 카드 + 파스텔 glow** 조합이 이 테마의 핵심이다. 낮(라이트) 배경은 항상 비행기 하늘이며 다른 배경으로 바꾸지 않는다(사용자 결정 2026-11-06).
 
 ## 도형 광택 공식 (라이트) — 도형은 투명 금지
 

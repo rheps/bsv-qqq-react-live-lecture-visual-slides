@@ -262,8 +262,8 @@ if ((e.key === 'e' || e.key === 'E') && !EMBED) setEdit(v => !v);
 - Tailwind CDN 사용 (production-ready라고 부르지 않는다)
 - 외부 프레젠테이션 라이브러리 금지 (Reveal.js·Swiper 등)
 - 샘플 요청이면 3~5장, 실제 작업은 내용에 맞춰 장수 제한 없음(붐비는 한 장보다 여러 장)
-- **Modern Glassy Light 테마**: 메인 액센트 블루 `#3B82F6`, 파스텔 메시 그라디언트 배경 + `backdrop-filter` 유리 카드. 슬라이드별 `theme`로 라이트/다크/웜 전환, 다크는 거의 순수 블랙. **보라/violet/indigo/plum 금지.**
-- **전체화면 배경 + 고정 1200×900(4:3) 캔버스 통짜 스케일**: 배경(그라디언트+blob)은 모니터 끝까지, **내용만** 가운데 4:3 캔버스에 담아 `transform:scale(var(--fit))`. 좌우 빈 공간·경계선 없음. 캔버스 안 내용은 **전부 고정 px**, `vh/vw`는 배경·`#root`·페이지번호 같은 viewport 요소에만.
+- **Modern Glassy Light 테마**: 메인 액센트 블루 `#3B82F6`, **낮(라이트) 배경은 항상 비행기 하늘**(`references/sky-background.css`·`.js`, 사용자 결정 2026-11-06) + `backdrop-filter` 유리 카드. 슬라이드별 `theme`로 라이트(낮 하늘)/다크(밤하늘)/웜(낮 하늘)/bling(핑크) 전환, 다크는 거의 순수 블랙. **보라/violet/indigo/plum 금지.**
+- **전체화면 배경 + 고정 1200×900(4:3) 캔버스 통짜 스케일**: 배경(하늘)은 모니터 끝까지, **내용만** 가운데 4:3 캔버스에 담아 `transform:scale(var(--fit))`. 좌우 빈 공간·경계선 없음. 캔버스 안 내용은 **전부 고정 px**, `vh/vw`는 배경·`#root`·페이지번호 같은 viewport 요소에만.
 - Pretendard 폰트 (CDN) + 이모지 폰트 폴백
 - 모든 visible text 24px 이상 / 제목 48px+ / 핵심 문장 40px+ (글씨 줄이지 말고 슬라이드를 늘린다). `max-width`로 가두지 말고 캔버스 세로를 채워 가운데 정렬
 - spring-pop 등장 통일(인라인 transition로 class transition 덮어쓰지 않기) + 지속 애니메이션(breathe/glow); 큰 위치 이동(translateX) 금지

@@ -5,18 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>컴포넌트 갤러리 v2 — 스킬 생성판 (React + Framer Motion + 모션 키트)</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
+<link rel="stylesheet" href="references/sky-background.css">
 <style>
-  :root{ --blue:#3B82F6; --sky:#0EA5E9; --teal:#14B8A6; --ink:#0F172A; --mut:#475569; --grid:#E2E8F0; }
+  :root{ --blue:#3B82F6; --sky:#0EA5E9; --teal:#14B8A6; --ink:#0F172A; --mut:#334155; --grid:#E2E8F0; }
   *{box-sizing:border-box; word-break:keep-all;}
   html,body{margin:0;padding:0;}
   body{ font-family:"Pretendard","Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif;
-    color:var(--ink); background:linear-gradient(135deg,#EFF6FF 0%,#F0FDFA 50%,#F0F9FF 100%);
+    color:var(--ink); background:#A5CEEB linear-gradient(180deg,#93C2E6 0%,#A5CEEB 38%,#B7D9F1 70%,#C8E3F5 100%);
     background-attachment:fixed; min-height:100vh; }
-  .blob{position:fixed;border-radius:50%;filter:blur(60px);z-index:0;pointer-events:none;}
-  .blob1{top:-12vh;left:-8vw;width:46vh;height:46vh;background:radial-gradient(circle,rgba(59,130,246,.22),transparent 70%);animation:fl1 20s ease-in-out infinite;}
-  .blob2{bottom:-14vh;right:-6vw;width:52vh;height:52vh;background:radial-gradient(circle,rgba(20,184,166,.18),transparent 70%);animation:fl2 24s ease-in-out infinite;}
-  @keyframes fl1{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(40px,30px) scale(1.06)}}
-  @keyframes fl2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-40px,-26px) scale(1.08)}}
+  #sky{position:fixed;inset:0;z-index:0;pointer-events:none;}
   .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:40px 28px 120px;}
   header.hero{text-align:center;margin-bottom:8px;}
   header.hero h1{font-size:42px;font-weight:900;letter-spacing:-.03em;margin:0 0 10px;}
@@ -42,8 +39,9 @@
 </style>
 </head>
 <body>
-<div class="blob blob1"></div>
-<div class="blob blob2"></div>
+<div id="sky"></div>
+<script src="references/sky-background.js"></script>
+<script>QQQSky.mount(document.getElementById("sky"), "light");</script>
 <div id="root"></div>
 
 <!-- 1) 모션 키트(클래식 스크립트) — React/Babel 앞. window.QQQ 노출 + 키프레임 자동 주입 -->

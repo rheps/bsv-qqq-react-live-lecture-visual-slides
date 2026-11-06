@@ -141,6 +141,11 @@ const mdByFile = Object.fromEntries(refs.map(f => [f, read("references/" + f)]))
 const cssByFile = Object.fromEntries(refs.map(f => [f, fences(mdByFile[f], "css")]));
 const usageByFile = Object.fromEntries(refs.map(f => [f, fences(mdByFile[f], "jsx")]));
 usageByFile["qqq-component-kit.js"] = read("references/qqq-component-kit.js");
+// the standard sky background: sky-background.css + sky-background.js are one unit (key "sky-background");
+// the script names its classes as plain strings `cls: "cloud"`
+cssByFile["sky-background"] = read("references/sky-background.css");
+const skyClasses = [...read("references/sky-background.js").matchAll(/cls: "([^"]+)"/g)].map(m => m[1]).join(" ");
+usageByFile["sky-background"] = `<div className="${skyClasses}"/>`;
 const tpl = mdByFile["added-templates.md"];
 const jsx818 = fences(tpl.slice(tpl.indexOf("## 8. `prompt-box`"), tpl.indexOf("## 8~18 공용 CSS")), "jsx");
 
@@ -162,7 +167,10 @@ const a = ruleA(cssByFile), b = ruleB(cssByFile, usageByFile), c = ruleC(jsx818)
 ok("A: no bare short class rules in references/*.md CSS", !a.length, a);
 ok("B: no class used in one reference is styled by a bare rule in another", !b.length, b);
 ok("C: added-templates 8-18 component classes are prefixed", !c.length, c);
-ok("motion-theme blobs are scoped (.blob.bN)", /\.blob\.b1 \{/.test(cssByFile["motion-theme-upgrades.md"]) && !/(^|\s)\.b[1-6]\s*\{/m.test(cssByFile["motion-theme-upgrades.md"]));
+ok("no bare blob rules (.b1-.b6) anywhere; blob CSS, if any comes back, stays scoped as .blob.bN",
+  Object.values(cssByFile).every(css => !/(^|[\s,}])\.b[1-6]\s*[{,]/m.test(css.replace(/\/\*[\s\S]*?\*\//g, ""))));
+ok("sky background classes are read (aurora, cloud, flight, spark, milkyway, mwdust, shoot)",
+  ["aurora", "cloud", "flight", "spark", "milkyway", "mwdust", "shoot"].every(c => skyClasses.split(" ").includes(c)));
 ok("outcome-cards bars are prefixed (oc-b<n>)", /"oc-bar oc-b" \+ k/.test(tpl) && /\.oc-bar\.oc-b3/.test(tpl));
 
 let failed = 0;

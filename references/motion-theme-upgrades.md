@@ -1,6 +1,6 @@
 # motion-theme-upgrades.md — 동적 모션·테마 업그레이드
 
-실제 강의 덱을 다듬으며 나온 피드백에서 정리한 업그레이드 모음이다. 다음 7가지를 다룬다.
+실제 강의 덱을 다듬으며 나온 피드백에서 정리한 업그레이드 모음이다. 다음 8가지를 다룬다.
 
 1. 요소마다 다른 등장(모션 다양화 — "다 똑같이 띠용 튕긴다" 탈피)
 2. Magic-Move 모핑(`layoutId` — 슬라이드 간 요소가 이어지며 변형)
@@ -9,8 +9,9 @@
 5. 밑줄형 Eyebrow(양옆 줄/알약 박스 폐기)
 6. 다크 = 진짜 어둡게 + **밤하늘 배경**(은하수·별·별똥별)
 7. 라이트 글래스 투명도(선택)
+8. **배경 = 스킬 기본 하늘** — 낮(라이트) 배경은 항상 비행기 하늘(사용자 결정 2026-11-06), 다크는 밤하늘, bling은 핑크
 
-> **충돌 시 이 문서가 우선.** 기존 `design-and-readability.md` 3-g("등장은 spring-pop 하나로 통일")와 3-f/3-e("다크에서 blob 더 진하게")는 아래 1·6번으로 대체된다. `motion-system.md`의 모션 배정표는 1·2·3번으로 확장된다. `hl()`(design 3-b)은 코드 그대로 두되, 4번의 테마 변수 override를 추가하면 다크 가독성이 해결된다.
+> **충돌 시 이 문서가 우선.** 기존 `design-and-readability.md` 3-g("등장은 spring-pop 하나로 통일")와 3-f/3-e("다크에서 blob 더 진하게", 파스텔 라이트 배경)는 아래 1·6·8번으로 대체된다. `motion-system.md`의 모션 배정표는 1·2·3번으로 확장된다. `hl()`(design 3-b)은 코드 그대로 두되, 4번의 테마 변수 override를 추가하면 다크 가독성이 해결된다.
 
 ---
 
@@ -194,74 +195,24 @@ SVG 연결선/화살표는 단순 페이드 대신 **선이 그어지듯** 등�
 
 문제: "다크에서 blob을 더 진하게"(옛 3-f) + 중앙 광원 효과를 쓰면 화면이 환해서 **다크답지 않다.** (실제 피드백: "다크모드가 너무 밝아, 검정에 가깝게.")
 
-해법 A — 글로우를 확 낮춰 가장자리는 검정 유지:
+해법 A — 글로우를 확 낮춰 가장자리는 검정 유지: 밤 하늘의 색 구름 6개는 `filter:blur(80px); mix-blend-mode:screen; opacity:.4`, 색 알파 0.24~0.42(`FIELD_COLOURS.night`). 라이트 기준의 0.5~0.7을 그대로 쓰면 다시 환해진다. **중앙에서 빛이 퍼지는 burst(코어/갓레이)는 쓰지 않는다.**
 
-```css
-/* 다크에선 떠다니는 색구름(blob)을 강하게 죽인다 — 중앙에서 빛이 퍼지는 burst는 쓰지 않는다 */
-.theme-dark .bg-blob { opacity: 0.4; mix-blend-mode: screen; filter: blur(80px); }
-/* (블롭 색 알파도 0.3~0.42 수준으로. 라이트 기준의 0.5~0.7을 그대로 쓰면 다시 환해진다.) */
-```
+해법 B — 다크 전용 **밤하늘**(은하수 띠 + 반짝이는 별 + 별똥별 여러 개). 낮·핑크에는 그리지 않는다(`QQQSky`가 테마로 분기).
 
-해법 B — 다크 전용 **밤하늘**(은하수 띠 + 반짝이는 별 + 별똥별 여러 개). 라이트에는 렌더하지 않는다(테마로 분기).
+- 은하수 띠(`.milkyway`)는 **또렷하게**: `rgba(214,225,255,.20)/rgba(150,140,220,.11)`, `blur(24px)`, −22° 기울임(옛 `.13/.07`은 너무 흐림).
+- 별먼지(`.mwdust`) 28개는 은하수 띠를 따라 정적으로, 반짝임(`.spark`) 24개는 화면 전체에서 twinkle.
+- 별똥별(`.shoot`)은 **18개**(주기 3.6~5.6s, delay 0~5s로 흩어 여러 개가 번갈아/동시에 자주 떨어지게). 10개는 너무 뜸하다는 피드백.
+- reduced-motion이면 모두 멈춘다.
 
-```css
-/* 은하수 띠 — 화면을 가로지르는 부드러운 성운 */
-.milkyway {
-  position:absolute; top:-10%; left:-16%; width:132%; height:380px;
-  transform: rotate(-22deg);
-  background: radial-gradient(ellipse 56% 100% at 50% 50%,
-    rgba(214,225,255,.13) 0%, rgba(150,140,220,.07) 42%, transparent 72%);
-  filter: blur(26px); pointer-events:none;
-}
-/* 별(반짝임) — 좌표 배열로 흩뿌리고 twinkle 무한 반복 */
-.spark { position:absolute; border-radius:50%;
-  background: radial-gradient(circle,#fff 0%, rgba(255,255,255,0) 68%);
-  box-shadow: 0 0 18px rgba(255,255,255,.95), 0 0 6px rgba(190,220,255,1);
-  opacity:0; animation: twinkle 6s ease-in-out infinite; }
-@keyframes twinkle { 0%,100%{opacity:0;transform:translateY(0) scale(.5)}
-                     50%   {opacity:1;transform:translateY(-20px) scale(1.25)} }
-/* 별똥별 — 우상단→좌하단으로 꼬리 달고 낙하. 개수↑·주기↓로 자주, delay로 시차 */
-.shoot { position:absolute; width:3px; height:3px; border-radius:50%;
-  background:#fff; box-shadow:0 0 8px 2px rgba(255,255,255,.7);
-  opacity:0; transform: rotate(155deg);
-  animation: shoot linear infinite; pointer-events:none; }
-.shoot::before { content:""; position:absolute; top:50%; right:3px;
-  width:170px; height:2px; transform:translateY(-50%); border-radius:2px;
-  background: linear-gradient(to left, rgba(255,255,255,.9), rgba(255,255,255,0)); }
-@keyframes shoot {
-  0%  { transform: rotate(155deg) translateX(0);    opacity:0; }
-  4%  { opacity:1; } 17% { opacity:1; }
-  24%,100% { transform: rotate(155deg) translateX(760px); opacity:0; }
-}
-```
+코드는 따로 짜지 않는다 — **스킬 기본 재료 `sky-background.css`·`.js`(8번)**에 전부 들어 있다.
 
-```jsx
-// 밤하늘 요소는 다크에서만 렌더(theme로 분기). 좌표/딜레이는 고정 배열(SSR·재현 일관).
-{theme === "dark" && <>
-  <div className="milkyway"/>
-  {MW_DUST.map((d,i)=><div key={"d"+i} className="mwstar"
-     style={{top:d.top,left:d.left,width:d.s,height:d.s,opacity:d.o}}/>)}
-  {SHOOTERS.map((s,i)=><div key={"sh"+i} className="shoot"
-     style={{top:s.top,left:s.left,animationDuration:`${s.dur}s`,animationDelay:`${s.delay}s`}}/>)}
-</>}
-{SPARKS.map((sp,i)=><div key={i} className="spark" style={{top:sp.top,left:sp.left,
-   width:sp.size,height:sp.size,animationDuration:`${sp.dur}s`,animationDelay:`${sp.delay}s`}}/>)}
-```
-
-- `SHOOTERS`는 **16~20개**(주기 3.6~5.6s, `delay` 0~5s로 흩어 **여러 개가 번갈아/동시에** 자주 쏟아지게). 10개는 너무 뜸하다는 피드백 — 더 많이.
-- 은하수 띠(`.milkyway`)는 **또렷하게**: 알파를 `rgba(214,225,255,.20)/rgba(150,140,220,.11)` 수준으로 올린다(옛 `.13/.07`은 너무 흐림).
-- `MW_DUST`는 은하수 띠를 따라 작은 별 ~28개(정적), `SPARKS`는 화면 전체 트윙클 ~24개.
-- **중앙에서 빛이 퍼지는 burst(코어/갓레이)는 쓰지 않는다** — 다크답지 않다는 피드백.
-- **전체 배경 스택(오로라+블롭6+스파크+밤하늘)의 복붙용 전체 CSS·JSX는 아래 8번**에 있다.
-- `@media (prefers-reduced-motion: reduce)`에 `.spark,.shoot,blob,aurora`의 `animation:none`을 포함한다.
-
-해법 C — 라이트는 반대로 **색 구름을 더 잘 보이게**: 라이트/웜 blob은 채도(`saturate(1.4~1.5)`)와 색 알파를 올리고 궤도 이동 폭을 키운다(움직임이 눈에 띄게).
+해법 C(폐기) — 예전에는 라이트에 채도를 올린 색 블롭을 띄웠다. **이제 낮(라이트·웜) 배경은 항상 비행기 하늘이다**(8번, 사용자 결정 2026-11-06). 낮 하늘의 움직임은 흰 구름의 큰 궤도(±13~15vw/vh)와 화면을 가로지르는 비행기가 맡는다.
 
 ---
 
 ## 7. 라이트 글래스 투명도 (선택)
 
-더 역동적으로 — 배경(움직이는 색 구름)이 카드 너머로 비치게 하려면 라이트 글래스를 더 투명하게.
+더 역동적으로 — 배경(흰 구름·비행기가 지나는 낮 하늘)이 카드 너머로 비치게 하려면 라이트 글래스를 더 투명하게.
 
 ```css
 .glass-card {                /* 기본 0.65 → 0.40 */
@@ -292,186 +243,64 @@ SVG 연결선/화살표는 단순 페이드 대신 **선이 그어지듯** 등�
 
 ---
 
-## 8. 화려한 배경 레이어 스택 (복붙용 — 전체, 하나도 빼지 말 것)
+## 8. 배경 = 스킬 기본 하늘 — 낮은 무조건 비행기 (기본 재료, 하나도 빼지 말 것)
 
-배경(viewport 레벨 `.bg-layer`)에 **세 레이어를 쌓는다**: (A) 회전 오로라, (B) 드리프트 글로우 블롭 **5~6개**, (C) 빛 입자. 다크 테마는 여기에 **밤하늘**(은하수·별먼지·별똥별)을 더한다. 아래는 실제 강의 덱(잇다 C08)에서 검증된 **전체** CSS·JSX를 그대로 옮긴 것 — blob은 b1~b6 전부, 테마별 override까지 포함한다. 네임스페이스(여기선 `.deck`)는 프로젝트에 맞게 바꿔 쓴다.
+> **낮(라이트) 배경은 항상 비행기 하늘. 다른 배경으로 바꾸지 않는다.**
+> 사용자 결정 2026-11-06: "빨리 우리 스킬의 기본 재료로 써. 낮 배경은 무조건 비행기야". 이 하늘은 선택지가 아니라 스킬의 기본 재료다. 예전의 파스텔 메시 그라디언트 + 색 블롭 6개(b1~b6) + 파란 입자 스택은 낮 배경에서 폐기했다.
 
-> **보라(violet) 예외:** 글씨·UI·카드·강조색에는 violet/indigo 금지(SKILL #11). **단 움직이는 배경 장식(오로라·블롭)에만 violet 한 점 허용**(아래 `b4`·오로라). 텍스트로는 절대 쓰지 않는다.
+배경은 덱마다 새로 짜지 않는다. 두 파일을 **그대로** 덱에 인라인한다.
 
-> **"정지처럼 보이면 실패":** 라이트 배경의 색 구름은 **멀리서도 움직임이 보여야** 한다. 궤도 이동 폭은 화면 대비 ±13~15vw/vh, 주기 26~38s, `saturate(1.5)`. 이동 폭이 작아 정지처럼 보이면 안 된다.
+| 파일 | 내용 |
+|---|---|
+| `references/sky-background.css` | 하늘 CSS 전부: 테마별 바탕, 오로라, 구름, 비행기와 비행운, 밤하늘, 반짝임, ✨, 낮 글씨 대비 변수, reduced-motion, 검토 모드 |
+| `references/sky-background.js` | 클래식 스크립트 → `window.QQQSky`. 좌표 데이터(`DAY_CLOUDS` 11, `DAY_ROUTES` 10, `PLANE_PATHS` 5, `FIELD_CLOUDS` 6, `SPARKS` 24, `NIGHT_DUST` 28, `NIGHT_SHOOTERS` 18), `Background`(React), `mount(el, theme)`(React 없는 페이지), `nodes(theme, width)`, `skyOf(theme)` |
 
-### (A) 회전 오로라 — 다색 conic 2겹(36s + 역회전 52s)
+출처: 게시된 연수 슬라이드 `teacher-manager-intro.html`의 day/night/pink 하늘을 같은 값으로 옮겼다. 비행기는 코드로 그린 인라인 SVG 경로 5개(동체·두 날개·두 꼬리날개)이며 이미지 파일·외부 요청이 없다.
 
-```css
-.bg-layer { position:absolute; inset:0; overflow:hidden; z-index:0; pointer-events:none; }
+### 테마 대응
 
-.aurora {
-  position:absolute; top:50%; left:50%;
-  width:160vmax; height:160vmax; margin-left:-80vmax; margin-top:-80vmax;
-  border-radius:46% 54% 60% 40% / 52% 44% 56% 48%;
-  background: conic-gradient(from 0deg,
-    rgba(59,130,246,.28), rgba(20,184,166,.26), rgba(139,92,246,.24),
-    rgba(244,63,94,.22), rgba(245,158,11,.22), rgba(59,130,246,.28));
-  filter: blur(70px); opacity:.55; mix-blend-mode:multiply;
-  animation: spin 36s linear infinite;
-}
-.aurora.b { width:120vmax; height:120vmax; margin-left:-60vmax; margin-top:-60vmax;
-  animation-duration:52s; animation-direction:reverse; opacity:.4; }
-.theme-dark .aurora {
-  mix-blend-mode:screen; opacity:.2; filter:blur(90px);
-  background: conic-gradient(from 0deg,
-    rgba(59,130,246,.55), rgba(14,165,233,.5), rgba(139,92,246,.5),
-    rgba(244,63,94,.4), rgba(20,184,166,.45), rgba(59,130,246,.55));
-}
-.theme-bling .aurora {
-  background: conic-gradient(from 0deg,
-    rgba(244,114,182,.4), rgba(56,189,248,.3), rgba(251,113,133,.36),
-    rgba(167,139,250,.3), rgba(244,114,182,.4));
-  opacity:.7;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-```
+| 슬라이드 `theme` | 하늘(`.bg-layer[data-sky]`) | 그리는 것 |
+|---|---|---|
+| `light` (기본, 생략 포함) | **day — 비행기 하늘(필수)** | 하늘 그라디언트 `#93C2E6 → #A5CEEB → #B7D9F1 → #C8E3F5` + 오로라 2겹(흰·하늘색 conic, multiply) + 흰 구름 11개(궤도 이동) + 비행기 10노선. 12초 간격으로 한 대씩 화면을 가로지르고(120초 주기) 비행운이 뒤따라 길어졌다 사라진다 |
+| `warm` | **day — 비행기 하늘** | `warm`도 낮 배경이라 가장 가까운 것은 낮 하늘이다. "낮 배경은 무조건 비행기" 결정에 따라 light와 같은 하늘을 쓴다(따뜻한 파스텔 바탕은 폐기) |
+| `dark` | **night — 밤하늘** | 검정 그라디언트 + 오로라(screen, .2) + 톤 낮춘 색 구름 6개 + 은하수 띠 + 별먼지 28개 + 별똥별 18개 + 흰 반짝임 24개 |
+| `bling` (`pink-reversal`) | **pink — 핑크** | bling 핑크 그라디언트(`#FFC2DD → #FF9ECB → #FFB8D7`, 글자 대비 수치는 design 3-e 그대로) + 핑크 오로라 + 색 구름 6개 + 흰 반짝임 24개 + 캔버스 모서리 ✨ 두 개 |
 
-### (B) 드리프트 글로우 블롭 — 6개 전부 + 큰 궤도 + multiply
-
-> **Scoped on purpose**: the size/colour rules are `.blob.b1`…`.blob.b6`, never a bare `.b1`. A bare `.b1` also hits any other element that has a `b1` class (it once drew outcome-cards' dashboard bars as 56vh circles over the slide). Keep every background class compound with `.blob` (or prefixed), and give component classes a component prefix (`tests/class-collision-guard.mjs`).
-
-```css
-.blob { position:absolute; border-radius:50%; filter:blur(64px); mix-blend-mode:multiply; will-change:transform; }
-.theme-dark .blob { mix-blend-mode:screen; filter:blur(80px); opacity:.4; }
-/* 라이트/웜/블링: 색 구름을 더 진하고 또렷하게(채도 ↑) */
-.theme-light .blob, .theme-warm .blob, .theme-bling .blob { filter:blur(56px) saturate(1.5); }
-
-.blob.b1 { top:-12vh; left:-8vw;   width:56vh; height:56vh; background:radial-gradient(circle,rgba(59,130,246,.66) 0%,transparent 70%); animation:orbit1 26s ease-in-out infinite; }
-.blob.b2 { bottom:-16vh; right:-6vw; width:62vh; height:62vh; background:radial-gradient(circle,rgba(20,184,166,.6) 0%,transparent 70%);  animation:orbit2 32s ease-in-out infinite; }
-.blob.b3 { top:26vh; right:16vw;   width:40vh; height:40vh; background:radial-gradient(circle,rgba(244,63,94,.54) 0%,transparent 70%);   animation:orbit3 30s ease-in-out infinite; }
-.blob.b4 { bottom:8vh; left:12vw;  width:44vh; height:44vh; background:radial-gradient(circle,rgba(139,92,246,.54) 0%,transparent 70%);  animation:orbit1 38s ease-in-out infinite reverse; } /* ← 배경 한정 violet 예외 */
-.blob.b5 { top:-6vh; right:28vw;   width:34vh; height:34vh; background:radial-gradient(circle,rgba(245,158,11,.46) 0%,transparent 70%);  animation:orbit2 28s ease-in-out infinite; }
-.blob.b6 { bottom:22vh; left:40vw; width:38vh; height:38vh; background:radial-gradient(circle,rgba(14,165,233,.54) 0%,transparent 70%);  animation:orbit3 34s ease-in-out infinite reverse; }
-
-/* 다크: 블롭 6개 전부 톤다운(가장자리는 검정 유지) */
-.theme-dark .blob.b1 { background:radial-gradient(circle,rgba(59,130,246,.42) 0%,transparent 72%); }
-.theme-dark .blob.b2 { background:radial-gradient(circle,rgba(14,165,233,.36) 0%,transparent 72%); }
-.theme-dark .blob.b3 { background:radial-gradient(circle,rgba(244,63,94,.3) 0%,transparent 72%); }
-.theme-dark .blob.b4 { background:radial-gradient(circle,rgba(139,92,246,.34) 0%,transparent 72%); }
-.theme-dark .blob.b5 { background:radial-gradient(circle,rgba(245,158,11,.24) 0%,transparent 72%); }
-.theme-dark .blob.b6 { background:radial-gradient(circle,rgba(14,165,233,.34) 0%,transparent 72%); }
-/* 블링: b1·b3을 핑크/로즈로 */
-.theme-bling .blob.b1 { background:radial-gradient(circle,rgba(244,114,182,.55) 0%,transparent 70%); }
-.theme-bling .blob.b3 { background:radial-gradient(circle,rgba(251,113,133,.5) 0%,transparent 70%); }
-
-@keyframes orbit1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(13vw,10vh) scale(1.18)} 66%{transform:translate(-9vw,15vh) scale(.9)} }
-@keyframes orbit2 { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-15vw,-11vh) scale(1.22)} }
-@keyframes orbit3 { 0%,100%{transform:translate(0,0) scale(1)} 40%{transform:translate(11vw,-14vh) scale(1.16)} 75%{transform:translate(-12vw,7vh) scale(.86)} }
-```
-
-### (C) 빛 입자(spark) — 라이트=파란 입자 / 다크=흰 별
-
-```css
-.spark { position:absolute; border-radius:50%;
-  background:radial-gradient(circle,rgba(255,255,255,.95) 0%,rgba(255,255,255,0) 70%);
-  box-shadow:0 0 12px rgba(255,255,255,.8); opacity:0; animation:twinkle 6s ease-in-out infinite; }
-.theme-light .spark, .theme-warm .spark {
-  background:radial-gradient(circle,rgba(59,130,246,.85) 0%,rgba(59,130,246,0) 70%);
-  box-shadow:0 0 10px rgba(59,130,246,.55); }
-.theme-dark .spark {
-  background:radial-gradient(circle,#fff 0%,rgba(255,255,255,0) 68%);
-  box-shadow:0 0 18px rgba(255,255,255,.95), 0 0 6px rgba(190,220,255,1); }
-@keyframes twinkle { 0%,100%{opacity:0;transform:translateY(0) scale(.5)} 50%{opacity:1;transform:translateY(-20px) scale(1.25)} }
-```
-
-### (D) 밤하늘(다크 전용) — 은하수 더 또렷 + 별똥별 16~20개
-
-```css
-/* 은하수 띠 — 더 또렷하게(알파 ↑) */
-.milkyway { position:absolute; top:-10%; left:-16%; width:132%; height:380px; transform:rotate(-22deg);
-  background:radial-gradient(ellipse 56% 100% at 50% 50%,
-    rgba(214,225,255,.20) 0%, rgba(150,140,220,.11) 42%, transparent 72%);
-  filter:blur(24px); pointer-events:none; }
-.mwstar { position:absolute; border-radius:50%; background:#fff; box-shadow:0 0 4px rgba(255,255,255,.8); pointer-events:none; }
-.shoot { position:absolute; width:3px; height:3px; border-radius:50%; background:#fff;
-  box-shadow:0 0 8px 2px rgba(255,255,255,.7); opacity:0; transform:rotate(155deg);
-  animation:shoot linear infinite; pointer-events:none; }
-.shoot::before { content:""; position:absolute; top:50%; right:3px; width:170px; height:2px;
-  transform:translateY(-50%); border-radius:2px;
-  background:linear-gradient(to left,rgba(255,255,255,.9),rgba(255,255,255,0)); }
-@keyframes shoot { 0%{transform:rotate(155deg) translateX(0);opacity:0} 4%{opacity:1} 17%{opacity:1}
-  24%,100%{transform:rotate(155deg) translateX(760px);opacity:0} }
-```
-
-### bling 반짝이 + reduced-motion 가드
-
-> bling의 **배경 그라디언트·강조색**(`.app-wrap.theme-bling`)은 `design-and-readability.md` 3-e와 `added-templates.md`「8~12 공용 CSS」에 있다. 여기 오로라·블롭·✨는 그 위에 얹는 장식이다. bling은 `pink-reversal`("그러나…" 반전) 전용으로 쓴다.
-
-```css
-.theme-bling .stage-box::after  { content:"✨"; position:absolute; top:7%; right:11%; font-size:44px; animation:shimmer 2.4s ease-in-out infinite; z-index:3; }
-.theme-bling .stage-box::before { content:"✨"; position:absolute; bottom:13%; left:9%; font-size:30px; animation:shimmer 3.1s ease-in-out infinite .6s; z-index:3; }
-@keyframes shimmer { 0%,100%{opacity:.35;transform:scale(.9)} 50%{opacity:1;transform:scale(1.15)} }
-
-@media (prefers-reduced-motion:reduce){
-  .aurora,.blob,.spark,.shoot,.stage-box::before,.stage-box::after { animation:none !important; }
-}
-```
-
-### JSX — 좌표 배열(결정적·SSR 일치) + Background 컴포넌트
-
-밤하늘(은하수·별똥별)은 **다크에서만** 렌더한다. `SPARKS` 24개, `MW_DUST` 28개, `SHOOTERS`는 자주 쏟아지게 **16~20개**(주기 3.6~5.6s, delay 0~5s).
+### 붙이는 법
 
 ```jsx
-const SPARKS = [
-  {top:"18%",left:"12%",size:6,dur:6,delay:0},{top:"32%",left:"82%",size:5,dur:7,delay:1.2},
-  {top:"62%",left:"20%",size:7,dur:6.5,delay:.6},{top:"74%",left:"70%",size:5,dur:8,delay:2.1},
-  {top:"44%",left:"48%",size:4,dur:5.5,delay:1.7},{top:"12%",left:"60%",size:6,dur:7.5,delay:.3},
-  {top:"84%",left:"40%",size:5,dur:6.8,delay:2.6},{top:"52%",left:"88%",size:4,dur:7.2,delay:1.0},
-  {top:"26%",left:"34%",size:5,dur:6.2,delay:2.3},{top:"68%",left:"54%",size:6,dur:7.8,delay:.9},
-  {top:"8%",left:"26%",size:4,dur:5.2,delay:1.5},{top:"15%",left:"44%",size:5,dur:6.9,delay:3.1},
-  {top:"22%",left:"70%",size:3,dur:5.8,delay:.4},{top:"38%",left:"8%",size:6,dur:7.6,delay:2.0},
-  {top:"40%",left:"92%",size:4,dur:6.1,delay:1.1},{top:"56%",left:"36%",size:3,dur:5.4,delay:2.8},
-  {top:"58%",left:"74%",size:5,dur:7.0,delay:.8},{top:"70%",left:"12%",size:4,dur:6.4,delay:3.3},
-  {top:"78%",left:"58%",size:6,dur:8.2,delay:1.9},{top:"88%",left:"78%",size:4,dur:6.7,delay:.2},
-  {top:"90%",left:"22%",size:5,dur:7.4,delay:2.5},{top:"30%",left:"58%",size:3,dur:5.6,delay:1.4},
-  {top:"48%",left:"64%",size:4,dur:6.3,delay:3.0},{top:"64%",left:"44%",size:5,dur:7.9,delay:.5},
-];
-const MW_DUST = [
-  {top:"6%",left:"8%",s:2,o:.9},{top:"10%",left:"18%",s:1,o:.6},{top:"9%",left:"27%",s:2,o:.85},
-  {top:"14%",left:"13%",s:1,o:.5},{top:"13%",left:"33%",s:2,o:.95},{top:"17%",left:"24%",s:1,o:.55},
-  {top:"16%",left:"42%",s:2,o:.8},{top:"20%",left:"36%",s:1,o:.6},{top:"12%",left:"48%",s:1,o:.7},
-  {top:"22%",left:"50%",s:2,o:.9},{top:"8%",left:"38%",s:1,o:.5},{top:"24%",left:"20%",s:1,o:.55},
-  {top:"26%",left:"44%",s:2,o:.75},{top:"19%",left:"58%",s:1,o:.65},{top:"27%",left:"60%",s:2,o:.85},
-  {top:"23%",left:"66%",s:1,o:.5},{top:"30%",left:"54%",s:1,o:.6},{top:"31%",left:"70%",s:2,o:.8},
-  {top:"18%",left:"6%",s:1,o:.5},{top:"33%",left:"38%",s:1,o:.55},{top:"29%",left:"30%",s:1,o:.6},
-  {top:"35%",left:"62%",s:1,o:.7},{top:"11%",left:"55%",s:1,o:.5},{top:"25%",left:"12%",s:1,o:.6},
-  {top:"21%",left:"74%",s:2,o:.75},{top:"34%",left:"48%",s:1,o:.5},{top:"15%",left:"64%",s:1,o:.55},
-  {top:"28%",left:"78%",s:1,o:.6},
-];
-const SHOOTERS = [   // 10 → 18개로 더 자주 쏟아지게(사용자 요청)
-  {top:"3%",left:"68%",delay:0,dur:4},{top:"-3%",left:"90%",delay:.9,dur:4.6},
-  {top:"11%",left:"80%",delay:1.7,dur:3.6},{top:"5%",left:"56%",delay:2.5,dur:5},
-  {top:"17%",left:"95%",delay:3.3,dur:4.2},{top:"1%",left:"44%",delay:4.1,dur:5.4},
-  {top:"9%",left:"72%",delay:1.2,dur:4.8},{top:"20%",left:"62%",delay:2.9,dur:3.8},
-  {top:"-1%",left:"52%",delay:5,dur:4.4},{top:"14%",left:"86%",delay:3.7,dur:5.6},
-  {top:"7%",left:"34%",delay:.5,dur:4.0},{top:"4%",left:"78%",delay:2.2,dur:5.0},
-  {top:"19%",left:"50%",delay:3.0,dur:3.6},{top:"-2%",left:"66%",delay:1.4,dur:4.6},
-  {top:"12%",left:"40%",delay:4.6,dur:5.2},{top:"2%",left:"24%",delay:2.7,dur:4.2},
-  {top:"16%",left:"58%",delay:.2,dur:5.4},{top:"8%",left:"92%",delay:3.9,dur:3.8},
-];
-
-function Background({ theme }) {
-  return (
-    <div className="bg-layer" aria-hidden>
-      <div className="aurora" /><div className="aurora b" />
-      <div className="blob b1" /><div className="blob b2" /><div className="blob b3" />
-      <div className="blob b4" /><div className="blob b5" /><div className="blob b6" />
-      {theme === "dark" && <>
-        <div className="milkyway" />
-        {MW_DUST.map((d,i)=><div key={"d"+i} className="mwstar" style={{top:d.top,left:d.left,width:d.s,height:d.s,opacity:d.o}} />)}
-        {SHOOTERS.map((sh,i)=><div key={"sh"+i} className="shoot" style={{top:sh.top,left:sh.left,animationDuration:`${sh.dur}s`,animationDelay:`${sh.delay}s`}} />)}
-      </>}
-      {SPARKS.map((sp,i)=><div key={i} className="spark" style={{top:sp.top,left:sp.left,width:sp.size,height:sp.size,animationDuration:`${sp.dur}s`,animationDelay:`${sp.delay}s`}} />)}
-    </div>
-  );
-}
+// 덱 <head>: <style> 안에 sky-background.css 전문, Babel 스크립트보다 앞에 <script> sky-background.js 전문(클래식)
+const theme = cur?.type === "pink-reversal" ? "bling" : (cur?.theme || "light");
+<div className={"app-wrap theme-" + theme}>
+  <QQQSky.Background theme={theme}/>
+  <div className="stage-box">…</div>
+</div>
 ```
+
+React가 없는 페이지(갤러리 등)는 `QQQSky.mount(document.getElementById("sky"), "light")`로 같은 하늘을 그린다(`#sky{position:fixed;inset:0;z-index:0}`).
+
+- 배경은 viewport 레벨(`app-wrap` 직속 `.bg-layer`)에 둔다. 4:3 캔버스 안에 넣으면 구름·비행기가 경계에서 잘린다. 캔버스는 투명.
+- 비행기 노선은 화면 너비(`innerWidth`)를 따라 좌우 끝 바깥 60px에서 출발·도착한다. resize마다 다시 그린다.
+- `prefers-reduced-motion: reduce` → 오로라·구름·반짝임·별똥별·비행기·✨의 `animation:none`(하늘이 멈추고 비행기는 나타나지 않는다).
+- 검토 모드(`?review=1` → `html[data-review]`) → 하늘 전체 `animation-play-state:paused`. 앞의 비행기 다섯 대는 `--rv`(−3·−5·−7·−9·−11초)만큼 날아간 자리에서 멈춰 스틸에 보이고, 나머지 다섯은 숨는다. 같은 장은 두 번 찍어도 같은 스틸.
+- 클래스는 모두 `.bg-layer[data-sky=…]` 아래에서 테마가 갈린다. 다른 컴포넌트가 `cloud`·`flight`·`spark` 같은 이름을 쓰지 않는다(`tests/class-collision-guard.mjs`). 색 블롭 CSS를 다시 쓰게 되더라도 `.blob.b1`처럼 반드시 묶어 쓴다(맨 `.b1` 금지).
+
+### 하늘 위 글씨 대비 (낮)
+
+낮 하늘은 중간 밝기의 파랑이라, 파스텔 바탕 기준의 강조색(`#3B82F6`·`#0EA5E9`·`#10B981`·`#F43F5E`)으로 쓴 글씨는 하늘 위에서 대비가 2:1 아래로 떨어진다. 그래서 `sky-background.css`가 `.app-wrap.theme-light`·`.theme-warm`에서 **글씨용 강조색 변수를 한 단계 진하게** 덮어쓴다(4번 다크 override와 같은 방식, SVG·도형 hex는 그대로).
+
+| 변수 | 파스텔 기준 | 낮 하늘 | 가장 어두운 하늘 `#93C2E6` 대비 |
+|---|---|---|---|
+| `--ink` | `#0F172A` | 그대로 | 9.3:1 |
+| `--muted` | `#475569` | `#334155` | 5.5:1 |
+| `--blue` | `#3B82F6` | `#1D4ED8` | 3.5:1 |
+| `--sky` | `#0EA5E9` | `#075985` | 4.0:1 |
+| `--emerald` | `#10B981` | `#065F46` | 4.0:1 |
+| `--rose` | `#F43F5E` | `#BE123C` | 3.4:1 |
+| `--amber` | `#F59E0B` | `#92400E` | 3.8:1 |
+| `--teal` | `#14B8A6` | `#115E59` | 4.0:1 |
+
+모든 글씨가 24px 이상 굵은 글씨라 큰 글씨 기준 3:1 이상이면 통과다. 유리 카드 안은 하늘보다 밝아 대비가 더 높다. 상자 없이 하늘 위에 바로 놓이는 글씨(kinetic `big-question`·`key-message`, eyebrow, 캡션)는 덱을 만든 뒤 스크린샷으로 한 번 더 본다. 그래도 흐리면 그 글씨에만 옅은 흰 `text-shadow`나 얇은 유리 판을 더한다.
 
 ---
 
@@ -482,6 +311,8 @@ function Background({ theme }) {
 - [ ] 다크 슬라이드에서 **색 글씨(`*파랑*`·라벨)가 또렷**한가? (`.theme-dark` 강조색 override 적용?)
 - [ ] Eyebrow가 양옆 줄/알약이 아니라 **밑줄형(밑줄 6px)**인가?
 - [ ] 다크가 **검정에 가깝고**(가장자리), **은하수가 또렷**하고 별·별똥별(16~20개)이 자주 보이는가? 중앙 burst는 없는가?
-- [ ] **배경에 화려한 레이어 스택**(회전 오로라 2겹 + 드리프트 블롭 5~6개 + 빛 입자)이 다 들어갔는가? 라이트 색 구름이 **정지처럼 안 보이고** 또렷이 움직이는가?
+- [ ] **낮(라이트·웜) 슬라이드 배경이 비행기 하늘**인가(하늘 그라디언트 + 오로라 + 흰 구름 11개 + 비행기와 비행운, 색 블롭 없음)? 비행기가 한 대씩 가로지르는가? `sky-background.css`·`.js`를 고치지 않고 그대로 넣었는가?
+- [ ] 하늘 위에 바로 놓인 글씨(kinetic 질문·핵심 문장·eyebrow·캡션)가 또렷한가(낮 강조색 override 적용)?
+- [ ] reduced-motion·검토 모드(`?review=1`)에서 하늘이 멈추는가?
 - [ ] **다크 글래스 카드가 투명**해 밤하늘이 카드 뒤로 비치는가? (글자엔 text-shadow로 가독성 확보?)
-- [ ] **violet은 배경(오로라·블롭)에만** 쓰였고 글씨·UI·카드·강조색엔 없는가?
+- [ ] **violet은 배경(밤·핑크의 오로라·색 구름)에만** 쓰였고 글씨·UI·카드·강조색엔 없는가?

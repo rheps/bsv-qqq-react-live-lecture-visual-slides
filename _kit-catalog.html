@@ -7,20 +7,21 @@
 <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" rel="stylesheet">
 <!-- 스킬이 실제 덱에 인라인하는 바로 그 키트. 클래식 스크립트 → window.QQQ -->
 <script src="references/qqq-component-kit.js"></script>
+<link rel="stylesheet" href="references/sky-background.css">
+<script src="references/sky-background.js"></script>
 <style>
   *{box-sizing:border-box}
   body{
     margin:0; font-family:Pretendard,system-ui,sans-serif; color:#0F172A;
-    background:
-      radial-gradient(1100px 700px at 12% -8%, #DBEAFE 0%, transparent 60%),
-      radial-gradient(1000px 700px at 100% 0%, #CCFBF1 0%, transparent 55%),
-      radial-gradient(900px 700px at 50% 115%, #FCE7F3 0%, transparent 55%),
-      linear-gradient(180deg,#F8FAFF 0%, #F1F5F9 100%);
+    background:#A5CEEB linear-gradient(180deg,#93C2E6 0%,#A5CEEB 38%,#B7D9F1 70%,#C8E3F5 100%) fixed;
     min-height:100vh; padding:40px 28px 80px;
   }
+  /* 배경 = QQQ 기본 낮 하늘(비행기). references/sky-background.css·js */
+  #sky{position:fixed; inset:0; z-index:0; pointer-events:none;}
+  header,.grid{position:relative; z-index:1;}
   header{max-width:1240px; margin:0 auto 26px}
   h1{font-size:30px; font-weight:900; margin:0 0 8px; letter-spacing:-.02em}
-  header p{font-size:15px; color:#475569; margin:0; line-height:1.6}
+  header p{font-size:15px; color:#334155; margin:0; line-height:1.6}
   header code{background:rgba(59,130,246,.1); padding:1px 6px; border-radius:6px; font-size:13px}
   .grid{max-width:1240px; margin:0 auto; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:18px;}
   .card{
@@ -45,6 +46,8 @@
 </style>
 </head>
 <body>
+<div id="sky"></div>
+<script>QQQSky.mount(document.getElementById("sky"), "light");</script>
 <header>
   <h1>키트 검증 카탈로그 <span style="font-size:15px;font-weight:600;color:#475569">— 스킬 산출물(<code>qqq-component-kit.js</code>)로 직접 렌더</span></h1>
   <p>이 페이지는 갤러리 내부 엔진을 쓰지 <b>않는다</b>. 스킬이 실제 강의 덱에 인라인하는 <code>references/qqq-component-kit.js</code>만 불러, 모든 컴포넌트를 <code>QQQ.mount(n, el)</code>로 그린다 — 실제 덱과 동일한 경로. <b>등장 후 정착해 사라지지 않고</b> 생명 레이어가 도는지 확인하는 용도.</p>

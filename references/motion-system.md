@@ -121,11 +121,11 @@ FM 가로 이동(`x`)이 잘리지 않도록 캔버스 overflow 정책을 바꾼
 /* 잘림은 viewport 레벨에서만 처리 */
 #root, html, body { overflow: hidden; }
 
-/* blob은 별도 viewport 레이어에서 클립 — 4:3 밖으로 새지 않음 */
+/* 배경 하늘(구름·비행기)은 별도 viewport 레이어에서 클립 — 4:3 밖으로 새지 않음 */
 .bg-layer { position: absolute; inset: 0; overflow: hidden; }
 ```
 
-이 구조 덕분에 `fromLeft`/`fromRight` 가로 슬라이드 인이 캔버스 경계에서 잘리지 않고, blob은 여전히 배경 레이어 안에서만 움직인다.
+이 구조 덕분에 `fromLeft`/`fromRight` 가로 슬라이드 인이 캔버스 경계에서 잘리지 않고, 구름·비행기는 여전히 배경 레이어 안에서만 움직인다.
 
 ---
 

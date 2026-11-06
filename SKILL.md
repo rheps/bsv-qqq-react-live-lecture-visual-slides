@@ -1,6 +1,6 @@
 ---
 name: bsv-qqq-react-live-lecture-visual-slides
-description: Use this skill when the user wants to create a React-based slide system for live teaching, lectures, classroom explanation, online lessons, or instructor-led presentations (강의용 슬라이드, 발표 슬라이드, 수업 자료, 강의 화면). The slides use a "Modern Glassy Light" design — bright pastel-gradient background, glassmorphism cards (backdrop-filter blur), pastel glow box-shadows, and spring-pop animations (cubic-bezier overshoot). Large text (24px minimum, 48px+ titles), strong readability, and Pretendard font. The slides are visual support for an instructor's speech, not reading materials — the instructor explains, the slide supports dynamically. Trigger whenever the user mentions React 발표 슬라이드, 강의용 화면, 수업용 슬라이드, 트렌디한 발표 자료, 큰 글씨 발표 자료, online lecture slides, classroom slides, or wants slides that help an instructor explain while teaching, even if they don't say the word "React" explicitly.
+description: Use this skill when the user wants to create a React-based slide system for live teaching, lectures, classroom explanation, online lessons, or instructor-led presentations (강의용 슬라이드, 발표 슬라이드, 수업 자료, 강의 화면). The slides use a "Modern Glassy Light" design — the day background is always the built-in airplane sky (sky gradient, aurora, white clouds, airplanes with contrails), glassmorphism cards (backdrop-filter blur), pastel glow box-shadows, and spring-pop animations (cubic-bezier overshoot). Large text (24px minimum, 48px+ titles), strong readability, and Pretendard font. The slides are visual support for an instructor's speech, not reading materials — the instructor explains, the slide supports dynamically. Trigger whenever the user mentions React 발표 슬라이드, 강의용 화면, 수업용 슬라이드, 트렌디한 발표 자료, 큰 글씨 발표 자료, online lecture slides, classroom slides, or wants slides that help an instructor explain while teaching, even if they don't say the word "React" explicitly.
 ---
 
 # React Live Lecture Visual Slides (Modern Glassy Light)
@@ -50,18 +50,18 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 
 ## 작업 원칙 (요약)
 
-1. **Modern Glassy Light 테마 + 다중 테마**: 기본 라이트는 블루/하늘/틸 파스텔 메시 그라디언트 + `backdrop-filter: blur(16px)` 유리 카드. **메인 액센트는 블루 `#3B82F6`** (보라/violet/indigo/plum 금지). 슬라이드별 `theme` 필드로 라이트/다크/웜 전환. **다크 = 거의 순수 블랙** (`#000000 → #0a0a0a` 그라디언트). 다크에서도 액센트는 블루/하늘. **보라(violet/indigo) 금지는 글씨·UI·카드·강조색에 한한다 — 단 움직이는 배경 장식(회전 오로라·드리프트 블롭)에만 violet 한 점 허용**(8번 배경 스택의 `b4`·오로라). 텍스트로는 절대 금지. **다크는 "진짜 어둡게"**(글로우 blob 강도를 죽여 가장자리는 검정 유지, 중앙 burst 금지)하고, 다크 전용 **밤하늘**(은하수 띠+별 반짝임+별똥별)으로 분위기를 낸다. **다크에서 색 강조 글씨가 묻히지 않게 강조색 CSS 변수를 `.theme-dark`에서 밝은 톤으로 override**한다. (`references/motion-theme-upgrades.md` 4·6번)
-2. **Framer Motion 기반 등장 + snap 두 함정 유지**: 등장은 `SlideMotion.enter` 프리셋(FM variants)으로. **콘텐츠 캔버스(`.stage-box`)를 `overflow:visible`로 두고 잘림은 viewport 레벨(`#root`/`html,body{overflow:hidden}`)에서만** 처리하므로 `x` 가로 이동(슬라이드 인)도 허용된다(배경 blob은 viewport 레벨 `.bg-layer`에서 이미 클립됨). **snap(끊김) 두 함정은 그대로:** (a) **하위 컴포넌트를 render 함수 안에서 정의하지 마라**(remount→snap, 반드시 모듈 레벨). (b) **같은 요소에 CSS transition/animation과 FM을 동시에 걸지 마라**(충돌·snap). 등장에 FM을 주면 그 요소의 옛 CSS 등장 클래스(`spring-pop` 등)는 제거한다. 색·그림자 같은 지속 CSS는 FM과 다른 속성/노드면 공존 가능.
+1. **Modern Glassy Light 테마 + 다중 테마**: **낮(라이트) 배경은 항상 비행기 하늘. 다른 배경으로 바꾸지 않는다.** (사용자 결정 2026-11-06: "빨리 우리 스킬의 기본 재료로 써. 낮 배경은 무조건 비행기야") 하늘 그라디언트 + 오로라 + 흰 구름 11개 + 비행운을 끄는 비행기(한 번에 한 대씩 가로지름) 위에 `backdrop-filter` 유리 카드를 얹는다. 배경은 스킬 기본 재료 `references/sky-background.css` + `references/sky-background.js`(`QQQSky.Background`)를 덱에 그대로 인라인해 쓴다 — 덱마다 배경을 새로 짜지 않는다. 테마 대응: `light`·`warm` → **낮 = 비행기 하늘(필수)**, `dark` → **밤하늘**, `bling`(`pink-reversal`) → **핑크**. 하늘 위 글씨가 묻히지 않게 낮 테마는 글씨용 강조색 변수를 한 단계 진하게 덮어쓴다(`sky-background.css`). **메인 액센트는 블루 `#3B82F6`** (보라/violet/indigo/plum 금지). 슬라이드별 `theme` 필드로 라이트/다크/웜 전환. **다크 = 거의 순수 블랙** (`#000000 → #0a0a0a` 그라디언트). 다크에서도 액센트는 블루/하늘. **보라(violet/indigo) 금지는 글씨·UI·카드·강조색에 한한다 — 단 움직이는 배경 장식(밤·핑크의 오로라·색 구름)에만 violet 한 점 허용**(8번). 텍스트로는 절대 금지. **다크는 "진짜 어둡게"**(색 구름 강도를 죽여 가장자리는 검정 유지, 중앙 burst 금지)하고, 다크 전용 **밤하늘**(은하수 띠+별 반짝임+별똥별)으로 분위기를 낸다. **다크에서 색 강조 글씨가 묻히지 않게 강조색 CSS 변수를 `.theme-dark`에서 밝은 톤으로 override**한다. (`references/motion-theme-upgrades.md` 4·6번)
+2. **Framer Motion 기반 등장 + snap 두 함정 유지**: 등장은 `SlideMotion.enter` 프리셋(FM variants)으로. **콘텐츠 캔버스(`.stage-box`)를 `overflow:visible`로 두고 잘림은 viewport 레벨(`#root`/`html,body{overflow:hidden}`)에서만** 처리하므로 `x` 가로 이동(슬라이드 인)도 허용된다(배경 하늘은 viewport 레벨 `.bg-layer`에서 이미 클립됨). **snap(끊김) 두 함정은 그대로:** (a) **하위 컴포넌트를 render 함수 안에서 정의하지 마라**(remount→snap, 반드시 모듈 레벨). (b) **같은 요소에 CSS transition/animation과 FM을 동시에 걸지 마라**(충돌·snap). 등장에 FM을 주면 그 요소의 옛 CSS 등장 클래스(`spring-pop` 등)는 제거한다. 색·그림자 같은 지속 CSS는 FM과 다른 속성/노드면 공존 가능.
 3. **가독성 절대 수호**: 화려함 속에서도 모든 visible text는 24px 이상. 캡션·라벨도 예외 없음. 글자를 줄이지 말고 슬라이드를 늘린다.
 4. **한 슬라이드 = 한 메시지**: 데이터는 CSS `height` transition만으로 바닥에서 솟아오르는 동적 바 차트로 직접 구현한다. 무거운 차트 라이브러리 금지.
 5. **기술 스택**: React + **Framer Motion(CDN UMD, `window.Motion`)** + CSS variables + SVG + `location.hash` + 커스텀 훅. 화려한 모션은 Framer Motion으로 구현한다(spring-pop도 FM 스프링으로). FM은 `react-dom` UMD **뒤**, `@babel/standalone` **앞**에 `<script src="https://unpkg.com/framer-motion@11/dist/framer-motion.js"></script>`로 싣는다. `window.Motion`이 없으면(오프라인) 평범한 요소로 degrade하는 가드를 둔다(`const M_OK=!!(window.Motion&&window.Motion.motion)`). **Reveal.js·GSAP은 계속 비사용.** 무거운 차트 라이브러리도 금지(차트는 직접 구현).
 6. **Build는 큰 단위로, 연결선 포함**: 항목 박스가 등장할 때 박스 사이를 잇는 얇고 빛나는 세로 연결선이 스르륵 그어지는 Vertical Step Flow를 구현한다. 긴 문장 여러 개를 build로 흘리지 않는다.
 7. **이모지 적극 활용**: 강조 요소·step·card에 이모지를 곁들인다 (🔍🎯🎨⚖️, 🧭🌊🔎⚙️🚀 등). `font-family`에 `Segoe UI Emoji`, `Apple Color Emoji`, `Noto Color Emoji` 폴백을 둔다. 큰 이모지는 반드시 `anim-breathe`/`anim-wave`/`anim-float`로 살아 움직이게.
-8. **배경도 살아 있게 (전체화면 화려한 레이어 스택)**: 전체화면 `bg-layer`(app-wrap 안, `position:absolute;inset:0`)에 **세 레이어를 쌓는다 — ① 회전 오로라(다색 conic) 1~2겹 ② 드리프트 글로우 블롭 5~6개(b1~b6, 큰 궤도·`mix-blend:multiply`·라이트 `saturate(1.5)`) ③ 빛 입자(라이트=파란 입자·다크=흰 별)**. 다크 테마는 여기에 **밤하늘**(은하수 띠 + 별먼지 + 별똥별 16~20개)을 더한다. blob을 4:3 캔버스(`overflow:hidden`) 안에 넣으면 잘려 좌우 빈 공간·경계선이 생기므로 반드시 viewport 레벨. **라이트 색 구름은 정지처럼 보이면 실패** — 궤도 이동 폭을 화면 대비 ±13~15vw/vh로 크게(주기 26~38s). 복붙용 전체 CSS·JSX(오로라·블롭6 전부·스파크·밤하늘)는 `references/motion-theme-upgrades.md` **8번**.
+8. **배경 = 스킬 기본 하늘 (낮은 무조건 비행기)**: 전체화면 `bg-layer`(app-wrap 안, `position:absolute;inset:0`)는 `QQQSky.Background`가 그린다. **낮(`light`·`warm`) = 하늘 그라디언트 + 오로라 2겹 + 흰 구름 11개 + 비행기 10노선(12초 간격으로 한 대씩, 비행운이 따라가다 사라짐, 비행기는 코드로 그린 인라인 SVG)** — 항상 이 배경이고 다른 배경(파스텔 메시·색 블롭 스택)으로 바꾸지 않는다(사용자 결정 2026-11-06). **밤(`dark`) = 검정 + 오로라 + 톤 낮춘 색 구름 6개 + 은하수 띠 + 별먼지 28개 + 별똥별 18개 + 반짝임 24개.** **핑크(`bling`) = bling 핑크 + 오로라 + 색 구름 6개 + 흰 반짝임 + ✨.** 배경을 4:3 캔버스(`overflow:hidden`) 안에 넣으면 잘려 좌우 빈 공간·경계선이 생기므로 반드시 viewport 레벨. `prefers-reduced-motion`이면 하늘이 멈추고, 검토 모드(`?review=1` → `html[data-review]`)면 하늘이 멈추며 앞의 비행기 다섯 대가 날던 자리에 선다(같은 장은 같은 스틸). 파일·테마 대응·하늘 위 글씨 대비는 `references/motion-theme-upgrades.md` **8번**.
 9. **지속(ambient) 모션 — 비텍스트에만**: 등장이 끝난 뒤에도 화면이 살아 있도록 `SlideMotion.idle` 프리셋(무한 반복)을 둔다. 강도는 `SlideMotion.K`(기본 2.2, 활발). **단, 지속 모션은 이모지·그림·카드·큰 기호 등 비텍스트 요소에만 적용한다. 제목·핵심문장·질문·본문 같은 읽는 글씨에는 지속 모션을 절대 걸지 않는다**(글씨가 계속 흔들리면 읽기 방해 — 사용자 확정 규칙). 글씨는 `MotionItem`에 `enter`만 주고 `idle`은 주지 않는다. 카드는 인덱스별 delay로 호흡 패턴을 비대칭으로. **추가 원칙: 지속 모션은 비텍스트 도형/장식에만, 등장은 1회 후 정착(절대 opacity→0 루프 금지). 시각 컴포넌트 키트도 동일 — 등장 후 사라졌다가 재등장하는 루프는 허용하지 않는다.**
 10. **Speaker notes 필수**: 각 슬라이드 데이터에 `notes` 필드를 두고, 화면에는 표시하지 않고 `console`에 출력한다.
 11. **렌더링은 현재 ± 1장만**: 모든 슬라이드를 한 번에 렌더링하지 않는다.
-12. **전체화면 배경 + 고정 4:3 캔버스 통짜 스케일**: 배경(그라디언트+blob)은 모니터를 끝까지 꽉 채우고, **내용만** 가운데 고정 `1200×900`(4:3) 캔버스에 담는다. 캔버스는 `transform:scale(var(--fit))`로 화면에 맞춘다(`--fit = min(vw/1200, vh/900)`, resize마다 JS로 갱신). 어느 모니터에서도 동일 비율·동일 글자 크기, 항상 딱 맞고 안 잘림. **내용 사이즈는 전부 고정 px**(캔버스 좌표계)로 — `vh`를 쓰면 스케일이 이중 적용된다. `vh/vw`는 전체화면 요소(배경 blob·`#root`·페이지 번호)에만. 캔버스 세로(900px)를 글자·간격을 키워 꽉 채워 위아래가 비지 않게 한다. (옛 방식인 "4:3 stage-box를 100vh로 두고 바깥을 비우는" 구조는 좌우 빈 공간/경계선 때문에 버렸다.)
+12. **전체화면 배경 + 고정 4:3 캔버스 통짜 스케일**: 배경(하늘)은 모니터를 끝까지 꽉 채우고, **내용만** 가운데 고정 `1200×900`(4:3) 캔버스에 담는다. 캔버스는 `transform:scale(var(--fit))`로 화면에 맞춘다(`--fit = min(vw/1200, vh/900)`, resize마다 JS로 갱신). 어느 모니터에서도 동일 비율·동일 글자 크기, 항상 딱 맞고 안 잘림. **내용 사이즈는 전부 고정 px**(캔버스 좌표계)로 — `vh`를 쓰면 스케일이 이중 적용된다. `vh/vw`는 전체화면 요소(배경 하늘·`#root`·페이지 번호)에만. 캔버스 세로(900px)를 글자·간격을 키워 꽉 채워 위아래가 비지 않게 한다. (옛 방식인 "4:3 stage-box를 100vh로 두고 바깥을 비우는" 구조는 좌우 빈 공간/경계선 때문에 버렸다.)
 13. **CSS 선택자 == className 정확히 일치**: React에서 `className="stage"` 쓰면 CSS도 `.stage`. CSS만 `.slide`로 정의하면 padding/align이 적용 안 되어 슬라이드가 위·아래로 잘려 보인다. (실제 발생함)
 14. **언어는 요청 따름**: 한국어로 요청하면 슬라이드 텍스트도 한국어.
 15. **항목은 자동 순차 등장 / 좌·우 클릭으로 이동**: 슬라이드에 들어가면 build 항목이 타이머로 하나씩 자동 등장한다(첫 항목 ~0.35초 뒤, 이후 0.6초 간격). 항목마다 클릭하게 하지 않는다. **이동은 화면 좌측 절반 클릭=이전, 우측 절반 클릭=다음** (`onClick`에서 `e.clientX < innerWidth/2 ? prev : next`), 키보드는 ←/PageUp=이전·→/Space/PageDown=다음. **우하단에 ◀ [N/M] ▶ 버튼**도 둬서 클릭으로 이동 — 버튼 onClick엔 반드시 `e.stopPropagation()`(안 하면 좌·우 클릭 영역까지 같이 발동). 바 차트 막대도 같은 0.6초 순차. 강사는 설명만 하고 화면이 알아서 흐른다.
@@ -88,7 +88,7 @@ Layer 1만 있고 Layer 2가 없으면 결과물이 "제목 + 텍스트 카드" 
 3. **선언형 데이터 정리**: `id`, `type`, `title`, `keywords`, `visual`, `builds`, `notes` 필드 채우기. (`references/architecture.md` 참고)
 4. **React 컴포넌트 구성**: `Presentation → SlideStage → SlideFrame → LectureSlideTemplate`. 네비게이션은 `useSlideNavigation` 훅 하나가 키보드·터치·hash를 모두 관리.
 5. **시각화·애니메이션 추가**: glass-card + spring-pop 기본 적용. 바 차트, 플로우 연결선, glow 강조 등 멀리서도 보이는 큰 시각 요소.
-6. **검증**: 모든 visible text 24px 이상, 한 슬라이드 한 메시지, 스크롤 없음, light 배경 유지.
+6. **검증**: 모든 visible text 24px 이상, 한 슬라이드 한 메시지, 스크롤 없음, 낮 슬라이드는 비행기 하늘, 하늘 위 글씨가 또렷한지.
 
 ## 슬라이드 템플릿 목록
 
@@ -167,7 +167,8 @@ Kinetic type kit (`added-templates.md` 15, ported from the user's own video skil
 - `references/visual-component-library.md` — 시각 컴포넌트 전체 목록
 - `references/chart-components.md` — SVG/CSS 차트 가이드
 - `references/design-and-readability.md` — **Modern Glassy Light 테마 색상, glass-card CSS, spring-pop CSS, 폰트, 가독성 규칙**
-- `references/motion-theme-upgrades.md` — **동적 모션·테마 업그레이드(우선 적용).** 요소별 모션 다양화 / Magic-Move 모핑(layoutId) / 연결선 draw-on / **테마별 강조색(다크 색글씨 가독성)** / 밑줄형 Eyebrow / **다크=검정+밤하늘(은하수·별·별똥별)** / 투명 글래스. 충돌 시 이 문서가 우선.
+- `references/sky-background.css` + `references/sky-background.js` — **스킬 기본 배경(기본 재료).** 낮 = 비행기 하늘(항상), 밤 = 밤하늘, 핑크 = bling. 덱에 두 파일을 그대로 인라인하고 `<QQQSky.Background theme={theme}/>`(React) 또는 `QQQSky.mount(el, theme)`(일반 페이지)로 그린다. 고치면 `node tests/sky-guard.mjs`.
+- `references/motion-theme-upgrades.md` — **동적 모션·테마 업그레이드(우선 적용).** 요소별 모션 다양화 / Magic-Move 모핑(layoutId) / 연결선 draw-on / **테마별 강조색(다크 색글씨·낮 하늘 위 글씨 가독성)** / 밑줄형 Eyebrow / **배경 = 낮 비행기 하늘·밤하늘·핑크(8번)** / 투명 글래스. 충돌 시 이 문서가 우선.
 - `references/architecture.md` — 레이아웃, 기술 스택, React 구조, slides 스키마
 - `references/slide-patterns.md` — 분할 규칙, 애니메이션 규칙 (spring-pop), build 규칙
 - `references/runtime-and-output.md` — 네비게이션 훅, hash 동기화, 출력 요구사항
@@ -176,7 +177,7 @@ Kinetic type kit (`added-templates.md` 15, ported from the user's own video skil
 
 1. **글자 크기**: 메인 화면에 24px 미만 글자가 하나도 없는가?
 2. **한 메시지**: 각 슬라이드가 한 메시지만 담고 있는가?
-3. **테마**: 다크 배경·불투명 블랙 카드·강한 네온이 없는가? 라이트 배경을 유지하는가?
+3. **테마**: 불투명 블랙 카드·강한 네온이 없는가? 낮(라이트) 슬라이드 배경이 비행기 하늘인가(다른 배경으로 바꾸지 않았는가)?
 4. **스크롤**: 모든 슬라이드가 한 화면 안에 완결되는가? 긴 슬라이드(5단계 step-flow, 6행 이상 표)가 stage 위·아래로 잘리지 않는가?
 5. **수직 정렬**: `.stage`가 `align-items:center` 통일 + `.box`가 다시 flex column 가운데 정렬인가? 타입별 분기(flex-start vs center)는 짧으면 비고 길면 잘리는 모순을 만든다.
 6. **그라디언트 텍스트 fallback**: 그라디언트 + `WebkitTextFillColor:transparent` 쓸 때 항상 `color: var(--...)` fallback이 먼저 있는가? 없으면 webkit 미지원/렌더 타이밍에서 글자가 사라진다.
@@ -184,17 +185,17 @@ Kinetic type kit (`added-templates.md` 15, ported from the user's own video skil
 8. **바 차트 작은 값**: `animated-bar-chart`에서 max 대비 1% 미만 값이 있을 때 라벨이 막대 안이 아니라 막대 위 chip으로 떠 있는가? 막대 안 흰 글자는 잘려서 안 보인다.
 9. **등장이 끊기지 않는가(snap)**: `translateX` 큰 이동 금지(잘림). 그리고 **(a) render 함수 안에서 하위 컴포넌트 정의 금지**(remount→snap, 모듈 레벨로), **(b) spring-pop 요소에 인라인 `transition` 금지**(class transition 덮어써 snap). 의심되면 등장 중 `opacity/transform`을 시간순으로 재서 점진(부드러움)인지 한 프레임 점프(snap)인지 확인.
 10. **편집기**: `E` 키와 `✏️` 플로팅 버튼으로 편집 패널이 열리는가? 텍스트 수정이 화면에 즉시 반영되고 localStorage에 자동저장되는가? **💾 저장(파일 덮어쓰기, File System Access)**·**⬇ 내보내기(다운로드)**가 동작하는가? **💾 저장은 파일 핸들을 IndexedDB에 기억**해, 재방문(새 세션) 첫 저장 때 폴더 탐색 없이 권한 허락 한 번으로 같은 파일을 덮어쓰는가? (핸들 무효 시 자동으로 다시 파일 선택 폴백, `📍 저장위치 잊기`로 초기화) 저장 HTML에서 **Babel 주입 컴파일 스크립트가 제거**돼 재오픈 시 중복 실행이 없는가? 슬라이드 목록에서 **드래그·▲▼ 순서 변경 · ⧉ 복제 · 🗑 삭제(↩ 되돌리기)**가 되는가? **📋 복사→📥 붙여넣기(보관함)로 파일 간 이동**도 되는가? (`references/runtime-and-output.md` 섹션 8 참고)
-11. **보라 — 글씨/UI/카드 금지, 배경 장식만 예외**: indigo/violet/plum은 글씨·UI·카드·강조색 어디서도 쓰지 않는다. 메인은 블루(#3B82F6), 보조는 sky/teal/emerald/amber/rose. 다크 테마는 순수 블랙. **단 움직이는 배경 장식(회전 오로라·드리프트 블롭 `b4`)에만 violet 한 점 허용**(8번 스택). 텍스트로 새지 않았는지 확인.
+11. **보라 — 글씨/UI/카드 금지, 배경 장식만 예외**: indigo/violet/plum은 글씨·UI·카드·강조색 어디서도 쓰지 않는다. 메인은 블루(#3B82F6), 보조는 sky/teal/emerald/amber/rose. 다크 테마는 순수 블랙. **단 움직이는 배경 장식(밤·핑크의 오로라·색 구름)에만 violet 한 점 허용**(8번). 텍스트로 새지 않았는지 확인.
 12. **notes**: 모든 슬라이드에 speaker notes가 있는가? console에 출력되는가?
 13. **다양성**: title + text 카드만 반복되지 않는가? glass-card, bar-chart, step-flow 등 Layer 2 시각 요소가 섞였는가? 같은 type(icon-versus·step-flow 등)을 5장 넘게 반복하지 않는가? (`prompt-box`·`screenshot-slot`·`command-box`·`command-list`도 5장 한도·2장 연속 금지 그대로 — 실습은 `prompt-box`↔`screenshot-slot`을 번갈아. `pink-reversal`은 덱당 1~2장, 연속 금지.)
-14. **전체화면 배경 — 화려한 스택 + 경계선/빈 공간 없는가**: 4:3 캔버스 바깥(좌우)이 흰색·검정·다른 색으로 비지 않는가? **회전 오로라 2겹 + 드리프트 블롭 5~6개 + 빛 입자**가 모두 들어가 모니터 끝까지 이음매 없이 이어지는가? **라이트 색 구름이 정지처럼 안 보이고 또렷이 움직이는가?** (배경은 viewport 레벨, 캔버스는 투명. 8번 스택.)
+14. **전체화면 배경 — 비행기 하늘 + 경계선/빈 공간 없는가**: 4:3 캔버스 바깥(좌우)이 흰색·검정·다른 색으로 비지 않고 모니터 끝까지 이음매 없이 이어지는가? **낮 슬라이드에 하늘 그라디언트·흰 구름·비행기(`.flight`, 비행운)가 있고 색 블롭(`.blob`)이 없는가?** 비행기가 한 대씩 화면을 가로지르는가? 밤은 은하수·별·별똥별, 핑크는 색 구름·반짝임·✨인가? reduced-motion·검토 모드에서 하늘이 멈추는가? **하늘 위에 바로 놓인 글씨(eyebrow·캡션·kinetic 질문/핵심 문장)가 또렷한가?** (배경은 viewport 레벨, 캔버스는 투명. 8번.)
 15. **사이즈 단위**: 내용이 전부 고정 px(캔버스 좌표)인가? `vh`가 캔버스 안에 남아 스케일 이중 적용되지 않는가? (`vh/vw`는 배경·`#root`·번호 같은 viewport 요소에만.)
 16. **세로 채움**: 짧은 슬라이드도 캔버스 세로(900px)를 적절히 채우는가, 위아래가 휑하지 않은가? 빽빽한 슬라이드는 900px 넘겨 잘리지 않는가? (내용 높이 ≤ ~820px 확인.)
 17. **자동 순차 + 클릭=다음**: 항목이 클릭 없이 0.6초 간격으로 자동 등장하는가? 클릭/→ 한 번에 다음 슬라이드로 넘어가는가(스텝 클릭 폐지)?
 18. **라벨 pill 금지**: 제목 위 라벨이 길쭉한 pill 칩이 아니라 Eyebrow(페이드 선+자간)인가?
 19. **마커 전 필드 적용**: 모든 템플릿의 모든 텍스트 렌더(제목·부제·라벨·항목·표 칸·칩·캡션·목차·차트 라벨·Eyebrow)가 `hl()`을 통과해, 어느 페이지 어느 칸에서도 `*파랑*`/`~로즈~`가 작동하는가? 로즈 span에 `WebkitTextFillColor`가 있는가? **또 `hl`이 `\n`→`<br/>`로 줄바꿈을 처리해, 편집기에서 Enter가 제목·카드·표 등 모든 칸에서 줄바꿈으로 보이는가?**(`pre-line`에 의존 금지) (`references/design-and-readability.md` 3-b 참고)
 20. **FM 로딩 가드**: `window.Motion` 없을 때 흰 화면 없이 평범한 요소로 degrade하는가?
-21. **캔버스 잘림 해제**: `.stage-box`가 `overflow:visible`이고, 가로 슬라이드 인이 안 잘리며, blob이 4:3 밖으로 새지 않는가?
+21. **캔버스 잘림 해제**: `.stage-box`가 `overflow:visible`이고, 가로 슬라이드 인이 안 잘리며, 배경 하늘이 4:3 안에 갇히지 않고 viewport 레벨에 있는가?
 22. **지속 모션 비텍스트 한정**: 읽는 글씨에 idle이 없고, 이모지·카드·기호에만 있는가?
 23. **내보내기 보존**: 내장 편집기 내보내기/저장 HTML에서 FM CDN `<script src>`가 보존되어 재오픈 시 모션이 살아있는가?
 24. **FM/CSS 중복 금지**: 같은 요소에 FM 등장과 옛 CSS 등장 애니메이션이 동시에 걸려 snap나지 않는가?
