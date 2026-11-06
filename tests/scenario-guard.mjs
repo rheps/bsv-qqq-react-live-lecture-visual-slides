@@ -146,6 +146,38 @@ ok("15-18: no inline fontSize under 24", !/fontSize:\s*(1\d|2[0-3])\b/.test(c151
 ok("15-18: CSS font sizes >= 24px", [...cssAll.matchAll(/\.qqq-(kt|kw|mk|bq|km|oc)[^{]*\{[^}]*\}/g)].every(m => [...m[0].matchAll(/font-size:(\d+)px/g)].every(f => +f[1] >= 24)));
 ok("15-18: titles >= 48px (question 80, quote 62)", /\.qqq-bq-q\{[^}]*font-size:80px/.test(cssAll) && /\.qqq-km-msg\{[^}]*font-size:62px/.test(cssAll));
 ok("15-18: reduced-motion and review blocks", /@media \(prefers-reduced-motion: reduce\)\{\s*\.qqq-kw/.test(cssAll) && /html\[data-review\] \.qqq-kw/.test(cssAll));
+{ // text stays level: no rotate/skew on any text element of big-question, key-message, outcome-cards (decoration may turn)
+  const TEXT = /\.(qqq-bq-(sub2?|subt|q|stage)|qqq-kt(-glue)?|qqq-kw|qqq-mk(-ink)?|qqq-km-(fig|body|msg|lead|by)|qqq-oc-(label|desc|num|head|year|card)|oc-y-(old|new)|qqq-count|t-(hero|title|sub|cap|label|body))(?![\w-])/;
+  const TILT = /\brotateZ?\s*\(|\bskew[XY]?\s*\(|(^|[;\s{])rotate\s*:/;
+  const bad = [];
+  for (const m of cssAll.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+    for (const sel of m[1].split(",")) {
+      const subject = sel.trim().split(/[\s>+~]+/).pop() || "";
+      if (subject.includes("::") || !TEXT.test(subject)) continue;
+      if (TILT.test(m[2])) bad.push(sel.trim());
+    }
+  }
+  ok("15-18: no rotate/skew on text elements (CSS)" + (bad.length ? " -> " + bad.join(" | ") : ""), bad.length === 0);
+  ok("15-18: no rotate/skew in inline JSX styles", !/style=\{\{[^}]*\b(rotate|skew)/.test(c1518));
+  ok("big-question: sub line rule has no transform", /\.qqq-bq-sub\{[^}]*\}/.test(cssAll) && !/transform/.test(cssAll.match(/\.qqq-bq-sub\{[^}]*\}/)[0]));
+  const thumb = n => (gallery.match(new RegExp(`\\{n:${n},type:"[^"]+"[\\s\\S]*?(?=\\n\\{n:|\\n\\n)`)) || [""])[0];
+  ok("gallery 4 / 7 / 89 thumbnails: no CSS rotate/skew", [4, 7, 89].every(n => thumb(n) && !/transform:\s*(rotate|skew)/.test(thumb(n))));
+}
+{ // key-message: both quote marks the same size, colour and opacity; closing mark right after the last word
+  const rule = s => [...cssAll.replace(/\/\*[\s\S]*?\*\//g, "").matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter(m => m[1].split(",").some(x => x.trim() === s)).map(m => m[2]).join(";");
+  const q = rule(".qqq-km-q");
+  const open = rule(".qqq-km-open") + rule(".qqq-km-fig.is-on .qqq-km-open"), close = rule(".qqq-km-close") + rule(".qqq-km-fig.is-on .qqq-km-close");
+  ok("key-message: one shared size rule for both quote SVGs (.qqq-km-q width/height in em)", /width:[\d.]+em/.test(q) && /height:[\d.]+em/.test(q));
+  ok("key-message: open/close rules set no size of their own", ![open, close].some(r => /(^|[;\s])(width|height|font-size)\s*:|scale\(/.test(r.replace(/transform:[^;]*scale\(\.5\)[^;]*;?/g, ""))));
+  ok("key-message: same final opacity (set once on .qqq-km-q)", /opacity:\.?\d/.test(rule(".qqq-km-fig.is-on .qqq-km-q")) && ![open, close].some(r => /opacity/.test(r)));
+  ok("key-message: both marks drawn by KmMark with the shared class", /className=\{"qqq-km-q " \+ className\}/.test(code(s17)));
+  ok("key-message: open before the first word, close right after the last word",
+    /before=\{<KmMark className="qqq-km-open"\/>\} after=\{<KmMark className="qqq-km-close" close\/>\}/.test(code(s17))
+    && /className="qqq-kt-glue"/.test(code(s15)) && /\.qqq-kt-glue\{\s*display:inline-block/.test(cssAll) && !/position:absolute/.test(open + close));
+  const marks = [...thumb4().matchAll(/<svg class="quote-mark" width="(\d+)" height="(\d+)"/g)].map(m => m[1] + "x" + m[2]);
+  ok("gallery 4 thumbnail: two quote marks of one size", marks.length === 2 && marks[0] === marks[1]);
+  function thumb4() { return (gallery.match(/\{n:4,type:"key-message"[\s\S]*?(?=\n\{n:)/) || [""])[0]; }
+}
 ok("reader: outcome-cards", byId.s15.type === "outcome-cards" && byId.s15.items.length === 3 && byId.s15.items[1].icon === "chart"
   && byId.s15.items[0].label === "Sorted *folders*" && byId.s15.items[2].visual === "doc-year-flip");
 ok("reader: outcome-cards builds", JSON.stringify(byId.s15.builds) === JSON.stringify(["title", "o0", "o1", "o2", "caption"]) && !rep.warnings.some(w => w.startsWith("s15")));

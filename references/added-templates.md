@@ -760,23 +760,30 @@ function kTokens(text) {
 }
 
 // Kinetic sentence: staggered word reveal; marked words get a marker. mark: "swipe" | "underline" | "ink"
-function KineticText({ text, show, mark = "swipe", delay = 0, as = "div", className, style }) {
+// before / after (optional): decoration glued to the first / last word (same line, never orphaned), e.g. quote marks.
+function KineticText({ text, show, mark = "swipe", delay = 0, as = "div", className, style, before, after }) {
   const on = useOn(show);
   const toks = kTokens(text);
-  const n = toks.filter(t => t.k === "w").length;
+  const ws = toks.filter(t => t.k === "w");
+  const n = ws.length;
+  const first = n ? ws[0].i : -1, last = n ? ws[n - 1].i : -1;
   const Tag = as;
   const nl = s => String(s).split("\n").map((x, j) => j ? [<br key={"b" + j}/>, x] : x);
+  const word = (t, j) => (
+    <span key={j} className={"qqq-kw" + (t.m ? " qqq-mk is-" + t.m + " qqq-mark-" + mark : "")} style={{ "--i": t.i }}>
+      {t.m ? <span className="qqq-mk-ink">{nl(t.s)}</span> : t.s}
+      {t.m && mark === "underline" &&
+        <svg className="qqq-mk-line" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M2 8 C 20 3, 44 11, 66 6 S 90 4, 98 7" pathLength="1"/>
+        </svg>}
+    </span>);
   return (
     <Tag className={"qqq-kt" + (on ? " is-on" : "") + (className ? " " + className : "")}
       style={{ ...(style || {}), "--kd": delay + "s", "--kn": n }}>
       {toks.map((t, j) => t.k === "br" ? <br key={j}/> : t.k === "sp" ? " " :
-        <span key={j} className={"qqq-kw" + (t.m ? " qqq-mk is-" + t.m + " qqq-mark-" + mark : "")} style={{ "--i": t.i }}>
-          {t.m ? <span className="qqq-mk-ink">{nl(t.s)}</span> : t.s}
-          {t.m && mark === "underline" &&
-            <svg className="qqq-mk-line" viewBox="0 0 100 12" preserveAspectRatio="none" aria-hidden="true">
-              <path d="M2 8 C 20 3, 44 11, 66 6 S 90 4, 98 7" pathLength="1"/>
-            </svg>}
-        </span>)}
+        (before && t.i === first) || (after && t.i === last)
+          ? <span key={j} className="qqq-kt-glue">{t.i === first ? before : null}{word(t)}{t.i === last ? after : null}</span>
+          : word(t, j))}
     </Tag>
   );
 }
@@ -823,7 +830,7 @@ function CountText({ value, show, seconds = 0.9, suffix = "" }) {
   - `title` **and** a different `question` → `title` is the big line and `question` is the arrow line under it. `sub` (if any) follows as a second arrow line.
   - only one of them, or both the same sentence (markers and spaces ignored) → that sentence is the big line and `sub` is the arrow line.
 - **Kinetic (default)**: no box. The big line is display type (80px/900, tight tracking, `text-wrap:balance`) and rises word by word. The `*emphasized*` word gets the gradient fill plus a **hand-drawn underline** drawn after the words land (`~x~` rose, `_x_` emerald). A huge faint gradient `?` sits behind the sentence and breathes (decoration). Three `Sparkle4` pop in after the big line.
-- Arrow lines: **not in a box** — a hand-drawn curved arrow draws itself, then the line appears in 36px with a slight tilt, like a note written beside the big line. Each arrow line is its own build step (the second one has no arrow of its own).
+- Arrow lines: **not in a box** — a hand-drawn curved arrow draws itself, then the line appears in 36px, **level** (no rotate or skew on any text), like a note written beside the big line. The arrow stays curved and is centred on the text line. Each arrow line is its own build step (the second one has no arrow of its own).
 - builds: `["title", "question", "sub"?, "caption"?]` when `title` and `question` differ, else `["question", "sub"?, "caption"?]` (the reader adds `sub`/`caption` only when present). The component reads steps by index, so the names are labels.
 - `variant`: `"kinetic"` (default, also when empty) or `"classic"`. The editor may change it; the two variants are separate components, so switching remounts cleanly.
 
@@ -907,7 +914,7 @@ function BigQuestion({ s, step }) {
 
 **When**: one sentence the lecturer stands behind — a claim, or their own words ("학교 일을 하며 제가 느낀 것"). Same type and slots as before (`lead`, `message`) plus the optional `by` (attribution line) and the common `eyebrow`/`caption`. The new look is the **default**. `variant:"classic"` keeps the old look (small muted `lead` over a centred 58px `message`).
 
-- **Quote (default)**: an editorial pull-quote, **no box**. `lead` becomes the kicker above the quote (28px/800 in `--blue`, after a 56px gradient rule). Large gradient quotation marks are drawn in SVG (not a font glyph): the opening mark pops in at the top left, a small closing mark follows at the bottom right. `message` is display type (62px/800, left-aligned, max 980px) and rises word by word. `*emphasized*` words get a **highlighter sweep** behind them after the words land. `by` is the attribution line under the quote (`— name`, 28px muted).
+- **Quote (default)**: an editorial pull-quote, **no box**. `lead` becomes the kicker above the quote (28px/800 in `--blue`, after a 56px gradient rule). Two gradient quotation marks are drawn in SVG (not a font glyph), **the same size, colour and opacity**, set inline with the text: the opening mark hangs just before the first word (the text stays left-aligned), the closing mark sits right after the last word (kept on the same line as it), so they frame the quote for 1–4 lines. The opening mark pops in first, the closing mark after the last word lands. `message` is display type (62px/800, left-aligned, max 980px) and rises word by word. `*emphasized*` words get a **highlighter sweep** behind them after the words land. `by` is the attribution line under the quote (`— name`, 28px muted).
 - builds: `["lead"?, "message", "by"?, "caption"?]`. Hint: for the lecturer's own words, put the setup in `lead` ("학교 일을 하며 제가 느낀 것") and the point in `message` (SKILL #17: the point is the hero).
 - `variant`: `"quote"` (default, also when empty) or `"classic"`.
 
@@ -935,14 +942,17 @@ function KeyMessageClassic({ s, step }) {
 }
 
 const KM_MARK = "M10 66C10 38 22 18 46 6L51 14C36 24 29 36 28 46C41 44 52 54 52 67C52 81 41 91 28 91C17 91 10 81 10 66Z";
-function KmMark({ className }) {
+// One shape for both marks: the closing mark is the same SVG turned 180deg (CSS). Its gradient runs the
+// other way, so after the turn both read blue (top left) -> sky: same size, colour and opacity.
+function KmMark({ className, close }) {
+  const g = close ? "qqq-km-g2" : "qqq-km-g", a = close ? "1" : "0", b = close ? "0" : "1";
   return (
-    <svg className={className} viewBox="0 0 120 96" aria-hidden="true">
-      <defs><linearGradient id="qqq-km-g" x1="0" y1="0" x2="1" y2="1">
+    <svg className={"qqq-km-q " + className} viewBox="0 0 120 96" aria-hidden="true">
+      <defs><linearGradient id={g} x1={a} y1={a} x2={b} y2={b}>
         <stop offset="0" style={{ stopColor: "var(--blue)" }}/><stop offset="1" style={{ stopColor: "var(--sky)" }}/>
       </linearGradient></defs>
-      <path d={KM_MARK} fill="url(#qqq-km-g)"/>
-      <path d={KM_MARK} transform="translate(58 0)" fill="url(#qqq-km-g)"/>
+      <path d={KM_MARK} fill={"url(#" + g + ")"}/>
+      <path d={KM_MARK} transform="translate(58 0)" fill={"url(#" + g + ")"}/>
     </svg>
   );
 }
@@ -956,9 +966,8 @@ function KeyMessageQuote({ s, step }) {
       <figure className={"qqq-km-fig" + (msgOn ? " is-on" : "")}>
         {s.lead && <MI show={vF(0, step)} anim="left" className="qqq-km-lead">{hl(s.lead)}</MI>}
         <div className="qqq-km-body">
-          <KmMark className="qqq-km-open"/>
-          <KineticText as="blockquote" className="t-hero qqq-km-msg" text={s.message} show={vF(iMsg, step)} mark="swipe" delay={0.15}/>
-          <KmMark className="qqq-km-close"/>
+          <KineticText as="blockquote" className="t-hero qqq-km-msg" text={s.message} show={vF(iMsg, step)} mark="swipe" delay={0.15}
+            before={<KmMark className="qqq-km-open"/>} after={<KmMark className="qqq-km-close" close/>}/>
         </div>
         {s.by && <MI show={vF(iMsg + 1, step)} anim="rise" className="qqq-km-by"><span className="qqq-km-dash" aria-hidden="true"/>{hl(s.by)}</MI>}
       </figure>
@@ -1304,7 +1313,8 @@ function CodeWindow({s,step}){
   background:linear-gradient(160deg,#3B82F6,#0EA5E9); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
 .theme-dark .qqq-bq-qm{ opacity:.26; background:linear-gradient(160deg,#7AB8FF,#4FD0FF); -webkit-background-clip:text; background-clip:text; }
 .qqq-bq-q{ position:relative; z-index:1; margin:0; font-size:80px; font-weight:900; line-height:1.2; letter-spacing:-.035em; text-wrap:balance; }
-.qqq-bq-sub{ display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px; transform:rotate(-1.2deg); }
+/* the sub line stays level: no rotate/skew on text (tests/scenario-guard.mjs) */
+.qqq-bq-sub{ display:flex; align-items:center; justify-content:center; gap:14px; margin-top:18px; }
 .qqq-bq-arrow{ width:84px; height:56px; flex-shrink:0; overflow:visible; }
 .qqq-bq-arrow path{ fill:none; stroke:var(--blue); stroke-width:4.5; stroke-linecap:round; stroke-linejoin:round;
   stroke-dasharray:1; stroke-dashoffset:1; transition:stroke-dashoffset .5s cubic-bezier(.65,0,.35,1); }
@@ -1317,13 +1327,16 @@ function CodeWindow({s,step}){
 .qqq-km-fig{ position:relative; margin:0; width:fit-content; min-width:min(560px,100%); max-width:980px; text-align:left; }
 .qqq-km-lead{ display:flex; align-items:center; gap:16px; margin-bottom:14px; font-size:28px; font-weight:800; letter-spacing:.02em; color:var(--blue); }
 .qqq-km-lead::before{ content:""; flex-shrink:0; width:56px; height:6px; border-radius:9px; background:linear-gradient(90deg,var(--blue),var(--sky)); }
-.qqq-km-body{ position:relative; padding:82px 64px 6px 0; }
-.qqq-km-open{ position:absolute; left:-14px; top:-2px; width:108px; height:auto; opacity:0; transform:scale(.5) rotate(-14deg); transform-origin:30% 70%;
+.qqq-km-body{ position:relative; padding:8px 64px 6px 0; }  /* right room: the closing mark fits after a full-width last line */
+.qqq-kt-glue{ display:inline-block; }  /* word + mark never split; inline-block (not nowrap) keeps text-wrap:pretty working */
+/* both quote marks: one size (em of the quote text), one colour, one opacity; only the entrance differs */
+.qqq-km-q{ display:inline-block; width:.9em; height:.72em; vertical-align:text-top; overflow:visible; opacity:0;
   transition:opacity .35s ease, transform .7s cubic-bezier(.34,1.56,.64,1); }
-.qqq-km-close{ position:absolute; right:0; bottom:-30px; width:62px; height:auto; opacity:0; transform:rotate(180deg) scale(.5);
-  transition:opacity .35s ease 1.1s, transform .7s cubic-bezier(.34,1.56,.64,1) 1.1s; }
-.qqq-km-fig.is-on .qqq-km-open{ opacity:.95; transform:none; }
-.qqq-km-fig.is-on .qqq-km-close{ opacity:.5; transform:rotate(180deg); }
+.qqq-km-open{ margin:0 .16em 0 -1.06em; transform:scale(.5) rotate(-14deg); transform-origin:30% 70%; }
+.qqq-km-close{ margin-left:.14em; transform:rotate(180deg) scale(.5); transition-delay:calc(var(--kd,0s) + var(--kn,1) * 55ms + .35s); }
+.qqq-km-fig.is-on .qqq-km-q{ opacity:.95; }
+.qqq-km-fig.is-on .qqq-km-open{ transform:none; }
+.qqq-km-fig.is-on .qqq-km-close{ transform:rotate(180deg); }
 .qqq-km-msg{ margin:0; font-size:62px; font-weight:800; line-height:1.34; letter-spacing:-.025em; text-wrap:pretty; }
 .qqq-km-by{ display:flex; align-items:center; gap:14px; margin-top:38px; font-size:28px; font-weight:700; color:var(--muted,#475569); }
 .qqq-km-dash{ width:40px; height:4px; border-radius:4px; background:currentColor; }
