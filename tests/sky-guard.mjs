@@ -110,6 +110,11 @@ const low = Object.entries({ ink: "#0F172A", ...tokens }).map(([k, v]) => [k, v,
 ok("day text tokens: muted, blue, sky, emerald, rose, amber, teal are overridden", ["muted", "blue", "sky", "emerald", "rose", "amber", "teal"].every(k => tokens[k]));
 ok("day text tokens: every one >= 3:1 on #93C2E6", !low.length, low.map(([k, v, r]) => `${k} ${v} ${r.toFixed(2)}:1`));
 
+// --- template text sits on the sky: its colour comes from the theme variables (day deepens them), not from PCOL hex ---
+const tplJsx = [...read("references/added-templates.md").matchAll(/```jsx\n([\s\S]*?)```/g)].map(m => m[1]).join("\n");
+const hexText = [...tplJsx.matchAll(/[{,]\s*color\s*:\s*[^,}]*PCOL\.[^,}]*/g)].map(m => m[0].trim());
+ok("added-templates: text colours use var(--…), never PCOL hex (bridge arrow labels, tradeoff, reasons labels)", !hexText.length, hexText);
+
 // --- the plane is code, not an image; nothing is fetched ---
 ok("sky script: no image files, no URLs (only the SVG namespace)",
   !/\.(png|jpe?g|gif|webp|svg)["']/i.test(js) && !/url\(/.test(js) && [...js.matchAll(/https?:\/\/[^\s"']+/g)].every(m => m[0] === "http://www.w3.org/2000/svg"));

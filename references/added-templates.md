@@ -76,7 +76,7 @@ function Platforms({s,step}){
         {s.groups.map((g,i)=>(
           <MI key={i} show={vF(2+i,step)} hover className="glass" style={{flex:1,maxWidth:460,padding:"30px 26px",borderTop:`4px solid ${i?PCOL.rose:PCOL.blue}`}}>
             <Idle kind="float" style={{fontSize:60}}>{g.emoji}</Idle>
-            <div className="t-label" style={{fontSize:32,marginTop:10,color:i?PCOL.rose:PCOL.blue}}>{hl(g.label)}</div>
+            <div className="t-label" style={{fontSize:32,marginTop:10,color:i?"var(--rose)":"var(--blue)"}}>{hl(g.label)}</div>
             <div style={{display:"flex",gap:10,flexWrap:"wrap",justifyContent:"center",marginTop:18}}>
               {g.items.map((it,j)=>(<span key={j} style={{fontSize:25,fontWeight:800,padding:"9px 18px",borderRadius:999,background:"rgba(59,130,246,.10)",color:"var(--ink)"}}>{hl(it)}</span>))}
             </div>
@@ -216,7 +216,7 @@ function Bridge({s,step}){
           <div className="t-label" style={{fontSize:28,marginTop:8}}>{hl(s.fromLabel)}</div>
         </div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",minWidth:200,gap:4}}>
-          {s.arrowLabels.map((a,i)=>(<div key={i} style={{fontSize:24,fontWeight:800,color:i?PCOL.teal:PCOL.sky}}>{hl(a)}</div>))}
+          {s.arrowLabels.map((a,i)=>(<div key={i} style={{fontSize:24,fontWeight:800,color:i?"var(--teal)":"var(--sky)"}}>{hl(a)}</div>))}
           <div style={{fontSize:52,fontWeight:900,color:"var(--blue)",lineHeight:1}}>→</div>
         </div>
         <div className="glass" style={{padding:"24px 30px",minWidth:210,borderTop:"4px solid var(--blue)"}}>
@@ -257,7 +257,7 @@ function Tradeoff({s,step}){
         {s.cons.map((c,i)=>(
           <MI key={i} show={vF(1+i,step)} hover className="glass" style={{flex:1,maxWidth:400,padding:"22px 24px",borderTop:`4px solid ${PCOL.rose}`}}>
             <Idle kind="wave" style={{fontSize:46}}>{c.emoji}</Idle>
-            <div className="t-label" style={{fontSize:28,marginTop:8,color:PCOL.rose}}>{hl(c.label)}</div>
+            <div className="t-label" style={{fontSize:28,marginTop:8,color:"var(--rose)"}}>{hl(c.label)}</div>
             <div className="t-body" style={{fontSize:25,marginTop:8}}>{hl(c.detail)}</div>
           </MI>
         ))}
@@ -265,7 +265,7 @@ function Tradeoff({s,step}){
       <MI show={vF(1+s.cons.length,step)} hover className="glass" style={{maxWidth:840,padding:"24px 34px",borderTop:`4px solid ${PCOL.blue}`,display:"flex",alignItems:"center",gap:24,textAlign:"left"}}>
         <Idle kind="breathe" style={{fontSize:62}}>{s.pro.emoji}</Idle>
         <div>
-          <div className="t-label" style={{fontSize:30,color:PCOL.blue}}>{hl(s.pro.label)}</div>
+          <div className="t-label" style={{fontSize:30,color:"var(--blue)"}}>{hl(s.pro.label)}</div>
           <div className="t-body" style={{fontSize:27,marginTop:8}}>{hl(s.pro.detail)}</div>
         </div>
       </MI>
