@@ -20,6 +20,7 @@ const NEW = [
   ["pink-reversal", "PinkReversal", 85], ["command-box", "CommandBox", 86],
   ["before-after-panel", "BeforeAfterPanel", 15], ["command-list", "CommandList", 87],
   ["capture-compare", "CaptureCompare", 88], ["outcome-cards", "OutcomeCards", 89],
+  ["code-window", "CodeWindow", 90],
 ];
 for (const [type, fn, n] of NEW) {
   ok(`${type}: component function`, new RegExp(`function ${fn}\\(\\{s,step\\}\\)`).test(tpl));
@@ -39,7 +40,7 @@ ok("SKILL: no deleted audit skill reference", !/qqq-slide-emphasis-audit/.test(s
 // reader on the fixture
 const rep = parseSlidesMd(read("tests/fixtures/SLIDES.sample.md"));
 const byId = Object.fromEntries(rep.slides.map(s => [s.id, s]));
-ok("reader: 18 slides", rep.slides.length === 18);
+ok("reader: 19 slides", rep.slides.length === 19);
 ok("reader: deck title", rep.deckTitle === "QQQ 새 컴포넌트 시험");
 ok("reader: **x** -> *x*", byId.s03.title === "이 프롬프트를 *그대로* 붙여 넣으세요");
 ok("reader: prompt kept byte-for-byte", byId.s03.prompt.includes("**굵게**도.") && byId.s03.prompt.includes("\n\n[출력 형식]") && !byId.s03.prompt.startsWith(" "));
@@ -110,7 +111,7 @@ ok("reader: capture-compare warns outside 2-3 and on missing after", cc.warnings
 const sec = (a, b) => tpl.slice(tpl.indexOf(a), tpl.indexOf(b));
 const code = t => [...t.matchAll(/```jsx\n([\s\S]*?)```/g)].map(m => m[1]).join("\n");
 const s15 = sec("## 15. Kinetic type kit", "## 16. `big-question`"), s16 = sec("## 16. `big-question`", "## 17. `key-message`");
-const s17 = sec("## 17. `key-message`", "## 18. `outcome-cards`"), s18 = sec("## 18. `outcome-cards`", "## 8~18 공용 CSS");
+const s17 = sec("## 17. `key-message`", "## 18. `outcome-cards`"), s18 = sec("## 18. `outcome-cards`", "## 19. `code-window`");
 const c1518 = code(s15) + code(s16) + code(s17) + code(s18);
 const cssAll = tpl.slice(tpl.indexOf("## 8~18 공용 CSS"));
 ok("kit: KineticText, useOn, kTokens, Sparkle4, CountText", ["KineticText", "useOn", "kTokens", "Sparkle4", "CountText"].every(f => code(s15).includes(`function ${f}(`)));
@@ -171,6 +172,40 @@ const oc = parseSlidesMd(`# SLIDES — t
 `);
 ok("reader: outcome-cards warns outside 2-4, missing icon, unknown visual", oc.warnings.some(w => /outcome-cards has 1 items/.test(w)) && oc.warnings.some(w => /items\.0\.icon missing/.test(w)) && oc.warnings.some(w => /visual "rocket" unknown/.test(w)));
 ok("reader: variant warnings", oc.warnings.some(w => /s01: variant is only read by/.test(w)) && oc.warnings.some(w => /big-question variant "fancy" unknown/.test(w)));
+
+// code-window (No. 90): template, CSS, reader
+const s19 = sec("## 19. `code-window`", "## 8~18 공용 CSS");
+const code19 = code(s19);
+const css19 = [...cssAll.matchAll(/\.qqq-cw[^{]*\{[^}]*\}/g)].map(m => m[0]);
+ok("code-window: section 19 placed before the shared CSS heading", s19.length > 200 && tpl.indexOf("## 19. `code-window`") < tpl.indexOf("## 8~18 공용 CSS")
+  && (s19.match(/```jsx/g) || []).length === 1);
+ok("code-window: module-level CodePane + CodeWindow", /^function CodePane\(/m.test(code19) && /^function CodeWindow\(\{s,step\}\)/m.test(code19));
+ok("code-window: code verbatim (not through hl), name through hl", !/hl\(p\.code/.test(code19) && /\{String\(p\.code \|\| ""\)\}/.test(code19) && /hl\(p\.name/.test(code19));
+ok("code-window: pre uses MONO and stops nav", /<pre className="qqq-cw-pre"[^>]*onClick=\{stopNav\}[^>]*onMouseDown=\{stopNav\}[^>]*onTouchStart=\{stopNav\}/.test(code19) && /fontFamily: MONO/.test(code19));
+ok("code-window: panes enter in order, caption last", /show=\{vF\(1\+i,step\)\}/.test(code19) && /vF\(1\+n,step\)/.test(code19));
+ok("code-window: no copy button, no new UI strings", !/useCopy|qqq-copy|QQQ_UI|<button/.test(code19) && !/[가-힣]/.test(code19.replace(/\/\/.*$/gm, "")));
+ok("code-window: CSS pre is 24px, no wrap, scrolls inside", /\.qqq-cw-pre\{[^}]*font-size:24px[^}]*line-height:1\.45[^}]*white-space:pre;[^}]*overflow:auto[^}]*overscroll-behavior:contain/.test(cssAll));
+ok("code-window: CSS font sizes >= 24px", css19.length >= 8 && css19.every(r => [...r.matchAll(/font-size:(\d+)px/g)].every(f => +f[1] >= 24)));
+ok("code-window: dark theme rules", /\.theme-dark \.qqq-cw-pre\{/.test(cssAll) && /\.theme-dark \.qqq-cw-bar\{/.test(cssAll));
+ok("reader: code-window panes", byId.s19.type === "code-window" && byId.s19.panes.length === 2 && byId.s19.panes[0].name === "*my-skill*/"
+  && byId.s19.panes[0].code === "my-skill/\n├── SKILL.md\n├── references/\n│   └── guide.md\n└── scripts/\n    └── check.py"
+  && byId.s19.panes[1].code === "---\nname: my-skill\n---");
+ok("reader: code-window builds", JSON.stringify(byId.s19.builds) === JSON.stringify(["title", "p0", "p1", "caption"]) && !rep.warnings.some(w => w.startsWith("s19")));
+const cw = parseSlidesMd(`# SLIDES — t
+## S01 · one
+- title: t
+- component: code-window
+- slots:
+  - panes.0.name: a.md
+  - panes.0.code: x: **b** \`c\` *d*\\n  indented: _e_\\n[강사 note]
+  - panes.1.name: b.md
+  - panes.2.name: c.md
+  - panes.2.code: z
+- notes: n
+`);
+ok("reader: code-window code byte-for-byte (only \\n converted, leading spaces kept)", cw.slides[0].panes[0].code === "x: **b** `c` *d*\n  indented: _e_\n[강사 note]");
+ok("reader: code-window warns outside 1-2 and on missing code", cw.warnings.some(w => /code-window has 3 panes/.test(w)) && cw.warnings.some(w => /panes\.1\.code missing/.test(w))
+  && !cw.warnings.some(w => /lecturer marker/.test(w)));
 
 // contract-name renames (hero-title label, closing-prompt action/chips, four-card cards)
 const ren = parseSlidesMd(`# SLIDES — t

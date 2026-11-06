@@ -557,6 +557,8 @@ CDN:
 
 예외 — `prompt-box`의 `prompt`, `command-box`의 `command`, `command-list`의 `items[].command`: 청중이 **읽는 글이 아니라 복사해 쓰는 재료**라 전문을 그대로 둔다. 대신 글자는 24px 그대로, 길면 **상자 안에서만** 스크롤한다(`added-templates.md` 8·12·13절).
 
+Exception — `code-window` `panes[].code`: a real file shown as it is (folder tree, front matter, config). It is rendered verbatim (not through `hl()`, no wrapping) at 24px mono and scrolls inside its pane; do not shorten or reword it to fit (`added-templates.md` section 19).
+
 ---
 
 ## 7. 왜 라이트 배경인가

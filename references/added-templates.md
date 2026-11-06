@@ -1,6 +1,6 @@
-# 추가 템플릿 + kinetic type kit (복붙용 스펙, 1~18절)
+# 추가 템플릿 + kinetic type kit (복붙용 스펙, 1~19절)
 
-`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`), plus 13 `command-list` (multi-line command copy), 14 `capture-compare` (before → after capture pairs with enlarge), 15 the kinetic type kit (ported from the user's video skill), 16 `big-question` and 17 `key-message` (new default looks for two base templates, `variant:"classic"` keeps the old look) and 18 `outcome-cards` (No. 89, learning outcomes with built-in mini-visuals). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
+`bsv-qqq-react-live-lecture-visual-slides`로 실제 강의 덱을 만들며 검증된 7개 템플릿(1~7)과, 강의 시나리오(`bsv-qqq-lecture-scenario`의 SLIDES.md)용으로 추가한 5개 템플릿(8~12: `prompt-box`·`screenshot-slot`·`pink-reversal`·`before-after-panel`·`command-box`), plus 13 `command-list` (multi-line command copy), 14 `capture-compare` (before → after capture pairs with enlarge), 15 the kinetic type kit (ported from the user's video skill), 16 `big-question` and 17 `key-message` (new default looks for two base templates, `variant:"classic"` keeps the old look), 18 `outcome-cards` (No. 89, learning outcomes with built-in mini-visuals) and 19 `code-window` (No. 90, read-only file window). 모두 **모듈 레벨 함수**(render 함수 안 정의 금지 — snap 방지)이고, 공용 헬퍼 `hl()`·`MI`·`Idle`·`Eyebrow`·`vF`·`PCOL`을 그대로 쓴다. 글자는 전부 24px+, 그라디언트 텍스트는 `color` fallback 먼저(`hl`이 처리). 등장은 FM 프리셋(`MI`), 지속 모션은 비텍스트(`Idle`)에만.
 
 전제 헬퍼(생성기 본문에 이미 있는 것):
 ```js
@@ -1114,8 +1114,61 @@ function OutcomeCards({s,step}){
 
 ---
 
+## 19. `code-window` — read-only file window (No. 90)
+
+**When**: show a real file or folder as it is, read-only: a skill folder tree next to a short excerpt of its `SKILL.md` front matter, a config file, a few lines of a script. 1 or 2 panes. Something the audience copies stays `prompt-box` (8) or `command-box` (12). Requested by the scenario as `component: code-window` (slots: `title` · `panes.N.name` · `panes.N.code` · `caption`).
+
+- Each pane is a glass card drawn as a file window: a title bar with three small dots and the pane `name` (through `hl()`), then a `<pre>` with the shared `MONO` font stack at 24px, line height 1.45, `white-space:pre` (no wrapping, so tree lines and indentation stay aligned).
+- `code` is rendered verbatim and does **not** go through `hl()` (`*`, `_`, `~` in YAML or Markdown stay as written). Box-drawing characters (`├──`, `│`, `└──`) line up because the font is monospaced and ligatures are off.
+- A long or wide file scrolls **inside the pane** in both directions (`overflow:auto`, `overscroll-behavior:contain`); the font never shrinks. `max-height` (border-box, padding included) keeps the content height under about 790px: 510px without a caption, 450px with one (13 / 12 lines at 24px before the pane scrolls). With 2 panes they sit side by side (each about 520px wide, about 34 characters per line before scrolling); 1 pane is one wide window (max 1000px).
+- The `<pre>` stops click / mouse / touch propagation (`stopNav`), so scrolling or selecting text does not change slides. No copy button and no new UI strings. Needs `MONO` and `stopNav` from section 8.
+- Panes enter in order (`p0`, `p1`). No idle motion. 1–2 panes; the reader warns otherwise and when a pane has no `code`.
+
+Data:
+```js
+{ id, type:"code-window", theme:"light", eyebrow, title:"A skill is *one folder*",
+  panes:[
+    { name:"my-skill/", code:"my-skill/\n├── SKILL.md\n├── references/\n│   └── guide.md\n└── scripts/\n    └── check.py" },
+    { name:"SKILL.md", code:"---\nname: my-skill\n---" },
+  ],
+  caption, builds:["title","p0","p1","caption"] }   // one "p<n>" per pane; caption only when present
+```
+```jsx
+function CodePane({ p, show, maxH }) {
+  return (
+    <MI show={show} className="glass qqq-cw-pane" style={{ minWidth: 0, padding: 0, textAlign: "left" }}>
+      <div className="qqq-cw-bar">
+        <span className="qqq-cw-dots" aria-hidden="true"><span className="qqq-cw-dot"/><span className="qqq-cw-dot"/><span className="qqq-cw-dot"/></span>
+        <span className="qqq-cw-name">{hl(p.name || "")}</span>
+      </div>
+      <pre className="qqq-cw-pre" onClick={stopNav} onMouseDown={stopNav} onTouchStart={stopNav} onTouchEnd={stopNav}
+        style={{ maxHeight: maxH, fontFamily: MONO }}>{String(p.code || "")}</pre>
+    </MI>
+  );
+}
+
+function CodeWindow({s,step}){
+  const panes = (s.panes || []).slice(0, 2);
+  const n = panes.length;
+  const maxH = s.caption ? 450 : 510;
+  return (
+    <div className="box">
+      {s.eyebrow && <Eyebrow>{hl(s.eyebrow)}</Eyebrow>}
+      <MI show={vF(0,step)} className="t-title" style={{marginBottom:22}}>{hl(s.title)}</MI>
+      <div className={"qqq-cw qqq-cw-n" + n}>
+        {panes.map((p,i)=><CodePane key={i} p={p||{}} show={vF(1+i,step)} maxH={maxH}/>)}
+      </div>
+      {s.caption && <MI show={vF(1+n,step)} className="t-cap" style={{marginTop:18}}>{hl(s.caption)}</MI>}
+    </div>
+  );
+}
+```
+
+---
+
 ## 8~18 공용 CSS (덱 `<style>`에 추가)
 ```css
+/* also covers section 19 (code-window), see the block before "screenshot-slot" */
 /* prompt-box */
 .qqq-prompt-pre{ margin:0; font-size:24px; line-height:1.6; font-weight:600; white-space:pre-wrap; word-break:break-word;
   overflow-y:auto; overscroll-behavior:contain; padding:18px 22px; border-radius:14px; color:inherit;
@@ -1174,6 +1227,26 @@ function OutcomeCards({s,step}){
 .qqq-cc-zimg{ display:block; max-width:90vw; max-height:36vh; width:auto; height:auto; object-fit:contain; }
 .qqq-cc-zarrow{ font-size:36px; font-weight:900; line-height:1; color:#7AB8FF; }
 .qqq-cc-znote{ font-size:26px; font-weight:700; color:#E2E8F0; text-align:center; }
+/* 19. code-window — read-only file window; code is verbatim, 24px, scrolls inside the pane */
+.qqq-cw{ display:grid; gap:20px; width:100%; max-width:1100px; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+.qqq-cw.qqq-cw-n1{ grid-template-columns:minmax(0,1fr); max-width:1000px; }
+.qqq-cw-pane{ display:flex; flex-direction:column; overflow:hidden; border-radius:18px; }
+.qqq-cw-bar{ display:flex; align-items:center; gap:14px; padding:10px 18px; background:rgba(15,23,42,.05);
+  border-bottom:1px solid rgba(59,130,246,.18); }
+.qqq-cw-dots{ display:inline-flex; gap:8px; flex-shrink:0; }
+.qqq-cw-dot{ width:14px; height:14px; border-radius:50%; background:#F43F5E; }
+.qqq-cw-dot:nth-child(2){ background:#F59E0B; }
+.qqq-cw-dot:nth-child(3){ background:#10B981; }
+.qqq-cw-name{ flex:1; min-width:0; font-size:24px; font-weight:800; line-height:1.3; color:var(--blue);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.qqq-cw-pre{ margin:0; font-size:24px; line-height:1.45; font-weight:600; white-space:pre; tab-size:4;
+  font-variant-ligatures:none; font-feature-settings:"liga" 0, "calt" 0; overflow:auto; overscroll-behavior:contain;
+  box-sizing:border-box; padding:16px 20px; color:inherit; background:rgba(255,255,255,.35); cursor:text; user-select:text; text-align:left; }
+.qqq-cw-pre::-webkit-scrollbar{ width:12px; height:12px; }
+.qqq-cw-pre::-webkit-scrollbar-thumb{ background:rgba(59,130,246,.45); border-radius:8px; border:3px solid transparent; background-clip:padding-box; }
+.qqq-cw-pre::-webkit-scrollbar-corner{ background:transparent; }
+.theme-dark .qqq-cw-bar{ background:rgba(255,255,255,.08); border-bottom-color:rgba(255,255,255,.14); }
+.theme-dark .qqq-cw-pre{ background:rgba(255,255,255,.06); color:#F1F5F9; }
 /* screenshot-slot */
 .qqq-shot-empty{ display:block; border:4px dashed rgba(59,130,246,.45); border-radius:22px; background:rgba(255,255,255,.35);
   backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
@@ -1388,6 +1461,7 @@ case "capture-compare":    return <CaptureCompare s={s} step={step}/>;
 case "big-question":       return <BigQuestion s={s} step={step}/>;   // 16 — replaces the base template
 case "key-message":        return <KeyMessage s={s} step={step}/>;    // 17 — replaces the base template
 case "outcome-cards":      return <OutcomeCards s={s} step={step}/>;
+case "code-window":        return <CodeWindow s={s} step={step}/>;
 ```
 
 ## 다크/핑크 테마 메모
@@ -1396,4 +1470,5 @@ case "outcome-cards":      return <OutcomeCards s={s} step={step}/>;
 - **bling 배경은 위 "8~18 공용 CSS"의 `.app-wrap.theme-bling`이 정의한다**(예전엔 오로라·블롭·✨만 있고 배경 그라디언트가 없었다). 다른 type에 `theme:"bling"`을 줘도 같은 핑크 배경·강조색이 된다.
 - `prompt-box`·`command-box`·`screenshot-slot`·`before-after-panel`은 light/dark 모두 확인했다. `command-list` was checked in light and dark at 1920×1080 and 1280×720. `capture-compare` was checked in light at 1920×1080 and 1280×720 (rows, enlarge dialog, keyboard open and close). 다크에선 프롬프트 상자·자리 표시 틀이 투명 톤으로 바뀐다(공용 CSS의 `.theme-dark` 줄).
 - Sections 15–18 (`big-question` kinetic and classic, `key-message` quote and classic, `outcome-cards` with 2, 3 and 4 items and every built-in visual) were rendered from this file's code in headless Chromium at 1920×1080 and 1280×720, in light and dark, mid-animation, and with reduced motion (final state at once). No text under 24px, content height ≤ 792px, no console errors.
+- Section 19 `code-window` was rendered from this file's code in headless Chromium at 1200×900 (1 and 2 panes, a 12-line tree and a 10-line YAML excerpt with Hangul, with and without caption), in light and dark: no text under 24px, content height ≤ 726px (inside the canvas), box-drawing lines aligned, long panes scroll inside the pane, a click on the pane does not reach the stage.
 - Class names: component classes carry a prefix (`qqq-`, `oc-`; outcome-cards modifiers are `oc-b0`, `oc-f0`, `oc-k0`, `oc-d0`, `oc-r0`, `oc-y-old`, `oc-v-dash`, `qqq-oc-t-blue`, `qqq-oc-n4`; kinetic marks are `qqq-mark-swipe`). The background blobs are scoped as `.blob.b1`…`.blob.b6` (`motion-theme-upgrades.md` 8). `tests/class-collision-guard.mjs` fails on a bare short class rule or a class one reference uses that another styles bare. Checked with the blob background, outcome-cards (3 and 4 items) and `big-question` with `title` + `question` at 1920×1080 and 1280×720: bars stay inside their window, the struck-through old year stays inside the visual.

@@ -8,6 +8,7 @@
 // The reader does not rewrite content. It only converts markup:
 //   **word** -> *word* (QQQ blue marker), `code` -> code, literal \n -> line break.
 // prompt / command text (incl. command-list items.N.command) is copied byte-for-byte (no marker conversion).
+// code-window panes.N.code is copied byte-for-byte too, except that a literal \n becomes a line break.
 
 import { readFileSync } from "node:fs";
 
@@ -18,7 +19,7 @@ export const KNOWN_TYPES = new Set([
   "table-slide", "keyword-cluster", "video",
   "reproduce", "platforms", "reasons", "keymsg", "versus", "bridge", "tradeoff",
   "prompt-box", "screenshot-slot", "pink-reversal", "before-after-panel", "command-box", "command-list",
-  "capture-compare", "outcome-cards",
+  "capture-compare", "outcome-cards", "code-window",
 ]);
 
 // Template code (75~81) passes these fields through hl() without a guard; an absent value would
@@ -86,6 +87,7 @@ export function buildsFor(s) {
     case "command-list": return ["title", ...(s.items || []).map((_, i) => "i" + i), ...opt(s.hint, "hint"), ...cap];
     case "capture-compare": return ["title", ...(s.cases || []).map((_, i) => "c" + i), ...cap];
     case "outcome-cards": return ["title", ...(s.items || []).map((_, i) => "o" + i), ...cap];
+    case "code-window": return ["title", ...(s.panes || []).map((_, i) => "p" + i), ...cap];
     default: return []; // NEW type: the new template defines its own builds
   }
 }
@@ -197,8 +199,10 @@ export function parseSlidesMd(text) {
       }
       const leaf = path.split(".").pop();
       // prompt-box prompt, command-box command, command-list items.N.command: copied byte-for-byte
-      const isRaw = path === "prompt" || leaf === "command";
-      let v = isRaw ? val : screenText(val);
+      // code-window panes.N.code: verbatim file text; only a literal \n becomes a newline (leading spaces kept)
+      const isCode = comp === "code-window" && leaf === "code";
+      const isRaw = path === "prompt" || leaf === "command" || isCode;
+      let v = isCode ? val.replace(/\\n/g, "\n") : isRaw ? val : screenText(val);
       // image slots may hold the "[강사 캡처 예정]" placeholder (screenshot-slot image, capture-compare cases.N.before/after)
       const isImageSlot = path === "image" || (comp === "capture-compare" && (leaf === "before" || leaf === "after"));
       if (!isRaw && /^\[강사/.test(v.trim()) && !isImageSlot)
@@ -230,6 +234,13 @@ export function parseSlidesMd(text) {
           if (!it || typeof it !== "object" || !String(it[k] || "").trim()) report.warnings.push(`${raw.id}: outcome-cards items.${i}.${k} missing`);
         if (it && it.visual && !OC_VISUALS.includes(it.visual))
           report.warnings.push(`${raw.id}: outcome-cards items.${i}.visual "${it.visual}" unknown (drawn as icon)`);
+      });
+    }
+    if (comp === "code-window") {
+      const n = len(s.panes);
+      if (n < 1 || n > 2) report.warnings.push(`${raw.id}: code-window has ${n} panes (expected 1-2)`);
+      (s.panes || []).forEach((p, i) => {
+        if (!p || typeof p !== "object" || !String(p.code || "").trim()) report.warnings.push(`${raw.id}: code-window panes.${i}.code missing`);
       });
     }
     if (s.variant !== undefined) {

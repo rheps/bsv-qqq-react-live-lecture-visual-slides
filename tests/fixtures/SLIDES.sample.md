@@ -270,3 +270,17 @@
   - question: What do we check **first**?
   - caption: Two minutes with your neighbour
 - notes: big-question title as the big line, question as the arrow line
+
+## S19 · Skill folder
+- title: A skill is **one folder**
+- composition: Structure
+- component: code-window
+- theme: light
+- slots:
+  - eyebrow: Inside a skill
+  - panes.0.name: **my-skill**/
+  - panes.0.code: my-skill/\n├── SKILL.md\n├── references/\n│   └── guide.md\n└── scripts/\n    └── check.py
+  - panes.1.name: SKILL.md
+  - panes.1.code: ---\nname: my-skill\n---
+  - caption: One folder, one SKILL.md
+- notes: code-window reader test (fictional skill)

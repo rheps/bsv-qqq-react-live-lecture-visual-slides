@@ -34,6 +34,7 @@
 | **결과 화면 캡처** (영상 없음) | `screenshot-slot` ✅ | 장식 이미지 |
 | **2–3 before → after capture pairs** | `capture-compare` ✅ | one `screenshot-slot` per capture, or text-only `before-after-panel` |
 | **"By the end you will…" 2–4 outcomes** | `outcome-cards` ✅ (drawn mini-visual per item) | `four-card` with emoji only, or a bullet list |
+| **A real file or folder shown as it is (read-only)** | `code-window` ✅ (1–2 file panes, verbatim mono) | a screenshot of the editor, or `prompt-box` with a copy button |
 | **"그러나…" 반전** | `pink-reversal` ✅ (bling) | key-message에 "그러나" 붙이기 |
 | **부/장 시작, 표지** | `section-divider` / `hero-title` ✅ | key-message |
 | **마무리·행동 촉구** | `closing-prompt` ✅ | key-message |
@@ -136,7 +137,7 @@
 
 ---
 
-> 위 14개 외에 `added-templates.md`의 75~81·83~89과 15 `before-after-panel`도 ✅ 구현됐다(코드 포함).
+> 위 14개 외에 `added-templates.md`의 75~81·83~90과 15 `before-after-panel`도 ✅ 구현됐다(코드 포함).
 
 ---
 
